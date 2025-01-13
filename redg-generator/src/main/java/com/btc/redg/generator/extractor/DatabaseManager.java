@@ -39,6 +39,8 @@ import schemacrawler.schemacrawler.*;
 import schemacrawler.schemacrawler.exceptions.SchemaCrawlerException;
 import schemacrawler.tools.utility.SchemaCrawlerUtility;
 import us.fatehi.utility.datasource.DatabaseConnectionSource;
+import us.fatehi.utility.datasource.DatabaseConnectionSources;
+import us.fatehi.utility.datasource.MultiUseUserCredentials;
 
 /**
  * <p>
@@ -56,42 +58,12 @@ public class DatabaseManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseManager.class);
 
-    /**
-     * Loads the JDBC driver specified in {@code jdbcDriver} and establishes a JBDC connection with the given {@code connectionString}, {@code username} and
-     * {@code password}.
-     *
-     * @param jdbcDriver       The fully-qualified class name of the JDBC driver
-     * @param connectionString The JDBC connection string
-     * @param username         The extractor username
-     * @param password         The extractor password
-     * @return The established JDBc connection
-     * @throws ClassNotFoundException Gets thrown when loading the driver fails
-     * @throws SQLException           Gets thrown when connection to the extractor fails
-     */
-    public static Connection connectToDatabase(final String jdbcDriver,
-                                               final String connectionString,
-                                               final String username,
-                                               final String password)
-            throws ClassNotFoundException, SQLException {
-        //Load jdbc driver
-        try {
-            LOG.debug("Trying to load jdbc driver " + jdbcDriver);
-            Class.forName(jdbcDriver);
-            LOG.info("Successfully loaded jdbc driver");
-        } catch (ClassNotFoundException e) {
-            LOG.error("Could not load jdbc driver with name " + jdbcDriver);
-            throw e;
-        }
-        // get connection
-        try {
-            LOG.debug("Connecting to extractor " + connectionString);
-            final Connection conn = DriverManager.getConnection(connectionString, username, password);
-            LOG.info("Successfully connected to extractor");
-            return conn;
-        } catch (SQLException e) {
-            LOG.error("Could not connect to extractor", e);
-            throw e;
-        }
+
+    public static DatabaseConnectionSource createConnectionSource(final String jdbcDriver,
+                                                                  final String connectionString,
+                                                                  final String username,
+                                                                  final String password) {
+        return DatabaseConnectionSources.newDatabaseConnectionSource(connectionString, new MultiUseUserCredentials(username, password));
     }
 
     /**
@@ -99,18 +71,18 @@ public class DatabaseManager {
      * The SQL gets split into statements and gets executed via the {@code connection} by a {@link ScriptRunner}. The output from the script runner simply gets
      * discarded.
      *
-     * @param connection The JDBC connection to use for script execution
-     * @param sqlScripts The array containing all sql files that should be executed
+     * @param databaseConnectionSource provides the JDBC connection to use for script execution
+     * @param sqlScripts               The array containing all sql files that should be executed
      * @throws IOException  Gets thrown when a file IO fails
      * @throws SQLException Gets thrown when the a part of the SQL could not be executed
      */
-    public static void executePreparationScripts(final Connection connection, final File[] sqlScripts) throws IOException, SQLException {
+    public static void executePreparationScripts(final DatabaseConnectionSource databaseConnectionSource, final File[] sqlScripts) throws IOException, SQLException {
         LOG.info("Executing provided SQL scripts...");
         if (sqlScripts == null || sqlScripts.length == 0) {
             LOG.info("No SQL script was provided.");
             return;
         }
-        final ScriptRunner scriptRunner = new ScriptRunner(connection, true, true);
+        final ScriptRunner scriptRunner = new ScriptRunner(databaseConnectionSource.get(), true, true);
         scriptRunner.setErrorLogWriter(new NullPrintWriter());
         scriptRunner.setLogWriter(new NullPrintWriter());
         for (final File sqlScript : sqlScripts) {
@@ -135,18 +107,27 @@ public class DatabaseManager {
     /**
      * Starts the schema crawler and lets it crawl the given JDBC connection.
      *
-     * @param connection The JDBC connection
-     * @param schemaRule The {@link InclusionRule} to be passed to SchemaCrawler that specifies which schemas should be analyzed
-     * @param tableRule  The {@link InclusionRule} to be passed to SchemaCrawler that specifies which tables should be analyzed. If a table is included by the
-     *                   {@code tableRule} but excluded by the {@code schemaRule} it will not be analyzed.
+     * @param databaseConnectionSource provides the JDBC connection
+     * @param schemaRule               The {@link InclusionRule} to be passed to SchemaCrawler that specifies which schemas should be analyzed
+     * @param tableRule                The {@link InclusionRule} to be passed to SchemaCrawler that specifies which tables should be analyzed. If a table is included by the
+     *                                 {@code tableRule} but excluded by the {@code schemaRule} it will not be analyzed.
      * @return The populated {@link Catalog} object containing the metadata for the extractor
      * @throws SchemaCrawlerException Gets thrown when the database could not be crawled successfully
      */
-    public static Catalog crawlDatabase(final Connection connection, final InclusionRule schemaRule, final InclusionRule tableRule) throws SchemaCrawlerException {
+    public static Catalog crawlDatabase(final DatabaseConnectionSource databaseConnectionSource, final InclusionRule schemaRule, final InclusionRule tableRule) throws SchemaCrawlerException {
         final SchemaCrawlerOptions options = SchemaCrawlerOptionsBuilder.newSchemaCrawlerOptions()
-                .withLoadOptions(LoadOptionsBuilder.builder().withSchemaInfoLevel(SchemaInfoLevelBuilder.standard()).toOptions())
-                .withLimitOptions(LimitOptionsBuilder.builder().includeAllRoutines().toOptions());
-                //TODO check equality between new and old
+                .withLoadOptions(LoadOptionsBuilder.builder().withSchemaInfoLevel(SchemaInfoLevelBuilder.builder()
+                        .withTag("standard")
+                        .withInfoLevel(InfoLevel.standard)
+                        .setRetrieveIndexes(false)
+                        .toOptions()
+                ).toOptions())
+                .withLimitOptions(LimitOptionsBuilder.builder()
+                        .routineTypes(Arrays.asList(RoutineType.procedure, RoutineType.unknown))
+                        .includeSchemas(schemaRule == null ? new IncludeAll() : schemaRule)
+                        .includeTables(tableRule == null ? new IncludeAll() : tableRule)
+                        .toOptions());
+        //TODO check equality between new and old
 //                .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard().setRetrieveIndexes(false))
 //                .routineTypes(Arrays.asList(RoutineType.procedure, RoutineType.unknown))
 //                .includeSchemas(schemaRule == null ? new IncludeAll() : schemaRule)
@@ -154,7 +135,7 @@ public class DatabaseManager {
 //                .toOptions();
 
         try {
-            return SchemaCrawlerUtility.getCatalog((DatabaseConnectionSource) connection, options);
+            return SchemaCrawlerUtility.getCatalog(databaseConnectionSource, options);
         } catch (SchemaCrawlerException e) {
             LOG.error("Schema crawling failed with exception", e);
             throw e;

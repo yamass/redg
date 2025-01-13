@@ -25,11 +25,13 @@ import com.btc.redg.generator.extractor.explicitattributedecider.ExplicitAttribu
 import com.btc.redg.generator.extractor.nameprovider.DefaultNameProvider;
 import com.btc.redg.models.ConvenienceSetterModel;
 import com.btc.redg.models.TableModel;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import schemacrawler.schema.*;
 import schemacrawler.inclusionrule.IncludeAll;
+import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 import java.io.File;
 import java.sql.Connection;
@@ -43,6 +45,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 
+//@Ignore //TODO is a change in TableModel to be expected due to schemacrawler upgrade?
 public class CodeGeneratorTest {
 
     @Rule
@@ -50,12 +53,12 @@ public class CodeGeneratorTest {
 
     @Test
     public void testGenerateCodeForTable() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-cg-tt", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-tt", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
         Schema s = db.getSchemas().stream().filter(schema -> schema.getName().equals("PUBLIC")).findFirst().orElse(null);
         assertNotNull(s);
@@ -86,19 +89,16 @@ public class CodeGeneratorTest {
         String existingClassResult = cg.generateExistingClassCodeForTable(model);
         assertNotNull(existingClassResult);
         assertEquals(Helpers.getResourceAsString("codegenerator/tableResultExisting.java"), existingClassResult);
-
-        connection.close();
-
     }
 
     @Test
     public void testGenerateCodeEscaping() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-cg-te", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-te", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-escaping.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
         Schema s = db.getSchemas().stream().filter(schema -> schema.getName().equals("PUBLIC")).findFirst().orElse(null);
         assertNotNull(s);
@@ -126,18 +126,16 @@ public class CodeGeneratorTest {
         assertEquals(Helpers.getResourceAsString("codegenerator/table-escaping-Result-group.java"), resultGroup);
 
         //TODO: add test for existing class
-
-        connection.close();
     }
 
     @Test
     public void testGenerateCodeWithMultipartForeignKey() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-cg-mpfk", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-mpfk", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-multipart-fk.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
         Schema s = db.getSchemas().stream()
                 .filter(schema -> schema.getName().equals("PUBLIC"))
@@ -170,17 +168,16 @@ public class CodeGeneratorTest {
         existingClassResult = cg.generateExistingClassCodeForTable(demoCompany);
         assertNotNull(existingClassResult);
         assertEquals(Helpers.getResourceAsString("codegenerator/table-multipart-Result2-Existing.java"), existingClassResult);
-        connection.close();
     }
 
     @Test
     public void testGenerateMainClass() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-cg-main", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-main", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         List<TableModel> models = MetadataExtractor.extract(db);
@@ -189,18 +186,15 @@ public class CodeGeneratorTest {
         String result = cg.generateMainClass(models, false);
         assertNotNull(result);
         assertEquals(Helpers.getResourceAsString("codegenerator/mainResult.java"), result);
-        connection.close();
-
     }
 
     @Test
     public void testGenerateCodeJoinHelper() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-cg-jt", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-jt", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-join-table.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         List<TableModel> models = MetadataExtractor.extract(db);
@@ -215,18 +209,16 @@ public class CodeGeneratorTest {
         String existingClassResult = generator.generateExistingClassCodeForTable(model);
         assertNotNull(existingClassResult);
         assertEquals(Helpers.getResourceAsString("codegenerator/table-join-Result-Existing.java"), existingClassResult);
-        connection.close();
-
     }
 
     @Test
     public void testGenerateConvenienceMethods() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-cg-dcm", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-dcm", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-date-convenience.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         TableExtractor tableExtractor = new TableExtractor(
@@ -252,18 +244,15 @@ public class CodeGeneratorTest {
         String existingClassResult = generator.generateExistingClassCodeForTable(model);
         assertNotNull(existingClassResult);
         assertEquals(Helpers.getResourceAsString("codegenerator/table-date-convenience-Result-Existing.java"), existingClassResult);
-        connection.close();
-
     }
 
     @Test
     public void testEnableVisualization() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:testEnableVisualization", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:testEnableVisualization", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
         Schema s = db.getSchemas().stream().filter(schema -> schema.getName().equals("PUBLIC")).findFirst().orElse(null);
         assertNotNull(s);
@@ -294,18 +283,16 @@ public class CodeGeneratorTest {
         String existingClassResult = cg.generateExistingClassCodeForTable(model);
         assertNotNull(existingClassResult);
         assertEquals(Helpers.getResourceAsString("codegenerator/tableResultExisting-wV.java"), existingClassResult);
-
-        connection.close();
     }
 
     @Test
     public void testGenerateMainClassWithVisualization() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-cg-main", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-main-viz", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         List<TableModel> models = MetadataExtractor.extract(db);
@@ -314,7 +301,5 @@ public class CodeGeneratorTest {
         String result = cg.generateMainClass(models, true);
         assertNotNull(result);
         assertEquals(Helpers.getResourceAsString("codegenerator/mainResult-wV.java"), result);
-        connection.close();
-
     }
 }

@@ -21,6 +21,7 @@ import java.sql.Connection;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -38,6 +39,7 @@ import schemacrawler.schema.Schema;
 import schemacrawler.schema.Table;
 import schemacrawler.inclusionrule.IncludeAll;
 import schemacrawler.inclusionrule.RegularExpressionInclusionRule;
+import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 
 public class TableExtractorTest {
@@ -47,12 +49,12 @@ public class TableExtractorTest {
 
     @Test
     public void testExtractTable() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-te", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-te", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         Schema s = db.lookupSchema("\"RT-TE\".PUBLIC").orElse(null);
@@ -75,12 +77,12 @@ public class TableExtractorTest {
 
     @Test
     public void testExtractTableCompositeForeignKey() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-te", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-te", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-exchange-rate.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         Schema s = db.lookupSchema("\"RT-TE\".PUBLIC").orElse(null);
@@ -160,12 +162,12 @@ public class TableExtractorTest {
         thrown.expect(RedGGenerationException.class);
         thrown.expectMessage("foreign key is in an excluded table");
 
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-te-f", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-te-f", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new RegularExpressionInclusionRule(".*USER.*"));
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new RegularExpressionInclusionRule(".*USER.*"));
         assertNotNull(db);
         Schema s = db.lookupSchema("\"RT-TE-F\".PUBLIC").orElse(null);
         assertNotNull(s);

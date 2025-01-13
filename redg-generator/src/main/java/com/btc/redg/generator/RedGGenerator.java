@@ -32,6 +32,7 @@ import schemacrawler.schema.Catalog;
 import schemacrawler.inclusionrule.IncludeAll;
 import schemacrawler.inclusionrule.InclusionRule;
 import schemacrawler.schemacrawler.exceptions.SchemaCrawlerException;
+import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -74,7 +75,7 @@ public class RedGGenerator {
      *                                   performance hit and slightly more memory usage if activated.
      * @param shouldCloseConnection      Indicates whether the JDBC connection should be closed after the database analysis
      */
-    public static void generateCode(final Connection connection,
+    public static void generateCode(final DatabaseConnectionSource databaseConnectionSource,
                                     final InclusionRule schemaRule,
                                     final InclusionRule tableRule,
                                     String targetPackage,
@@ -86,7 +87,7 @@ public class RedGGenerator {
                                     final ConvenienceSetterProvider convenienceSetterProvider,
                                     final boolean enableVisualizationSupport,
                                     final boolean shouldCloseConnection) {
-        Objects.requireNonNull(connection, "RedG requires a JDBC connection to a database to perform an analysis");
+        Objects.requireNonNull(databaseConnectionSource, "RedG requires a JDBC connection to a database to perform an analysis");
         targetPackage = targetPackage != null ? targetPackage : TableExtractor.DEFAULT_TARGET_PACKAGE;
         classPrefix = classPrefix != null ? classPrefix : TableExtractor.DEFAULT_CLASS_PREFIX;
         final TableExtractor tableExtractor = new TableExtractor(classPrefix, targetPackage, dataTypeProvider, nameProvider, explicitAttributeDecider,
@@ -95,29 +96,21 @@ public class RedGGenerator {
 
         LOG.info("Starting the RedG all-in-one code generation.");
 
-        Catalog databaseCatalog = crawlDatabase(connection, schemaRule, tableRule, shouldCloseConnection);
+        Catalog databaseCatalog = crawlDatabase(databaseConnectionSource, schemaRule, tableRule, shouldCloseConnection);
         final List<TableModel> tables = extractTableModel(tableExtractor, databaseCatalog);
         Path targetWithPkgFolders = createPackageFolderStructure(targetDirectory, targetPackage);
         new CodeGenerator().generate(tables, targetWithPkgFolders, enableVisualizationSupport);
     }
 
-    public static Catalog crawlDatabase(Connection connection, InclusionRule schemaRule, InclusionRule tableRule, boolean shouldCloseConnection) {
+    public static Catalog crawlDatabase(DatabaseConnectionSource databaseConnectionSource, InclusionRule schemaRule, InclusionRule tableRule, boolean shouldCloseConnection) {
         Catalog database;
         try {
             LOG.info("Crawling the database for metadata...");
-            database = DatabaseManager.crawlDatabase(connection, schemaRule, tableRule);
+            database = DatabaseManager.crawlDatabase(databaseConnectionSource, schemaRule, tableRule);
             LOG.info("Crawling done. Metadata completely assembled.");
         } catch (SchemaCrawlerException e) {
             LOG.error("Crawling failed with an exception.", e);
             throw new RedGGenerationException("Crawling failed", e);
-        } finally {
-            if (shouldCloseConnection) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    LOG.warn("Closing the JDBC connection failed. Code generation will continue.");
-                }
-            }
         }
         return database;
     }

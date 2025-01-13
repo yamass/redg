@@ -28,6 +28,7 @@ import schemacrawler.schema.ForeignKey;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.Table;
 import schemacrawler.inclusionrule.IncludeAll;
+import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 import java.io.File;
 import java.sql.Connection;
@@ -39,12 +40,12 @@ public class ForeignKeyExtractorTest {
 
     @Test
     public void testForeignKeyExtraction() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-fe", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-fe", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         Schema s = db.lookupSchema("\"RT-FE\".PUBLIC").orElse(null);

@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import schemacrawler.schema.*;
 import schemacrawler.inclusionrule.IncludeAll;
+import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 import java.io.File;
 import java.sql.Connection;
@@ -40,12 +41,12 @@ public class ColumnExtractorTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-ce", "", "");
-        assertNotNull(connection);
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cet", "", "");
+        assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        catalog = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        catalog = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
         assertNotNull(catalog);
     }
 
@@ -99,7 +100,7 @@ public class ColumnExtractorTest {
     }
 
     private Column extractColumnFromDemoDb(String tableName, String columnName) throws Exception {
-        Schema s = catalog.lookupSchema("\"RT-CE\".PUBLIC").orElse(null);
+        Schema s = catalog.lookupSchema("\"RT-CET\".PUBLIC").orElse(null);
         assertNotNull(s);
         Table t = catalog.lookupTable(s, tableName).orElse(null);
         assertNotNull(t);

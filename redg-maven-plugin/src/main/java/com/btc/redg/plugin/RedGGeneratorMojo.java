@@ -123,18 +123,19 @@ public class RedGGeneratorMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        Connection connection;
+        DatabaseConnectionSource databaseConnectionSource;
         try {
-            connection = DatabaseManager.connectToDatabase(jdbcDriver, connectionString, username, password);
-        } catch (SQLException | ClassNotFoundException e) {
+             databaseConnectionSource = DatabaseConnectionSources.newDatabaseConnectionSource(
+                    connectionString, new MultiUseUserCredentials(username, password));
+        } catch (Exception e) {
             throw new MojoFailureException("Could not connect to extractor: " + e.toString(), e);
         }
 
         // execute Liquibase update if Liquibase is on classpath and changelog file is provided 
-        new OptionalLiquibaseRunner(liquibaseChangeLogFile).execute(getLog(),connection);
+        new OptionalLiquibaseRunner(liquibaseChangeLogFile).execute(getLog(), databaseConnectionSource.get());
         
         try {
-            DatabaseManager.executePreparationScripts(connection, sqlScripts);
+            DatabaseManager.executePreparationScripts(databaseConnectionSource, sqlScripts);
         } catch (IOException | SQLException e) {
             throw new MojoFailureException("Could not execute SQL scripts: " + e.toString(), e);
         }
@@ -208,7 +209,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
         }
 
         try {
-            RedGGenerator.generateCode(connection,
+            RedGGenerator.generateCode(databaseConnectionSource,
                     new RegularExpressionInclusionRule(this.schemaRegex),
                     new RegularExpressionInclusionRule(this.tablesRegex),
                     targetPackage,

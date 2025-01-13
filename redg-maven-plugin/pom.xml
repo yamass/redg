@@ -125,6 +125,12 @@
             <version>42.7.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>us.fatehi</groupId>
+            <artifactId>schemacrawler-postgresql</artifactId>
+            <version>${schemacrawlerVersion}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

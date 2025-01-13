@@ -30,6 +30,7 @@ import schemacrawler.schema.Catalog;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ForeignKey;
 import schemacrawler.schema.Table;
+import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 /**
  * @author Yann Massard (yamass@gmail.com)
@@ -42,13 +43,13 @@ public class JpaMetamodelRedGProviderTest {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		provider = JpaMetamodelRedGProvider.fromPersistenceUnit("com.btc.redg");
-		try(Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:jpaprovidertest", "sa", "");
-			Statement statement = connection.createStatement()) {
+		try(DatabaseConnectionSource dcs = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:jpaprovidertest", "sa", "");
+			Statement statement = dcs.get().createStatement()) {
 			statement.execute("create table NON_MAPPED_TABLE ("
 					+ "  NORMAL_COLUMN NUMBER(19),"
 					+ "  FK NUMBER(19) references MANAGEDSUPERCLASSJOINED(ID),"
 					+ ")");
-			catalog = DatabaseManager.crawlDatabase(connection, null, null);
+			catalog = DatabaseManager.crawlDatabase(dcs, null, null);
 		}
 	}
 

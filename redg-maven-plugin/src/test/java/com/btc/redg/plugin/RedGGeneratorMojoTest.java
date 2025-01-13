@@ -19,6 +19,7 @@ package com.btc.redg.plugin;
 
 import io.takari.maven.testing.TestMavenRuntime;
 import io.takari.maven.testing.TestResources;
+import org.hibernate.cfg.Environment;
 import org.junit.Rule;
 import org.junit.Test;
 import org.postgresql.Driver;
