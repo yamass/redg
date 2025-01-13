@@ -27,7 +27,7 @@ import schemacrawler.schema.Catalog;
 import schemacrawler.schema.ForeignKey;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.Table;
-import schemacrawler.schemacrawler.IncludeAll;
+import schemacrawler.inclusionrule.IncludeAll;
 
 import java.io.File;
 import java.sql.Connection;

@@ -20,7 +20,7 @@ import com.btc.redg.generator.Helpers;
 import com.btc.redg.models.TableModel;
 import org.junit.Test;
 import schemacrawler.schema.Catalog;
-import schemacrawler.schemacrawler.IncludeAll;
+import schemacrawler.inclusionrule.IncludeAll;
 
 import java.io.File;
 import java.sql.Connection;

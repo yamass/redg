@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.ForeignKeyColumnReference;
+import schemacrawler.schema.ColumnReference;
 
 /**
  * <p>
@@ -95,7 +95,7 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
                 .map(Column::getName)
                 .anyMatch(name -> name.matches(regex));*/
         List<String> columnNames = foreignKey.getColumnReferences().stream()
-                .map(ForeignKeyColumnReference::getForeignKeyColumn)
+                .map(ColumnReference::getForeignKeyColumn)
                 .map(Column::getName)
                 .collect(Collectors.toList());
         if (columnNames.size() != regexes.length) {

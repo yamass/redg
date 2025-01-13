@@ -29,9 +29,9 @@ import com.btc.redg.models.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schemacrawler.schema.Catalog;
-import schemacrawler.schemacrawler.IncludeAll;
-import schemacrawler.schemacrawler.InclusionRule;
-import schemacrawler.schemacrawler.SchemaCrawlerException;
+import schemacrawler.inclusionrule.IncludeAll;
+import schemacrawler.inclusionrule.InclusionRule;
+import schemacrawler.schemacrawler.exceptions.SchemaCrawlerException;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -20,8 +20,8 @@ import com.btc.redg.generator.extractor.nameprovider.NameProvider;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import schemacrawler.schema.Column;
+import schemacrawler.schema.ColumnReference;
 import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.ForeignKeyColumnReference;
 import schemacrawler.schema.Table;
 
 import java.io.File;
@@ -67,7 +67,7 @@ public class JsonFileNameProvider implements NameProvider {
 
     @Override
     public String getMethodNameForReference(final ForeignKey foreignKey) {
-        ForeignKeyColumnReference firstForeignKeyColumnReferences = foreignKey.getColumnReferences().get(0);
+        ColumnReference firstForeignKeyColumnReferences = foreignKey.getColumnReferences().get(0);
         final String tableName = firstForeignKeyColumnReferences.getForeignKeyColumn().getParent().getName();
         if (mappings.containsKey(tableName)) {
             if (mappings.get(tableName).getColumns() != null &&

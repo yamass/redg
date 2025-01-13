@@ -33,13 +33,12 @@ import com.btc.redg.generator.extractor.utils.ScriptRunner;
 
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.RoutineType;
-import schemacrawler.schemacrawler.IncludeAll;
-import schemacrawler.schemacrawler.InclusionRule;
-import schemacrawler.schemacrawler.SchemaCrawlerException;
-import schemacrawler.schemacrawler.SchemaCrawlerOptions;
-import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder;
-import schemacrawler.schemacrawler.SchemaInfoLevelBuilder;
-import schemacrawler.utility.SchemaCrawlerUtility;
+import schemacrawler.inclusionrule.IncludeAll;
+import schemacrawler.inclusionrule.InclusionRule;
+import schemacrawler.schemacrawler.*;
+import schemacrawler.schemacrawler.exceptions.SchemaCrawlerException;
+import schemacrawler.tools.utility.SchemaCrawlerUtility;
+import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 /**
  * <p>
@@ -144,15 +143,18 @@ public class DatabaseManager {
      * @throws SchemaCrawlerException Gets thrown when the database could not be crawled successfully
      */
     public static Catalog crawlDatabase(final Connection connection, final InclusionRule schemaRule, final InclusionRule tableRule) throws SchemaCrawlerException {
-        final SchemaCrawlerOptions options = SchemaCrawlerOptionsBuilder.builder()
-                .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard().setRetrieveIndexes(false))
-                .routineTypes(Arrays.asList(RoutineType.procedure, RoutineType.unknown))
-                .includeSchemas(schemaRule == null ? new IncludeAll() : schemaRule)
-                .includeTables(tableRule == null ? new IncludeAll() : tableRule)
-                .toOptions();
+        final SchemaCrawlerOptions options = SchemaCrawlerOptionsBuilder.newSchemaCrawlerOptions()
+                .withLoadOptions(LoadOptionsBuilder.builder().withSchemaInfoLevel(SchemaInfoLevelBuilder.standard()).toOptions())
+                .withLimitOptions(LimitOptionsBuilder.builder().includeAllRoutines().toOptions());
+                //TODO check equality between new and old
+//                .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard().setRetrieveIndexes(false))
+//                .routineTypes(Arrays.asList(RoutineType.procedure, RoutineType.unknown))
+//                .includeSchemas(schemaRule == null ? new IncludeAll() : schemaRule)
+//                .includeTables(tableRule == null ? new IncludeAll() : tableRule)
+//                .toOptions();
 
         try {
-            return SchemaCrawlerUtility.getCatalog(connection, options);
+            return SchemaCrawlerUtility.getCatalog((DatabaseConnectionSource) connection, options);
         } catch (SchemaCrawlerException e) {
             LOG.error("Schema crawling failed with exception", e);
             throw e;

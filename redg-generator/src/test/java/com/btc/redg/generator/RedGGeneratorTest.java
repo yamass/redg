@@ -22,8 +22,8 @@ import com.btc.redg.generator.utils.DatabaseConnectionParameter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import schemacrawler.schemacrawler.ExcludeAll;
-import schemacrawler.schemacrawler.IncludeAll;
+import schemacrawler.inclusionrule.ExcludeAll;
+import schemacrawler.inclusionrule.IncludeAll;
 
 import java.io.File;
 import java.net.URI;

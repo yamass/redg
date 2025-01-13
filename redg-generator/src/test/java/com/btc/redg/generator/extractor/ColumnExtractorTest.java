@@ -26,7 +26,7 @@ import com.btc.redg.models.ColumnModel;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import schemacrawler.schema.*;
-import schemacrawler.schemacrawler.IncludeAll;
+import schemacrawler.inclusionrule.IncludeAll;
 
 import java.io.File;
 import java.sql.Connection;
