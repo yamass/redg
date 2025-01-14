@@ -18,13 +18,14 @@ package com.btc.redg.generator;
 
 import com.btc.redg.generator.exceptions.RedGGenerationException;
 import com.btc.redg.generator.extractor.DatabaseManager;
+import com.btc.redg.generator.testutil.DatabaseTestUtil;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import schemacrawler.inclusionrule.ExcludeAll;
 import schemacrawler.inclusionrule.IncludeAll;
-import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,13 +42,13 @@ public class RedGGeneratorTest {
 
     @Test
     public void testGenerateCode_Working() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:redg-test-all", "", "");
+        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
 
         Path p = Files.createTempDirectory("redg-test");
-        RedGGenerator.generateCode(databaseConnectionSource,
+        RedGGenerator.generateCode(dataSource,
                 new IncludeAll(),
                 new IncludeAll(),
                 null,
@@ -77,13 +78,13 @@ public class RedGGeneratorTest {
         thrown.expect(RedGGenerationException.class);
         thrown.expectMessage("Crawling failed");
 
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:redg-test-all2", "", "");
+        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all2", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
 
         Path p = Files.createTempDirectory("redg-test");
-        RedGGenerator.generateCode(databaseConnectionSource,
+        RedGGenerator.generateCode(dataSource,
                 new ExcludeAll(),
                 new ExcludeAll(),
                 null,
@@ -102,10 +103,10 @@ public class RedGGeneratorTest {
         thrown.expect(RedGGenerationException.class);
         thrown.expectMessage("Creation of package folder structure failed");
 
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:redg-test-all3", "", "");
+        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all3", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
 
         Path p;
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
@@ -118,7 +119,7 @@ public class RedGGeneratorTest {
             // failing unit test
             p = Paths.get("/dev/redg");
         }
-        RedGGenerator.generateCode(databaseConnectionSource,
+        RedGGenerator.generateCode(dataSource,
                 new IncludeAll(),
                 new IncludeAll(),
                 null,

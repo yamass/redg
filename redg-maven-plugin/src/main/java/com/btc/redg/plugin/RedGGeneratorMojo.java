@@ -32,9 +32,11 @@ import com.btc.redg.generator.extractor.explicitattributedecider.DefaultExplicit
 import com.btc.redg.generator.extractor.explicitattributedecider.ExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.explicitattributedecider.JsonFileExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
+import com.btc.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
 import com.btc.redg.jpa.JpaMetamodelRedGProvider;
 import com.btc.redg.plugin.liquibase.OptionalLiquibaseRunner;
-import com.btc.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -43,11 +45,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import schemacrawler.inclusionrule.RegularExpressionInclusionRule;
-import us.fatehi.utility.datasource.DatabaseConnectionSource;
-import us.fatehi.utility.datasource.DatabaseConnectionSources;
-import us.fatehi.utility.datasource.MultiUseUserCredentials;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -123,21 +121,23 @@ public class RedGGeneratorMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        DatabaseConnectionSource databaseConnectionSource;
-        try {
-             databaseConnectionSource = DatabaseConnectionSources.newDatabaseConnectionSource(
-                    connectionString, new MultiUseUserCredentials(username, password));
-        } catch (Exception e) {
-            throw new MojoFailureException("Could not connect to extractor: " + e.toString(), e);
-        }
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl( connectionString );
+        config.setUsername( username );
+        config.setPassword(password);
+        HikariDataSource dataSource = new HikariDataSource(config);
 
-        // execute Liquibase update if Liquibase is on classpath and changelog file is provided 
-        new OptionalLiquibaseRunner(liquibaseChangeLogFile).execute(getLog(), databaseConnectionSource.get());
-        
-        try {
-            DatabaseManager.executePreparationScripts(databaseConnectionSource, sqlScripts);
+        try (Connection connection = dataSource.getConnection()) {
+            // execute Liquibase update if Liquibase is on classpath and changelog file is provided
+            new OptionalLiquibaseRunner(liquibaseChangeLogFile).execute(getLog(), connection);
+        } catch (Exception e) {
+            throw new MojoFailureException("Exception while executing Liquibase: " + e, e);
+		}
+
+		try {
+            DatabaseManager.executePreparationScripts(dataSource, sqlScripts);
         } catch (IOException | SQLException e) {
-            throw new MojoFailureException("Could not execute SQL scripts: " + e.toString(), e);
+            throw new MojoFailureException("Could not execute SQL scripts: " + e, e);
         }
         // Clean-up old code files
         String[] packageParts = this.targetPackage.split("\\.");
@@ -209,7 +209,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
         }
 
         try {
-            RedGGenerator.generateCode(databaseConnectionSource,
+            RedGGenerator.generateCode(dataSource,
                     new RegularExpressionInclusionRule(this.schemaRegex),
                     new RegularExpressionInclusionRule(this.tablesRegex),
                     targetPackage,

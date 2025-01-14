@@ -16,9 +16,11 @@
 
 package com.btc.redg.jpa;
 
+import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Optional;
 
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,7 +31,9 @@ import schemacrawler.schema.Catalog;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ForeignKey;
 import schemacrawler.schema.Table;
-import us.fatehi.utility.datasource.DatabaseConnectionSource;
+
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
 
 /**
  * @author Yann Massard (yamass@gmail.com)
@@ -42,13 +46,14 @@ public class JpaMetamodelRedGProviderTest {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		provider = JpaMetamodelRedGProvider.fromPersistenceUnit("com.btc.redg");
-		try(DatabaseConnectionSource dcs = DatabaseManager.createConnectionSource("jdbc:h2:mem:jpaprovidertest", "sa", "");
-			Statement statement = dcs.get().createStatement()) {
+		DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:jpaprovidertest", "sa", "");
+		try(Connection connection = dataSource.getConnection();
+			Statement statement = connection.createStatement()) {
 			statement.execute("create table NON_MAPPED_TABLE ("
 					+ "  NORMAL_COLUMN NUMBER(19),"
 					+ "  FK NUMBER(19) references MANAGEDSUPERCLASSJOINED(ID),"
 					+ ")");
-			catalog = DatabaseManager.crawlDatabase(dcs, null, null);
+			catalog = DatabaseManager.crawlDatabase(dataSource, null, null);
 		}
 	}
 

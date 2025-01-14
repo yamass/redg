@@ -22,13 +22,14 @@ import com.btc.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider
 import com.btc.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.explicitattributedecider.ExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.nameprovider.DefaultNameProvider;
+import com.btc.redg.generator.testutil.DatabaseTestUtil;
 import com.btc.redg.models.ColumnModel;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import schemacrawler.schema.*;
 import schemacrawler.inclusionrule.IncludeAll;
-import us.fatehi.utility.datasource.DatabaseConnectionSource;
+import schemacrawler.schema.*;
 
+import javax.sql.DataSource;
 import java.io.File;
 
 import static org.junit.Assert.*;
@@ -40,12 +41,12 @@ public class ColumnExtractorTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cet", "", "");
-        assertNotNull(databaseConnectionSource);
+        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-cet", "", "");
+        assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
-        catalog = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        catalog = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         assertNotNull(catalog);
     }
 
