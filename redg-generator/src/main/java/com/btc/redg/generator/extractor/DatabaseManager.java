@@ -20,8 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
 
@@ -59,8 +57,7 @@ public class DatabaseManager {
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseManager.class);
 
 
-    public static DatabaseConnectionSource createConnectionSource(final String jdbcDriver,
-                                                                  final String connectionString,
+    public static DatabaseConnectionSource createConnectionSource(final String connectionString,
                                                                   final String username,
                                                                   final String password) {
         return DatabaseConnectionSources.newDatabaseConnectionSource(connectionString, new MultiUseUserCredentials(username, password));

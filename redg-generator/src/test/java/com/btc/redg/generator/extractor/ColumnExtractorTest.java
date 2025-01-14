@@ -30,7 +30,6 @@ import schemacrawler.inclusionrule.IncludeAll;
 import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 import java.io.File;
-import java.sql.Connection;
 
 import static org.junit.Assert.*;
 
@@ -41,7 +40,7 @@ public class ColumnExtractorTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cet", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cet", "", "");
         assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);

@@ -31,7 +31,6 @@ import schemacrawler.inclusionrule.IncludeAll;
 import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 import java.io.File;
-import java.sql.Connection;
 
 import static org.junit.Assert.*;
 
@@ -40,7 +39,7 @@ public class ForeignKeyExtractorTest {
 
     @Test
     public void testForeignKeyExtraction() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-fe", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-fe", "", "");
         assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);

@@ -34,7 +34,6 @@ import schemacrawler.inclusionrule.IncludeAll;
 import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 import java.io.File;
-import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +44,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 
-//@Ignore //TODO is a change in TableModel to be expected due to schemacrawler upgrade?
+@Ignore //TODO is a change in TableModel to be expected due to schemacrawler upgrade?
 public class CodeGeneratorTest {
 
     @Rule
@@ -53,7 +52,7 @@ public class CodeGeneratorTest {
 
     @Test
     public void testGenerateCodeForTable() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-tt", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cg-tt", "", "");
         assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
@@ -93,7 +92,7 @@ public class CodeGeneratorTest {
 
     @Test
     public void testGenerateCodeEscaping() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-te", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cg-te", "", "");
         assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-escaping.sql");
         assertNotNull(tempFile);
@@ -130,7 +129,7 @@ public class CodeGeneratorTest {
 
     @Test
     public void testGenerateCodeWithMultipartForeignKey() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-mpfk", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cg-mpfk", "", "");
         assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-multipart-fk.sql");
         assertNotNull(tempFile);
@@ -172,7 +171,7 @@ public class CodeGeneratorTest {
 
     @Test
     public void testGenerateMainClass() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-main", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cg-main", "", "");
         assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
@@ -190,7 +189,7 @@ public class CodeGeneratorTest {
 
     @Test
     public void testGenerateCodeJoinHelper() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-jt", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cg-jt", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-join-table.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
@@ -213,7 +212,7 @@ public class CodeGeneratorTest {
 
     @Test
     public void testGenerateConvenienceMethods() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-dcm", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cg-dcm", "", "");
         assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-date-convenience.sql");
         assertNotNull(tempFile);
@@ -248,7 +247,7 @@ public class CodeGeneratorTest {
 
     @Test
     public void testEnableVisualization() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:testEnableVisualization", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:testEnableVisualization", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
@@ -287,7 +286,7 @@ public class CodeGeneratorTest {
 
     @Test
     public void testGenerateMainClassWithVisualization() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:rt-cg-main-viz", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-cg-main-viz", "", "");
         assertNotNull(databaseConnectionSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);

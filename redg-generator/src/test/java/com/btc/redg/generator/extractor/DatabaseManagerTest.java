@@ -24,7 +24,6 @@ import org.junit.rules.ExpectedException;
 import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
 import java.io.File;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import static org.junit.Assert.assertNotNull;
@@ -38,7 +37,7 @@ public class DatabaseManagerTest {
 
     @Test
     public void testConnectToDatabase_H2Success() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:redg", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:redg", "", "");
         assertNotNull(databaseConnectionSource);
 //        assertTrue(connection.isValid(10));
     }
@@ -47,19 +46,19 @@ public class DatabaseManagerTest {
     @Test
     public void testConnectToDatabase_InvalidDriver() throws Exception {
         thrown.expect(ClassNotFoundException.class);
-        DatabaseManager.createConnectionSource("does.not.exist.Driver", "jdbc:dne:mem:redg", "", "");
+        DatabaseManager.createConnectionSource("jdbc:dne:mem:redg", "", "");
     }
 
     @Ignore //TODO
     @Test
     public void testConnectToDatabase_FailedConnection() throws Exception {
         thrown.expect(SQLException.class);
-        DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h4:invalid:redg", "", "");
+        DatabaseManager.createConnectionSource("jdbc:h4:invalid:redg", "", "");
     }
 
     @Test
     public void testExecutePreparationScripts_NoScripts() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:redg", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:redg", "", "");
         assertNotNull(databaseConnectionSource);
 
         DatabaseManager.executePreparationScripts(databaseConnectionSource, null);
@@ -70,7 +69,7 @@ public class DatabaseManagerTest {
     public void testExecutePreparationScripts_ScriptsInvalidSQL() throws Exception {
         thrown.expect(SQLException.class);
         thrown.expectMessage("CREATE TABLE NOPENOPENOPE");
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:redg", "", "");
+        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:redg", "", "");
         assertNotNull(databaseConnectionSource);
 
         DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{Helpers.getResourceAsFile("invalid.sql")});

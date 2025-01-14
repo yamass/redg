@@ -16,7 +16,6 @@
 
 package com.btc.redg.jpa;
 
-import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Optional;
 
@@ -43,7 +42,7 @@ public class JpaMetamodelRedGProviderTest {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		provider = JpaMetamodelRedGProvider.fromPersistenceUnit("com.btc.redg");
-		try(DatabaseConnectionSource dcs = DatabaseManager.createConnectionSource("org.h2.Driver", "jdbc:h2:mem:jpaprovidertest", "sa", "");
+		try(DatabaseConnectionSource dcs = DatabaseManager.createConnectionSource("jdbc:h2:mem:jpaprovidertest", "sa", "");
 			Statement statement = dcs.get().createStatement()) {
 			statement.execute("create table NON_MAPPED_TABLE ("
 					+ "  NORMAL_COLUMN NUMBER(19),"
