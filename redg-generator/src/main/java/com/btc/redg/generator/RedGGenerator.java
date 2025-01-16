@@ -28,16 +28,14 @@ import com.btc.redg.generator.utils.FileUtils;
 import com.btc.redg.models.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schemacrawler.schema.Catalog;
 import schemacrawler.inclusionrule.IncludeAll;
 import schemacrawler.inclusionrule.InclusionRule;
+import schemacrawler.schema.Catalog;
 import schemacrawler.schemacrawler.exceptions.SchemaCrawlerException;
-import us.fatehi.utility.datasource.DatabaseConnectionSource;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,7 +56,7 @@ public class RedGGenerator {
      * <p>Afterwards the {@link MetadataExtractor} gets called and extracts the relevant data into a list of {@link TableModel}s.
      * <p>The third step generates the code and writes it into the source files at the specified location.
      *
-     * @param connection                 The established JDBC connection that will be used as the data source for the analysis
+     * @param dataSource                 The established JDBC connection that will be used as the data source for the analysis
      * @param schemaRule                 The rule used for inclusion/exclusion of database schemas. Use {@code null} or {@link IncludeAll} for no filtering.
      * @param tableRule                  The rule used for inclusion/Exclusion of database tables. Use {@code null} or {@link IncludeAll} for no filtering.
      * @param targetPackage              The java package for the generated code. May not be default package. If {@code null},
@@ -75,7 +73,7 @@ public class RedGGenerator {
      *                                   performance hit and slightly more memory usage if activated.
      * @param shouldCloseConnection      Indicates whether the JDBC connection should be closed after the database analysis
      */
-    public static void generateCode(final DatabaseConnectionSource databaseConnectionSource,
+    public static void generateCode(final DataSource dataSource,
                                     final InclusionRule schemaRule,
                                     final InclusionRule tableRule,
                                     String targetPackage,
@@ -87,7 +85,7 @@ public class RedGGenerator {
                                     final ConvenienceSetterProvider convenienceSetterProvider,
                                     final boolean enableVisualizationSupport,
                                     final boolean shouldCloseConnection) {
-        Objects.requireNonNull(databaseConnectionSource, "RedG requires a JDBC connection to a database to perform an analysis");
+        Objects.requireNonNull(dataSource, "RedG requires a JDBC connection to a database to perform an analysis");
         targetPackage = targetPackage != null ? targetPackage : TableExtractor.DEFAULT_TARGET_PACKAGE;
         classPrefix = classPrefix != null ? classPrefix : TableExtractor.DEFAULT_CLASS_PREFIX;
         final TableExtractor tableExtractor = new TableExtractor(classPrefix, targetPackage, dataTypeProvider, nameProvider, explicitAttributeDecider,
@@ -96,17 +94,17 @@ public class RedGGenerator {
 
         LOG.info("Starting the RedG all-in-one code generation.");
 
-        Catalog databaseCatalog = crawlDatabase(databaseConnectionSource, schemaRule, tableRule, shouldCloseConnection);
+        Catalog databaseCatalog = crawlDatabase(dataSource, schemaRule, tableRule, shouldCloseConnection);
         final List<TableModel> tables = extractTableModel(tableExtractor, databaseCatalog);
         Path targetWithPkgFolders = createPackageFolderStructure(targetDirectory, targetPackage);
         new CodeGenerator().generate(tables, targetWithPkgFolders, enableVisualizationSupport);
     }
 
-    public static Catalog crawlDatabase(DatabaseConnectionSource databaseConnectionSource, InclusionRule schemaRule, InclusionRule tableRule, boolean shouldCloseConnection) {
+    public static Catalog crawlDatabase(DataSource dataSource, InclusionRule schemaRule, InclusionRule tableRule, boolean shouldCloseConnection) {
         Catalog database;
         try {
             LOG.info("Crawling the database for metadata...");
-            database = DatabaseManager.crawlDatabase(databaseConnectionSource, schemaRule, tableRule);
+            database = DatabaseManager.crawlDatabase(dataSource, schemaRule, tableRule);
             LOG.info("Crawling done. Metadata completely assembled.");
         } catch (SchemaCrawlerException e) {
             LOG.error("Crawling failed with an exception.", e);

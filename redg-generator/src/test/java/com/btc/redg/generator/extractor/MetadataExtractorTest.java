@@ -17,12 +17,13 @@
 package com.btc.redg.generator.extractor;
 
 import com.btc.redg.generator.Helpers;
+import com.btc.redg.generator.testutil.DatabaseTestUtil;
 import com.btc.redg.models.TableModel;
 import org.junit.Test;
-import schemacrawler.schema.Catalog;
 import schemacrawler.inclusionrule.IncludeAll;
-import us.fatehi.utility.datasource.DatabaseConnectionSource;
+import schemacrawler.schema.Catalog;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -34,12 +35,12 @@ public class MetadataExtractorTest {
 
     @Test
     public void testJoinTableProcessing() throws Exception {
-        DatabaseConnectionSource databaseConnectionSource = DatabaseManager.createConnectionSource("jdbc:h2:mem:rt-me", "", "");
-        assertNotNull(databaseConnectionSource);
+        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-me", "", "");
+        assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-join-table.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(databaseConnectionSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(databaseConnectionSource, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         List<TableModel> models = MetadataExtractor.extract(db);
