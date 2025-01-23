@@ -59,7 +59,7 @@ public class DatabaseManager {
      * The SQL gets split into statements and gets executed via the {@code connection} by a {@link ScriptRunner}. The output from the script runner simply gets
      * discarded.
      *
-     * @param dataSource The JDBC connection to use for script execution
+     * @param dataSource The data source providing a JDBC connection to use for script execution
      * @param sqlScripts               The array containing all sql files that should be executed
      * @throws IOException  Gets thrown when a file IO fails
      * @throws SQLException Gets thrown when the a part of the SQL could not be executed
@@ -117,12 +117,6 @@ public class DatabaseManager {
                         .includeSchemas(schemaRule == null ? new IncludeAll() : schemaRule)
                         .includeTables(tableRule == null ? new IncludeAll() : tableRule)
                         .toOptions());
-        //TODO check equality between new and old
-//                .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard().setRetrieveIndexes(false))
-//                .routineTypes(Arrays.asList(RoutineType.procedure, RoutineType.unknown))
-//                .includeSchemas(schemaRule == null ? new IncludeAll() : schemaRule)
-//                .includeTables(tableRule == null ? new IncludeAll() : tableRule)
-//                .toOptions();
 
         try {
             return SchemaCrawlerUtility.getCatalog(DatabaseConnectionSources.fromDataSource(dataSource), options);

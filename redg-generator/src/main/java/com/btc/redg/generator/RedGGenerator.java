@@ -56,7 +56,7 @@ public class RedGGenerator {
      * <p>Afterwards the {@link MetadataExtractor} gets called and extracts the relevant data into a list of {@link TableModel}s.
      * <p>The third step generates the code and writes it into the source files at the specified location.
      *
-     * @param dataSource                 The established JDBC connection that will be used as the data source for the analysis
+     * @param dataSource                 The data source for connecting to the database that will be used as the data source for the analysis
      * @param schemaRule                 The rule used for inclusion/exclusion of database schemas. Use {@code null} or {@link IncludeAll} for no filtering.
      * @param tableRule                  The rule used for inclusion/Exclusion of database tables. Use {@code null} or {@link IncludeAll} for no filtering.
      * @param targetPackage              The java package for the generated code. May not be default package. If {@code null},
