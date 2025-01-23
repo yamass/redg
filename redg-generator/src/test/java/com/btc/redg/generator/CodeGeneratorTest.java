@@ -26,7 +26,6 @@ import com.btc.redg.generator.extractor.nameprovider.DefaultNameProvider;
 import com.btc.redg.generator.testutil.DatabaseTestUtil;
 import com.btc.redg.models.ConvenienceSetterModel;
 import com.btc.redg.models.TableModel;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -43,7 +42,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 
-@Ignore //TODO is a change in TableModel to be expected due to schemacrawler upgrade?
 public class CodeGeneratorTest {
 
     @Rule
