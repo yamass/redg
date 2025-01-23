@@ -58,8 +58,7 @@ public class RedGGeneratorTest {
                 null,
                 null,
                 null,
-                false,
-                true);
+                false);
 
         Path mainFile = Paths.get(p.toAbsolutePath().toString(), "com", "btc", "redg", "generated", "RedG.java");
         assertTrue(Files.exists(mainFile));
@@ -94,8 +93,7 @@ public class RedGGeneratorTest {
                 null,
                 null,
                 null,
-                false,
-                true);
+                false);
     }
 
     @Test
@@ -129,7 +127,6 @@ public class RedGGeneratorTest {
                 null,
                 null,
                 null,
-                false,
-                true);
+                false);
     }
 }

@@ -71,7 +71,6 @@ public class RedGGenerator {
      *                                   as explicitly required
      * @param enableVisualizationSupport If {@code true}, the RedG visualization features will be enabled for the generated code. This will result in a small
      *                                   performance hit and slightly more memory usage if activated.
-     * @param shouldCloseConnection      Indicates whether the JDBC connection should be closed after the database analysis
      */
     public static void generateCode(final DataSource dataSource,
                                     final InclusionRule schemaRule,
@@ -83,8 +82,7 @@ public class RedGGenerator {
                                     final NameProvider nameProvider,
                                     final ExplicitAttributeDecider explicitAttributeDecider,
                                     final ConvenienceSetterProvider convenienceSetterProvider,
-                                    final boolean enableVisualizationSupport,
-                                    final boolean shouldCloseConnection) {
+                                    final boolean enableVisualizationSupport) {
         Objects.requireNonNull(dataSource, "RedG requires a JDBC connection to a database to perform an analysis");
         targetPackage = targetPackage != null ? targetPackage : TableExtractor.DEFAULT_TARGET_PACKAGE;
         classPrefix = classPrefix != null ? classPrefix : TableExtractor.DEFAULT_CLASS_PREFIX;
@@ -94,13 +92,13 @@ public class RedGGenerator {
 
         LOG.info("Starting the RedG all-in-one code generation.");
 
-        Catalog databaseCatalog = crawlDatabase(dataSource, schemaRule, tableRule, shouldCloseConnection);
+        Catalog databaseCatalog = crawlDatabase(dataSource, schemaRule, tableRule);
         final List<TableModel> tables = extractTableModel(tableExtractor, databaseCatalog);
         Path targetWithPkgFolders = createPackageFolderStructure(targetDirectory, targetPackage);
         new CodeGenerator().generate(tables, targetWithPkgFolders, enableVisualizationSupport);
     }
 
-    public static Catalog crawlDatabase(DataSource dataSource, InclusionRule schemaRule, InclusionRule tableRule, boolean shouldCloseConnection) {
+    public static Catalog crawlDatabase(DataSource dataSource, InclusionRule schemaRule, InclusionRule tableRule) {
         Catalog database;
         try {
             LOG.info("Crawling the database for metadata...");

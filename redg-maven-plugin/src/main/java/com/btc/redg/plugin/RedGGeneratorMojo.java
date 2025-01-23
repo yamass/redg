@@ -219,8 +219,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
                     nameProvider,
                     explicitAttributeDecider,
                     convenienceSetterProvider,
-                    this.enableVisualizationSupport,
-                    true);
+                    this.enableVisualizationSupport);
         } catch (RedGGenerationException e) {
             throw new MojoFailureException("Code generation failed", e);
         }
