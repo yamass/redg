@@ -4,13 +4,13 @@ import com.btc.redg.generated.recurse.GTreeElement;
 import com.btc.redg.generated.recurse.RedG;
 import com.btc.redg.generator.extractor.DatabaseManager;
 import com.btc.redg.tests.Helpers;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.sql.DataSource;
 import java.io.File;
-import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -22,15 +22,16 @@ public class RecurseTest {
     @Before
     public void initializeDatabase() throws Exception {
         Class.forName("org.h2.Driver");
-        final Connection connection = DriverManager.getConnection("jdbc:h2:mem:redg-recurse", "", "");
-        assertNotNull(connection);
+        final DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-recurse", "", "");
+        assertNotNull(dataSource);
         final File sqlFile = Helpers.getResourceAsFile("recurse-schema.sql");
-        DatabaseManager.executePreparationScripts(connection, new File[]{sqlFile});
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlFile});
     }
 
     @Test
     public void test() throws Exception {
-        final Connection connection = DriverManager.getConnection("jdbc:h2:mem:redg-recurse", "", "");
+        final Connection connection = JdbcConnectionPool.create("jdbc:h2:mem:redg-recurse", "", "")
+                .getConnection();
 
         final RedG redG = new RedG();
         prepareTestData(redG);

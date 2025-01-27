@@ -8,9 +8,11 @@ import com.btc.redg.generated.extractor.GUser;
 import com.btc.redg.generator.extractor.DatabaseManager;
 import com.btc.redg.runtime.AbstractRedG;
 import com.btc.redg.tests.Helpers;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.sql.DataSource;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.File;
@@ -19,7 +21,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -33,21 +34,21 @@ public class ExtractorTest {
     @Before
     public void initializeDatabase() throws Exception {
         Class.forName("org.h2.Driver");
-        final Connection connection = DriverManager.getConnection("jdbc:h2:mem:redg-extractor-source", "", "");
-        assertThat(connection).isNotNull();
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-source", "", "");
+        assertThat(dataSource).isNotNull();
         final File sqlSchemaFile = Helpers.getResourceAsFile("extractor-schema.sql");
-        DatabaseManager.executePreparationScripts(connection, new File[]{sqlSchemaFile});
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlSchemaFile});
         final File sqlDataFile = Helpers.getResourceAsFile("extractor-data.sql");
-        DatabaseManager.executePreparationScripts(connection, new File[]{sqlDataFile});
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlDataFile});
     }
 
     @Test
     public void test() throws Exception {
-        final Connection connection = DriverManager.getConnection("jdbc:h2:mem:redg-extractor-source", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-source", "", "");
 
         final DataExtractor dataExtractor = new DataExtractor();
         dataExtractor.setSqlSchemaName("\"REDG-EXTRACTOR-SOURCE\".PUBLIC");
-        List<EntityModel> models = dataExtractor.extractAllData(connection, Arrays.asList(GUser.getTableModel(), GConfiguration.getTableModel()));
+        List<EntityModel> models = dataExtractor.extractAllData(dataSource, Arrays.asList(GUser.getTableModel(), GConfiguration.getTableModel()));
 
         final String code = new CodeGenerator().generateCode(
                 "com.btc.redg.generated.extractor",
@@ -72,9 +73,11 @@ public class ExtractorTest {
         assertThat(redG).isNotNull();
         assertThat(redG.getEntities()).hasSize(12);
 
-        final Connection targetConnection = DriverManager.getConnection("jdbc:h2:mem:redg-extractor-target", "", "");
+        final DataSource targetDataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-target", "", "");
         final File sqlSchemaFile = Helpers.getResourceAsFile("extractor-schema.sql");
-        DatabaseManager.executePreparationScripts(targetConnection, new File[]{sqlSchemaFile});
+        DatabaseManager.executePreparationScripts(targetDataSource, new File[]{sqlSchemaFile});
+
+        final Connection targetConnection = targetDataSource.getConnection();
         redG.insertDataIntoDatabase(targetConnection);
 
         final Statement statement = targetConnection.createStatement();

@@ -29,7 +29,7 @@
         <module>redg-runtime</module>
         <module>redg-models</module>
         <module>redg-extractor</module>
-        <!--<module>redg-tests</module>-->
+        <module>redg-tests</module>
     </modules>
 
     <name>RedG - Ridiculously easy data Generation</name>
