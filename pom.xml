@@ -43,12 +43,6 @@
             <email>yamass@gmail.com</email>
             <timezone>Europe/Berlin</timezone>
         </developer>
-        <developer>
-            <id>olewehrmeyer</id>
-            <name>Ole Wehrmeyer</name>
-            <email>ole.wehrmeyer@prisma-capacity.eu</email>
-            <timezone>Europe/Berlin</timezone>
-        </developer>
     </developers>
 
     <licenses>

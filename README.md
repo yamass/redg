@@ -18,7 +18,9 @@ You can find the documentation [here](https://yamass.github.io/redg/documentatio
 
 Original author: Ole Wehrmeyer ([@olewehrmeyer](https://github.com/olewehrmeyer))
 
-Original inventor and current maintainer: Yann Massard ([@yamass](https://github.com/yamass))
+Inventor and current maintainer: Yann Massard ([@yamass](https://github.com/yamass))
+
+RedG was originally developed at ([BTC](https://www.btc-ag.com/)) but is now maintained independently.
 
 ## License
 
