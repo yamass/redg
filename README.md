@@ -1,6 +1,6 @@
 # RedG test data generation library
 
-[![Build Status](https://travis-ci.com/yamass/redg.svg?branch=main)](https://travis-ci.com/yamass/redg)
+[![Build Status](https://github.com/yamass/redg/actions/workflows/ci.yml/badge.svg)](https://github.com/yamass/redg/actions/workflows/ci.yml)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.yamass.redg/redg/badge.svg)](https://search.maven.org/search?q=g:de.yamass.redg)
 [![codecov](https://codecov.io/gh/yamass/redg/branch/main/graph/badge.svg)](https://codecov.io/gh/yamass/redg)
 
