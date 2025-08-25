@@ -60,7 +60,5 @@ This tests the GPG signing and the Javadoc and builds all required artifacts for
 
 Run `mvn release:clean release:prepare` to prepare the release and answer all the questions concering the version numbers.
 
-Afterwards is a good time to merge the newly created tag into the master branch, so that master contains exactly the lastest version that will soon be available on Maven Central.
-
 Now you can perform the actual release by running `mvn release:perform`.
 If no errors occur, the release will be available on Central in the next few hours.
