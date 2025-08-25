@@ -1,5 +1,5 @@
 import com.github.zemke.*;
-import com.btc.redg.runtime.AbstractRedG;
+import de.yamass.redg.runtime.AbstractRedG;
 
 public class RedG {
 

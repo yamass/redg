@@ -9,7 +9,7 @@ This is a step-by-step guide on how to deploy RedG to Maven Central vie the Sona
 ## Prerequisites
 
  - Have GPG installed and have an RSA key where the public key is published to the most common key servers (at least to hkp://pool.sks-keyservers.net)
- - Have a Sonatype Jira Account with permissions to deploy for `com.btc-ag.redg`
+ - Have a Sonatype Jira Account with permissions to deploy for `de.yamass.redg`
  
 ## Configuration files
 
@@ -17,17 +17,6 @@ There is some stuff you need in your `~/.m2/settings.xml`:
 
 ````xml
 <settings ...>
-	<!-- ... -->
-	<!-- if inside BTC corporate network, configure your local proxy (squid, cntlm) here -->
-	<proxies>
-		<proxy>
-			<id>my-proxy</id>
-			<active>true</active>
-			<protocol>https</protocol>
-			<host>127.0.0.1</host>
-			<port>3128</port>
-		</proxy>
-	</proxies>
 	<!-- ... -->
 	<servers>
 		<server>

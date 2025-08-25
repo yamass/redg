@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017 BTC Business Technology AG
+  ~ Copyright Yann Massard
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.btc-ag.redg</groupId>
+    <groupId>de.yamass.redg</groupId>
     <artifactId>redg</artifactId>
     <packaging>pom</packaging>
     <version>3.0.0-SNAPSHOT</version>
@@ -34,25 +34,19 @@
 
     <name>RedG - Ridiculously easy data Generation</name>
     <description>Generate test data for your database with ease and pure java</description>
-    <url>https://btc-ag.github.io/redg</url>
-
-    <organization>
-        <name>BTC Business Technology Consulting AG</name>
-        <url>https://www.btc-ag.com</url>
-    </organization>
+    <url>https://yamass.github.io/redg</url>
 
     <developers>
-        <developer>
-            <id>olewehrmeyer</id>
-            <name>Ole Wehrmeyer</name>
-            <email>ole.wehrmeyer@btc-ag.com</email>
-            <organization>BTC Business Technology Consulting AG</organization>
-            <timezone>Europe/Berlin</timezone>
-        </developer>
         <developer>
             <id>yamass</id>
             <name>Yann Massard</name>
             <email>yamass@gmail.com</email>
+            <timezone>Europe/Berlin</timezone>
+        </developer>
+        <developer>
+            <id>olewehrmeyer</id>
+            <name>Ole Wehrmeyer</name>
+            <email>ole.wehrmeyer@prisma-capacity.eu</email>
             <timezone>Europe/Berlin</timezone>
         </developer>
     </developers>
@@ -80,8 +74,8 @@
         <mavenProjectVersion>2.2.1</mavenProjectVersion>
         <logbackVersion>1.2.0</logbackVersion>
         <slf4jVersion>1.7.21</slf4jVersion>
-        <jacksonVersion>2.12.3</jacksonVersion>
-        <jacksonDatabindVersion>2.12.3</jacksonDatabindVersion>
+        <jacksonVersion>2.19.2</jacksonVersion>
+        <jacksonDatabindVersion>2.19.2</jacksonDatabindVersion>
         <jacocoVersion>0.8.5</jacocoVersion>
         <assertjVersion>3.6.1</assertjVersion>
         <mockitoVersion>2.23.0</mockitoVersion>
@@ -333,9 +327,9 @@
     </distributionManagement>
 
     <scm>
-        <url>https://github.com/btc-ag/redg/</url>
-        <connection>scm:git:https://github.com/btc-ag/redg.git</connection>
-        <developerConnection>scm:git:https://github.com/btc-ag/redg.git</developerConnection>
+        <url>https://github.com/yamass/redg/</url>
+        <connection>scm:git:https://github.com/yamass/redg.git</connection>
+        <developerConnection>scm:git:https://github.com/yamass/redg.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 

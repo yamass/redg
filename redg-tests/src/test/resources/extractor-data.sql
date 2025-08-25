@@ -1,8 +1,8 @@
 
 insert into "user" values
-  (0, 'admin', 'redg@btc-ag.com'),
-  (1, 'max', 'redg@btc-ag.com'),
-  (2, 'maria', 'redg@btc-ag.com');
+  (0, 'admin', 'redg@yamass.de'),
+  (1, 'max', 'redg@yamass.de'),
+  (2, 'maria', 'redg@yamass.de');
 
 insert into configuration values
   (0, 'is_admin', 'true'),

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017 BTC Business Technology AG
+  ~ Copyright Yann Massard
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>redg</artifactId>
-        <groupId>com.btc-ag.redg</groupId>
+        <groupId>de.yamass.redg</groupId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>RedG JPA Provider</name>
     <description>Name and data type providers for RedG that extract the data from a JPA metamodel.</description>
-    <url>https://btc-ag.github.io/redg</url>
+    <url>https://yamass.github.io/redg</url>
 
     <artifactId>redg-jpa-providers</artifactId>
 
@@ -40,7 +40,7 @@
             <artifactId>h2</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.btc-ag.redg</groupId>
+            <groupId>de.yamass.redg</groupId>
             <artifactId>redg-generator</artifactId>
             <version>${project.version}</version>
         </dependency>

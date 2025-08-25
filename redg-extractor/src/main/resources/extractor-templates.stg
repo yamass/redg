@@ -2,7 +2,7 @@
 codeClass(package, className, redGClass, entities) ::= <<
 
 import <package>.*;
-import com.btc.redg.runtime.AbstractRedG;
+import de.yamass.redg.runtime.AbstractRedG;
 
 public class <className> {
 
