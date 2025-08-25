@@ -15,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.yamass.redg</groupId>
@@ -70,7 +71,7 @@
         <slf4jVersion>1.7.21</slf4jVersion>
         <jacksonVersion>2.19.2</jacksonVersion>
         <jacksonDatabindVersion>2.19.2</jacksonDatabindVersion>
-        <jacocoVersion>0.8.5</jacocoVersion>
+        <jacocoVersion>0.8.13</jacocoVersion>
         <assertjVersion>3.6.1</assertjVersion>
         <mockitoVersion>2.23.0</mockitoVersion>
         <springVersion>4.3.5.RELEASE</springVersion>
@@ -99,9 +100,9 @@
             </dependency>
             <!--<dependency>-->
             <!-- TODO resolve conflicts when running in pkp -->
-                <!--<groupId>com.jcabi</groupId>-->
-                <!--<artifactId>jcabi-maven-slf4j</artifactId>-->
-                <!--<version>0.9</version>-->
+            <!--<groupId>com.jcabi</groupId>-->
+            <!--<artifactId>jcabi-maven-slf4j</artifactId>-->
+            <!--<version>0.9</version>-->
             <!--</dependency>-->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -262,37 +263,17 @@
                     <version>${jacocoVersion}</version>
                     <executions>
                         <execution>
-                            <id>default-prepare-agent</id>
+                            <id>prepare-agent</id>
                             <goals>
                                 <goal>prepare-agent</goal>
                             </goals>
                         </execution>
                         <execution>
-                            <id>default-report</id>
-                            <phase>test</phase>
+                            <id>report</id>
+                            <phase>verify</phase>
                             <goals>
                                 <goal>report</goal>
                             </goals>
-                        </execution>
-                        <execution>
-                            <id>default-check</id>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                            <configuration>
-                                <rules>
-                                    <rule>
-                                        <element>BUNDLE</element>
-                                        <limits>
-                                            <limit>
-                                                <counter>COMPLEXITY</counter>
-                                                <value>COVEREDRATIO</value>
-                                                <minimum>0.0</minimum>
-                                            </limit>
-                                        </limits>
-                                    </rule>
-                                </rules>
-                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
@@ -367,7 +348,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>3.2.3</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
