@@ -56,7 +56,7 @@ import com.btc.redg.generator.extractor.nameprovider.NameProvider;
 import com.btc.redg.generator.utils.NameUtils;
 
 import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.ForeignKeyColumnReference;
+import schemacrawler.schema.ColumnReference;
 import schemacrawler.schema.Table;
 
 /**
@@ -262,13 +262,13 @@ public class JpaMetamodelRedGProvider implements NameProvider, DataTypeProvider 
 	public String getCanonicalDataTypeName(schemacrawler.schema.Column column) {
 		SingularAttribute singularAttribute;
 		if (column.isPartOfForeignKey()) {
-			Optional<ForeignKeyColumnReference> foreignKeyColumnReferenceOptional = column.getParent().getForeignKeys().stream()
+			Optional<ColumnReference> foreignKeyColumnReferenceOptional = column.getParent().getForeignKeys().stream()
 					.flatMap(foreignKeyColumnReferences -> foreignKeyColumnReferences.getColumnReferences().stream())
 					.filter(foreignKeyColumnReference -> foreignKeyColumnReference.getForeignKeyColumn().getName().equals(column.getName()))
 					.findFirst();
 
 			if (foreignKeyColumnReferenceOptional.isPresent()) {
-				ForeignKeyColumnReference ref = foreignKeyColumnReferenceOptional.get();
+				ColumnReference ref = foreignKeyColumnReferenceOptional.get();
 				SingularAttribute targetSingularAttribute =
 						singularAttributesByColumnName.get(new QualifiedColumnName(ref.getPrimaryKeyColumn().getParent().getName().toUpperCase(), ref.getPrimaryKeyColumn().getName().toUpperCase()));
 				if (targetSingularAttribute != null) {

@@ -56,7 +56,7 @@ public class DummyDatabaseStructureProvider {
     static ForeignKey getSimpleForeignKey(final String columnName, String sourceTableName, final String targetTableName) {
         Column c = getReferencingDummyColumn(columnName, sourceTableName, targetTableName);
         ForeignKey fk = mock(ForeignKey.class);
-        ForeignKeyColumnReference reference = mock(ForeignKeyColumnReference.class);
+        ColumnReference reference = mock(ColumnReference.class);
         when(reference.getForeignKeyColumn()).thenReturn(c);
         when(fk.getColumnReferences()).thenReturn(Collections.singletonList(reference));
         return fk;
@@ -65,7 +65,7 @@ public class DummyDatabaseStructureProvider {
     static ForeignKey getMultiPartForeignKey(final String fkName, final String targetTableName) {
         Column c = getDummyColumn("", targetTableName);
         ForeignKey fk = mock(ForeignKey.class);
-        ForeignKeyColumnReference reference = mock(ForeignKeyColumnReference.class);
+        ColumnReference reference = mock(ColumnReference.class);
         when(reference.getForeignKeyColumn()).thenReturn(c);
         when(fk.getColumnReferences()).thenReturn(Arrays.asList(reference, reference, reference));
         when(fk.getName()).thenReturn(fkName);

@@ -5,9 +5,11 @@ import com.btc.redg.generated.standard.GRestaurant;
 import com.btc.redg.generated.standard.RedG;
 import com.btc.redg.generator.extractor.DatabaseManager;
 import com.btc.redg.tests.Helpers;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.sql.*;
 
@@ -19,15 +21,16 @@ public class StandardTest {
     @Before
     public void initializeDatabase() throws Exception {
         Class.forName("org.h2.Driver");
-        final Connection connection = DriverManager.getConnection("jdbc:h2:mem:redg-standard", "", "");
-        assertNotNull(connection);
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-standard", "", "");
+        assertNotNull(dataSource);
         final File sqlFile = Helpers.getResourceAsFile("standard-schema.sql");
-        DatabaseManager.executePreparationScripts(connection, new File[]{sqlFile});
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlFile});
     }
 
     @Test
     public void test() throws Exception {
-        final Connection connection = DriverManager.getConnection("jdbc:h2:mem:redg-standard", "", "");
+        final Connection connection = JdbcConnectionPool.create("jdbc:h2:mem:redg-standard", "", "")
+                .getConnection();
 
         final RedG redG = new RedG();
         prepareTestData(redG);

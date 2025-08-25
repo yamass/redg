@@ -28,7 +28,7 @@ import com.btc.redg.generator.extractor.explicitattributedecider.JsonFileExplici
 
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.ForeignKeyColumnReference;
+import schemacrawler.schema.ColumnReference;
 import schemacrawler.schema.Table;
 
 import static org.junit.Assert.assertFalse;
@@ -75,7 +75,7 @@ public class JsonFileExplicitAttributeDeciderTest {
 
         ForeignKey fk1Mock = Mockito.mock(ForeignKey.class);
 
-        ForeignKeyColumnReference fkcr1Mock = Mockito.mock(ForeignKeyColumnReference.class);
+        ColumnReference fkcr1Mock = Mockito.mock(ColumnReference.class);
 
         Column c1Mock = Mockito.mock(Column.class);
         Mockito.when(c1Mock.getName()).thenReturn("NOPE");
@@ -89,7 +89,7 @@ public class JsonFileExplicitAttributeDeciderTest {
 
         ForeignKey fk2Mock = Mockito.mock(ForeignKey.class);
 
-        ForeignKeyColumnReference fkcr2Mock = Mockito.mock(ForeignKeyColumnReference.class);
+        ColumnReference fkcr2Mock = Mockito.mock(ColumnReference.class);
 
         Column c2Mock = Mockito.mock(Column.class);
         Mockito.when(c2Mock.getName()).thenReturn("FOREIGNKEY1");
@@ -97,7 +97,7 @@ public class JsonFileExplicitAttributeDeciderTest {
 
         Mockito.when(fkcr2Mock.getForeignKeyColumn()).thenReturn(c2Mock);
 
-        ForeignKeyColumnReference fkcr3Mock = Mockito.mock(ForeignKeyColumnReference.class);
+        ColumnReference fkcr3Mock = Mockito.mock(ColumnReference.class);
 
         Column c3Mock = Mockito.mock(Column.class);
         Mockito.when(c3Mock.getName()).thenReturn("PART2");

@@ -32,9 +32,11 @@ import com.btc.redg.generator.extractor.explicitattributedecider.DefaultExplicit
 import com.btc.redg.generator.extractor.explicitattributedecider.ExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.explicitattributedecider.JsonFileExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
+import com.btc.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
 import com.btc.redg.jpa.JpaMetamodelRedGProvider;
 import com.btc.redg.plugin.liquibase.OptionalLiquibaseRunner;
-import com.btc.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -42,7 +44,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import schemacrawler.schemacrawler.RegularExpressionInclusionRule;
+import schemacrawler.inclusionrule.RegularExpressionInclusionRule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -116,23 +118,26 @@ public class RedGGeneratorMojo extends AbstractMojo {
 
     @Parameter
     private String liquibaseChangeLogFile;
-    
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        Connection connection;
-        try {
-            connection = DatabaseManager.connectToDatabase(jdbcDriver, connectionString, username, password);
-        } catch (SQLException | ClassNotFoundException e) {
-            throw new MojoFailureException("Could not connect to extractor: " + e.toString(), e);
-        }
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl( connectionString );
+        config.setUsername( username );
+        config.setPassword(password);
+        HikariDataSource dataSource = new HikariDataSource(config);
 
-        // execute Liquibase update if Liquibase is on classpath and changelog file is provided 
-        new OptionalLiquibaseRunner(liquibaseChangeLogFile).execute(getLog(),connection);
-        
-        try {
-            DatabaseManager.executePreparationScripts(connection, sqlScripts);
+        try (Connection connection = dataSource.getConnection()) {
+            // execute Liquibase update if Liquibase is on classpath and changelog file is provided
+            new OptionalLiquibaseRunner(liquibaseChangeLogFile).execute(getLog(), connection);
+        } catch (Exception e) {
+            throw new MojoFailureException("Exception while executing Liquibase: " + e, e);
+		}
+
+		try {
+            DatabaseManager.executePreparationScripts(dataSource, sqlScripts);
         } catch (IOException | SQLException e) {
-            throw new MojoFailureException("Could not execute SQL scripts: " + e.toString(), e);
+            throw new MojoFailureException("Could not execute SQL scripts: " + e, e);
         }
         // Clean-up old code files
         String[] packageParts = this.targetPackage.split("\\.");
@@ -204,7 +209,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
         }
 
         try {
-            RedGGenerator.generateCode(connection,
+            RedGGenerator.generateCode(dataSource,
                     new RegularExpressionInclusionRule(this.schemaRegex),
                     new RegularExpressionInclusionRule(this.tablesRegex),
                     targetPackage,
@@ -214,8 +219,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
                     nameProvider,
                     explicitAttributeDecider,
                     convenienceSetterProvider,
-                    this.enableVisualizationSupport,
-                    true);
+                    this.enableVisualizationSupport);
         } catch (RedGGenerationException e) {
             throw new MojoFailureException("Code generation failed", e);
         }

@@ -22,14 +22,15 @@ import com.btc.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider
 import com.btc.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.explicitattributedecider.ExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.nameprovider.DefaultNameProvider;
+import com.btc.redg.generator.testutil.DatabaseTestUtil;
 import com.btc.redg.models.ColumnModel;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import schemacrawler.inclusionrule.IncludeAll;
 import schemacrawler.schema.*;
-import schemacrawler.schemacrawler.IncludeAll;
 
+import javax.sql.DataSource;
 import java.io.File;
-import java.sql.Connection;
 
 import static org.junit.Assert.*;
 
@@ -40,12 +41,12 @@ public class ColumnExtractorTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-ce", "", "");
-        assertNotNull(connection);
+        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-cet", "", "");
+        assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        catalog = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        catalog = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         assertNotNull(catalog);
     }
 
@@ -99,7 +100,7 @@ public class ColumnExtractorTest {
     }
 
     private Column extractColumnFromDemoDb(String tableName, String columnName) throws Exception {
-        Schema s = catalog.lookupSchema("\"RT-CE\".PUBLIC").orElse(null);
+        Schema s = catalog.lookupSchema("\"RT-CET\".PUBLIC").orElse(null);
         assertNotNull(s);
         Table t = catalog.lookupTable(s, tableName).orElse(null);
         assertNotNull(t);

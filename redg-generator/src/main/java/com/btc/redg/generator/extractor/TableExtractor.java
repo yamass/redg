@@ -179,7 +179,7 @@ public class TableExtractor {
         if (table.getPrimaryKey() == null) {
             return false;
         }
-        final boolean hasMultipartFK = (table.getPrimaryKey().getColumns().size() > 1);
+        final boolean hasMultipartFK = (table.getPrimaryKey().getConstrainedColumns().size() > 1);
         for (final Column column : table.getColumns()) {
             if (hasMultipartFK) {
                 // has to be both

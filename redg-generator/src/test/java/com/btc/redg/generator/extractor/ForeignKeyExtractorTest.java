@@ -20,17 +20,18 @@ import com.btc.redg.generator.Helpers;
 import com.btc.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import com.btc.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
 import com.btc.redg.generator.extractor.nameprovider.DefaultNameProvider;
+import com.btc.redg.generator.testutil.DatabaseTestUtil;
 import com.btc.redg.models.ForeignKeyColumnModel;
 import com.btc.redg.models.ForeignKeyModel;
 import org.junit.Test;
+import schemacrawler.inclusionrule.IncludeAll;
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.ForeignKey;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.Table;
-import schemacrawler.schemacrawler.IncludeAll;
 
+import javax.sql.DataSource;
 import java.io.File;
-import java.sql.Connection;
 
 import static org.junit.Assert.*;
 
@@ -39,12 +40,12 @@ public class ForeignKeyExtractorTest {
 
     @Test
     public void testForeignKeyExtraction() throws Exception {
-        Connection connection = DatabaseManager.connectToDatabase("org.h2.Driver", "jdbc:h2:mem:rt-fe", "", "");
-        assertNotNull(connection);
+        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-fe", "", "");
+        assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(connection, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(connection, new IncludeAll(), new IncludeAll());
+        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
         Schema s = db.lookupSchema("\"RT-FE\".PUBLIC").orElse(null);
