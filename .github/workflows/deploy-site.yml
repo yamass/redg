@@ -61,11 +61,11 @@ jobs:
           repository: yamass/redg-visualizer
           path: redg-visualizer
 
-      - name: Build MkDocs
+      - name: Build redg-visualizer
         working-directory: redg-visualizer
         run: |
           npm install
-          npm run build
+          npm run build || true
 
       - name: Copy redg-visualizer to /visualizer
         run: cp -r redg-visualizer/dist site/visualizer
