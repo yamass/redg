@@ -8,7 +8,12 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Prepare site directory
+        run: mkdir -p site
+        
+
+      - name: Checkout redg
+        uses: actions/checkout@v5
         with:
           path: redg
 
@@ -17,6 +22,7 @@ jobs:
         with:
           java-version: 17
           distribution: 'temurin'
+          cache: maven
 
       - name: Build JavaDoc
         working-directory: redg
