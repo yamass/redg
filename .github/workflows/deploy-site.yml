@@ -55,6 +55,22 @@ jobs:
           mkdocs build -d ../site/documentation
 
 
+      - name: Checkout redg-visualizer
+        uses: actions/checkout@v5
+        with:
+          repository: yamass/redg-visualizer
+          path: redg-visualizer
+
+      - name: Build MkDocs
+        working-directory: redg-visualizer
+        run: |
+          npm install
+          npm run build
+
+      - name: Copy redg-visualizer to /visualizer
+        run: cp -r redg-visualizer/dist site/visualizer
+
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
