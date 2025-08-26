@@ -1,0 +1,56 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: redg
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Build JavaDoc
+        working-directory: redg
+        run: mvn javadoc:aggregate
+
+      - name: Copy JavaDoc
+        run: cp -r redg/target/reports/apidocs site/apidocs
+
+
+      - name: Checkout redg-website
+        uses: actions/checkout@v5
+        with:
+          repository: yamass/redg-website
+          path: redg-website
+
+      - name: Copy Landing Page
+        run: cp -r redg-website/* site/
+
+
+      - name: Checkout redg-documentation
+        uses: actions/checkout@v5
+        with:
+          repository: yamass/redg-documentation
+          path: redg-documentation
+
+      - name: Build MkDocs
+        working-directory: redg-documentation
+        run: |
+          pip install mkdocs mkdocs-material
+          mkdocs build -d ../site/documentation
+
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
