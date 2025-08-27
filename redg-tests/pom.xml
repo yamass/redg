@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>redg-tests</artifactId>
     <groupId>de.yamass</groupId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0</version>
 
     <description>
         A test suite that tests RedG by extracting code from a DB and inserting entities with that code.
@@ -17,7 +16,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <redg.version>3.0.0-SNAPSHOT</redg.version>
+        <redg.version>3.0.0</redg.version>
     </properties>
 
     <dependencies>
