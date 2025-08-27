@@ -351,6 +351,7 @@
                         <configuration>
                             <deploymentName>RedG ${project.version}</deploymentName>
                             <publishingServerId>ossrh</publishingServerId>
+                            <excludeArtifacts>redg-jpa-providers</excludeArtifacts>
                         </configuration>
                     </plugin>
                 </plugins>
