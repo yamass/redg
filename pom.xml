@@ -284,8 +284,8 @@
 
     <scm>
         <url>https://github.com/yamass/redg/</url>
-        <connection>scm:git:https://github.com/yamass/redg.git</connection>
-        <developerConnection>scm:git:https://github.com/yamass/redg.git</developerConnection>
+        <connection>scm:git:git@github.com:yamass/redg.git</connection>
+        <developerConnection>scm:git:git@github.com:yamass/redg.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
