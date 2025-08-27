@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>redg-tests</artifactId>
-    <groupId>de.yamass.redg</groupId>
+    <groupId>de.yamass</groupId>
     <version>3.0.0-SNAPSHOT</version>
 
     <description>
@@ -21,17 +21,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.yamass.redg</groupId>
+            <groupId>de.yamass</groupId>
             <artifactId>redg-runtime</artifactId>
             <version>${redg.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.yamass.redg</groupId>
+            <groupId>de.yamass</groupId>
             <artifactId>redg-generator</artifactId>
             <version>${redg.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.yamass.redg</groupId>
+            <groupId>de.yamass</groupId>
             <artifactId>redg-extractor</artifactId>
             <version>${redg.version}</version>
         </dependency>
@@ -57,7 +57,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>de.yamass.redg</groupId>
+                <groupId>de.yamass</groupId>
                 <artifactId>redg-maven-plugin</artifactId>
                 <version>${redg.version}</version>
                 <executions>
