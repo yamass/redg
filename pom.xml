@@ -21,7 +21,7 @@
     <groupId>de.yamass</groupId>
     <artifactId>redg</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
     <modules>
         <module>redg-generator</module>
         <module>redg-jpa-providers</module>
@@ -285,7 +285,7 @@
         <url>https://github.com/yamass/redg/</url>
         <connection>scm:git:git@github.com:yamass/redg.git</connection>
         <developerConnection>scm:git:git@github.com:yamass/redg.git</developerConnection>
-        <tag>redg-3.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <profiles>
