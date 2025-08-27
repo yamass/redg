@@ -23,7 +23,6 @@ de.yamass.redg.generator.utils
 de.yamass.redg.jpa
 de.yamass.redg.models
 de.yamass.redg.plugin
-de.yamass.redg.plugin.liquibase
 de.yamass.redg.plugin.util
 de.yamass.redg.runtime
 de.yamass.redg.runtime.defaultvalues
