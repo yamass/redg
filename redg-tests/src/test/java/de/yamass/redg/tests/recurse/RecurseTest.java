@@ -57,10 +57,10 @@ public class RecurseTest {
 
     private void prepareTestData(final RedG redg) {
         // create root element
-        GTreeElement root = redg.addTreeElement(redg.entitySelfReference()).value("Root");
-        redg.addTreeElement(root).value("Child 1");
-        GTreeElement child = redg.addTreeElement(root).value("Child 2");
-        redg.addTreeElement(child).value("Child 3");
+        GTreeElement root = redg.addTreeElement(redg.entitySelfReference()).someValue("Root");
+        redg.addTreeElement(root).someValue("Child 1");
+        GTreeElement child = redg.addTreeElement(root).someValue("Child 2");
+        redg.addTreeElement(child).someValue("Child 3");
 
     }
 }

@@ -4,13 +4,13 @@
 
 create table RESTAURANT (
   ID number(19) not null primary key,
-  NAME varchar2(50 char) not null
+  NAME varchar2(50 CHARACTERS) not null
 );
 
 create table GUEST (
   ID number(19) not null primary key,
-  FIRST_NAME varchar2(50 char),
-  LAST_NAME varchar2(50 char) not null
+  FIRST_NAME varchar2(50 CHARACTERS),
+  LAST_NAME varchar2(50 CHARACTERS) not null
 );
 
 create table RESERVATION (
@@ -25,7 +25,7 @@ create table RESERVATION (
 
 create table WAITER (
   ID number(19) not null primary key,
-  NAME varchar2(50 char) not null,
+  NAME varchar2(50 CHARACTERS) not null,
   RESTAURANT number(19),
 
   constraint FK_WAITER_WORKS_AT foreign key (RESTAURANT) references RESTAURANT(ID)

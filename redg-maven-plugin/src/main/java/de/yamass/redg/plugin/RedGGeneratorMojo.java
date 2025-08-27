@@ -16,6 +16,8 @@
 
 package de.yamass.redg.plugin;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import de.yamass.redg.generator.RedGGenerator;
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
 import de.yamass.redg.generator.extractor.DatabaseManager;
@@ -34,9 +36,6 @@ import de.yamass.redg.generator.extractor.explicitattributedecider.JsonFileExpli
 import de.yamass.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
 import de.yamass.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
 import de.yamass.redg.jpa.JpaMetamodelRedGProvider;
-import de.yamass.redg.plugin.liquibase.OptionalLiquibaseRunner;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -53,7 +52,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -116,9 +114,6 @@ public class RedGGeneratorMojo extends AbstractMojo {
     @Parameter
     private String classPrefix = TableExtractor.DEFAULT_CLASS_PREFIX;
 
-    @Parameter
-    private String liquibaseChangeLogFile;
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         HikariConfig config = new HikariConfig();
@@ -126,13 +121,6 @@ public class RedGGeneratorMojo extends AbstractMojo {
         config.setUsername( username );
         config.setPassword(password);
         HikariDataSource dataSource = new HikariDataSource(config);
-
-        try (Connection connection = dataSource.getConnection()) {
-            // execute Liquibase update if Liquibase is on classpath and changelog file is provided
-            new OptionalLiquibaseRunner(liquibaseChangeLogFile).execute(getLog(), connection);
-        } catch (Exception e) {
-            throw new MojoFailureException("Exception while executing Liquibase: " + e, e);
-		}
 
 		try {
             DatabaseManager.executePreparationScripts(dataSource, sqlScripts);

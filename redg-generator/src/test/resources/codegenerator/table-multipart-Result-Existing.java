@@ -94,22 +94,6 @@ public class ExistingGDemoUser extends GDemoUser {
      * {@inheritDoc}
      */
     @Override
-    public GDemoUser bankAcc(GDemoBankAccount value) {
-        throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GDemoBankAccount bankAcc() {
-        throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public GDemoUser company(GDemoCompany value) {
         throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
     }
@@ -122,21 +106,37 @@ public class ExistingGDemoUser extends GDemoUser {
         throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GDemoUser bankAcc(GDemoBankAccount value) {
+        throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
+    }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public java.lang.String accBic() {
+    public GDemoBankAccount bankAcc() {
         throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
     }
-    @Override
-    public java.lang.String accIban() {
-        throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
-    }
+
+
     @Override
     public java.lang.String worksAtName() {
         throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
     }
     @Override
     public java.lang.String worksAtCc() {
+        throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
+    }
+    @Override
+    public java.lang.String accBic() {
+        throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
+    }
+    @Override
+    public java.lang.String accIban() {
         throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
     }
 
@@ -146,7 +146,7 @@ public class ExistingGDemoUser extends GDemoUser {
         return String.format("SELECT COUNT(*) FROM \"DEMO_USER\" WHERE " +
                         "\"ID\" = %s",
                 this.redG.getSqlValuesFormatter().formatValue(super.id(),
-                        "DECIMAL", "DEMO_USER",
+                        "NUMERIC", "DEMO_USER",
                         "DEMO_USER", "ID")
         );
     }
@@ -167,7 +167,7 @@ public class ExistingGDemoUser extends GDemoUser {
     @Override
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[] {
-                new AttributeMetaInfo("ID", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "DECIMAL", 3, java.math.BigDecimal.class, true)
+                new AttributeMetaInfo("ID", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true)
         };
     }
 }

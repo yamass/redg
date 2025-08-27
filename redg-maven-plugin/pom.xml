@@ -51,7 +51,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
-            <scope>compile</scope>
+            <version>3.9.11</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
@@ -81,6 +81,7 @@
         <dependency>
             <groupId>io.takari.maven.plugins</groupId>
             <artifactId>takari-plugin-testing</artifactId>
+            <version>3.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -97,11 +98,6 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -113,12 +109,6 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-project</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<groupId>org.liquibase</groupId>
-        	<artifactId>liquibase-core</artifactId>
-        	<version>4.8.0</version>
-        	<optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -135,7 +125,6 @@
         <dependency>
             <groupId>us.fatehi</groupId>
             <artifactId>schemacrawler-postgresql</artifactId>
-            <version>${schemacrawlerVersion}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -168,7 +157,7 @@
             <plugin>
                 <groupId>io.takari.maven.plugins</groupId>
                 <artifactId>takari-lifecycle-plugin</artifactId>
-                <version>${takariLifecycleVersion}</version>
+                <version>2.3.0</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>

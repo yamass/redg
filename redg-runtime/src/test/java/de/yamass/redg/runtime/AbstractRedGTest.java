@@ -207,7 +207,7 @@ public class AbstractRedGTest {
     public void testInsertConnection() throws Exception {
         Connection connection = getConnection("conn");
         Statement stmt = connection.createStatement();
-        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHAR))");
+        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHARACTERS))");
 
         List<MockEntity1> gObjects = IntStream.rangeClosed(1, 20).mapToObj(i -> new MockEntity1()).collect(Collectors.toList());
 

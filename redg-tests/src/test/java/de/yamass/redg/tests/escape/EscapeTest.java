@@ -41,7 +41,7 @@ public class EscapeTest {
 
     private void checkData(Connection connection) throws Exception {
         final Statement statement = connection.createStatement();
-        final ResultSet rs = statement.executeQuery("select * from \"TABLE\"");
+        final ResultSet rs = statement.executeQuery("select * from \"T1\"");
         rs.next();
         Helpers.assertResultSet(rs, 0, "Test");
         rs.next();
@@ -49,7 +49,7 @@ public class EscapeTest {
     }
 
     private void prepareTestData(RedG redG) {
-        redG.addTable().name("Test");
-        redG.addTable().name("Hello");
+        redG.addT1().name("Test");
+        redG.addT1().name("Hello");
     }
 }

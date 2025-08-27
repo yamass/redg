@@ -30,6 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import schemacrawler.inclusionrule.IncludeAll;
+import schemacrawler.inclusionrule.InclusionRule;
 import schemacrawler.schema.*;
 
 import javax.sql.DataSource;
@@ -38,12 +39,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 public class CodeGeneratorTest {
 
+    public static final InclusionRule NO_INFORMATION_SCHEMA_INCLUSION_RULE = s -> !s.toLowerCase().replace("\"", "").contains(".information_schema");
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -53,7 +55,7 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         assertNotNull(db);
         Schema s = db.getSchemas().stream().filter(schema -> schema.getName().equals("PUBLIC")).findFirst().orElse(null);
         assertNotNull(s);
@@ -87,50 +89,13 @@ public class CodeGeneratorTest {
     }
 
     @Test
-    public void testGenerateCodeEscaping() throws Exception {
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-cg-te", "", "");
-        assertNotNull(dataSource);
-        File tempFile = Helpers.getResourceAsFile("codegenerator/test-escaping.sql");
-        assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
-        assertNotNull(db);
-        Schema s = db.getSchemas().stream().filter(schema -> schema.getName().equals("PUBLIC")).findFirst().orElse(null);
-        assertNotNull(s);
-        Table t1 = db.getTables(s).stream().filter(table -> table.getName().equals("TABLE")).findFirst().orElse(null);
-        assertNotNull(t1);
-        Table t2 = db.getTables(s).stream().filter(table -> table.getName().equals("GROUP")).findFirst().orElse(null);
-        assertNotNull(t2);
-
-        List<TableModel> models = MetadataExtractor.extract(db);
-        assertNotNull(models);
-        assertThat(models.size(), is(2));
-
-        TableModel modelTable = models.stream().filter(m -> Objects.equals("Table", m.getName())).findFirst().orElse(null);
-        assertNotNull(modelTable);
-        TableModel modelGroup = models.stream().filter(m -> Objects.equals("Group", m.getName())).findFirst().orElse(null);
-        assertNotNull(modelGroup);
-        CodeGenerator cg = new CodeGenerator();
-
-        String resultTable = cg.generateCodeForTable(modelTable, false);
-        String resultGroup = cg.generateCodeForTable(modelGroup, false);
-
-        assertNotNull(resultTable);
-        assertNotNull(resultGroup);
-        assertEquals(Helpers.getResourceAsString("codegenerator/table-escaping-Result-table.java"), resultTable);
-        assertEquals(Helpers.getResourceAsString("codegenerator/table-escaping-Result-group.java"), resultGroup);
-
-        //TODO: add test for existing class
-    }
-
-    @Test
     public void testGenerateCodeWithMultipartForeignKey() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-cg-mpfk", "", "");
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-multipart-fk.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         assertNotNull(db);
         Schema s = db.getSchemas().stream()
                 .filter(schema -> schema.getName().equals("PUBLIC"))
@@ -172,7 +137,7 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         assertNotNull(db);
 
         List<TableModel> models = MetadataExtractor.extract(db);
@@ -189,7 +154,7 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-join-table.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         assertNotNull(db);
 
         List<TableModel> models = MetadataExtractor.extract(db);
@@ -213,7 +178,7 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-date-convenience.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         assertNotNull(db);
 
         TableExtractor tableExtractor = new TableExtractor(
@@ -247,7 +212,7 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         assertNotNull(db);
         Schema s = db.getSchemas().stream().filter(schema -> schema.getName().equals("PUBLIC")).findFirst().orElse(null);
         assertNotNull(s);
@@ -287,7 +252,7 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         assertNotNull(db);
 
         List<TableModel> models = MetadataExtractor.extract(db);

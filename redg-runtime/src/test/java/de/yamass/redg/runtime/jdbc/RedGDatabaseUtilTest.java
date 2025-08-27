@@ -59,7 +59,7 @@ public class RedGDatabaseUtilTest {
     public void testInsertDataIntoDatabase() throws Exception {
         Connection connection = getConnection("-idid");
         Statement stmt = connection.createStatement();
-        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHAR))");
+        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHARACTERS))");
 
         List<MockEntity1> gObjects = IntStream.rangeClosed(1, 20).mapToObj(i -> new MockEntity1()).collect(Collectors.toList());
 
@@ -75,7 +75,7 @@ public class RedGDatabaseUtilTest {
     public void testInsertDataIntoDatabase2() throws Exception {
         Connection connection = getConnection("-idid2");
         Statement stmt = connection.createStatement();
-        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHAR))");
+        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHARACTERS))");
 
         List<MockEntity3> gObjects = IntStream.rangeClosed(1, 20).mapToObj(i -> new MockEntity3()).collect(Collectors.toList());
 
@@ -91,7 +91,7 @@ public class RedGDatabaseUtilTest {
     public void testInsertDataIntoDatabase3() throws Exception {
         Connection connection = getConnection("-idid3");
         Statement stmt = connection.createStatement();
-        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHAR))");
+        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHARACTERS))");
 
         List<MockEntity4> gObjects = IntStream.rangeClosed(1, 20).mapToObj(i -> new MockEntity4()).collect(Collectors.toList());
 
@@ -155,7 +155,7 @@ public class RedGDatabaseUtilTest {
     public void testInsertExistingDataIntoDatabase() throws Exception {
         Connection connection = getConnection("-iedid");
         Statement stmt = connection.createStatement();
-        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHAR))");
+        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHARACTERS))");
 
         stmt.execute("INSERT INTO TEST VALUES ('obj1')");
         RedGDatabaseUtil.insertDataIntoDatabase(Collections.singletonList(new ExistingMockEntity1()), connection);
@@ -166,7 +166,7 @@ public class RedGDatabaseUtilTest {
         this.thrown.expect(ExistingEntryMissingException.class);
         Connection connection = getConnection("-iedidm");
         Statement stmt = connection.createStatement();
-        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHAR))");
+        stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHARACTERS))");
 
         RedGDatabaseUtil.insertDataIntoDatabase(Collections.singletonList(new ExistingMockEntity1()), connection);
     }

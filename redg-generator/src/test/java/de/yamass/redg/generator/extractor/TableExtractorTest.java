@@ -94,18 +94,18 @@ public class TableExtractorTest {
 
         Assert.assertEquals(1, exchangeRefTableModel.getPrimaryKeyColumns().size());
         Assert.assertEquals("ID", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getDbName());
-        Assert.assertEquals("DECIMAL", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getSqlType());
+        Assert.assertEquals("NUMERIC", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getSqlType());
         Assert.assertEquals("java.math.BigDecimal", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getJavaTypeName());
         Assert.assertTrue(exchangeRefTableModel.getForeignKeyColumns().isEmpty());
 
         Assert.assertEquals(1, exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().size());
         Assert.assertEquals("NAME", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getDbName());
-        Assert.assertEquals("VARCHAR", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
+        Assert.assertEquals("CHARACTER VARYING", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
         Assert.assertEquals("java.lang.String", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getJavaTypeName());
 
         Assert.assertEquals(1, exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().size());
         Assert.assertEquals("FIRST_NAME", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getDbName());
-        Assert.assertEquals("VARCHAR", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
+        Assert.assertEquals("CHARACTER VARYING", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
         Assert.assertEquals("java.lang.String", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getJavaTypeName());
 
         Assert.assertEquals(2, exchangeRateTableModel.getForeignKeyColumns().size());

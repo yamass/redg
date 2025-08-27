@@ -16,23 +16,20 @@
 
 package de.yamass.redg.jpa;
 
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.Optional;
-
+import de.yamass.redg.generator.extractor.DatabaseManager;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import de.yamass.redg.generator.extractor.DatabaseManager;
-
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ForeignKey;
 import schemacrawler.schema.Table;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.Optional;
 
 /**
  * @author Yann Massard (yamass@gmail.com)
@@ -50,7 +47,7 @@ public class JpaMetamodelRedGProviderTest {
 			Statement statement = connection.createStatement()) {
 			statement.execute("create table NON_MAPPED_TABLE ("
 					+ "  NORMAL_COLUMN NUMBER(19),"
-					+ "  FK NUMBER(19) references MANAGEDSUPERCLASSJOINED(ID),"
+					+ "  FK NUMBER(19) references MANAGEDSUPERCLASSJOINED(ID)"
 					+ ")");
 			catalog = DatabaseManager.crawlDatabase(dataSource, null, null);
 		}

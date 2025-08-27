@@ -76,13 +76,15 @@ public class StandardTest {
 
     private void prepareTestData(final RedG redg) {
         GReservation reservation = redg.addReservation(
-                redg.dummyGuest(),
-                redg.addRestaurant()
-                        .name("Susan's Steakhouse")
+                redg.addRestaurant().name("Susan's Steakhouse"),
+                redg.dummyGuest()
         ).time(new Timestamp(1234567890L));
         redg.addWaiterReservation(redg.addWaiter().name("Sally"), reservation);
 
-        GReservation reservation2 = redg.addReservation(redg.dummyGuest(), redg.findSingleEntity(GRestaurant.class, r -> r.name().startsWith("Susan")));
+        GReservation reservation2 = redg.addReservation(
+                redg.findSingleEntity(GRestaurant.class, r -> r.name().startsWith("Susan")),
+                redg.dummyGuest()
+        );
         redg.addWaiterReservation(redg.addWaiter().name("Stefan"), reservation2);
     }
 }

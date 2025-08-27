@@ -109,7 +109,7 @@ public class ExistingGDemoUser extends GDemoUser {
      * {@inheritDoc}
      */
     @Override
-    public GDemoUser day(java.sql.Timestamp value) {
+    public GDemoUser dayTs(java.sql.Timestamp value) {
         throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
     }
 
@@ -117,7 +117,7 @@ public class ExistingGDemoUser extends GDemoUser {
      * {@inheritDoc}
      */
     @Override
-    public java.sql.Timestamp day() {
+    public java.sql.Timestamp dayTs() {
         throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
     }
 
@@ -150,7 +150,7 @@ public class ExistingGDemoUser extends GDemoUser {
         return String.format("SELECT COUNT(*) FROM \"DEMO_USER\" WHERE " +
                         "\"ID\" = %s",
                 this.redG.getSqlValuesFormatter().formatValue(super.id(),
-                        "DECIMAL", "DEMO_USER",
+                        "NUMERIC", "DEMO_USER",
                         "DEMO_USER", "ID")
         );
     }
@@ -171,7 +171,7 @@ public class ExistingGDemoUser extends GDemoUser {
     @Override
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[] {
-                new AttributeMetaInfo("ID", "DEMO_USER", "TESTENABLEVISUALIZATION.PUBLIC.DEMO_USER", "DECIMAL", 3, java.math.BigDecimal.class, true)
+                new AttributeMetaInfo("ID", "DEMO_USER", "TESTENABLEVISUALIZATION.PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true)
         };
     }
 }

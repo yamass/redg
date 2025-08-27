@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import static de.yamass.redg.generator.CodeGeneratorTest.NO_INFORMATION_SCHEMA_INCLUSION_RULE;
 import static org.junit.Assert.*;
 
 
@@ -40,7 +41,7 @@ public class MetadataExtractorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-join-table.sql");
         assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         assertNotNull(db);
 
         List<TableModel> models = MetadataExtractor.extract(db);
@@ -49,12 +50,12 @@ public class MetadataExtractorTest {
             if (model.getName().equals("DemoCompany")) {
                 assertEquals(1, model.getJoinTableSimplifierData().size());
                 assertTrue(model.getJoinTableSimplifierData().containsKey("GUserWorksAtCompanies"));
-                assertEquals(Arrays.asList("this", "userIdDemoUser"), model.getJoinTableSimplifierData().get("GUserWorksAtCompanies").getConstructorParams());
+                assertEquals(Arrays.asList("userIdDemoUser", "this"), model.getJoinTableSimplifierData().get("GUserWorksAtCompanies").getConstructorParams());
                 assertEquals(1, model.getJoinTableSimplifierData().get("GUserWorksAtCompanies").getMethodParams().size());
             } else if (model.getName().equals("DemoUser")) {
                 assertEquals(1, model.getJoinTableSimplifierData().size());
                 assertTrue(model.getJoinTableSimplifierData().containsKey("GUserWorksAtCompanies"));
-                assertEquals(Arrays.asList("companyIdDemoCompany", "this"), model.getJoinTableSimplifierData().get("GUserWorksAtCompanies").getConstructorParams());
+                assertEquals(Arrays.asList("this", "companyIdDemoCompany"), model.getJoinTableSimplifierData().get("GUserWorksAtCompanies").getConstructorParams());
                 assertEquals(1, model.getJoinTableSimplifierData().get("GUserWorksAtCompanies").getMethodParams().size());
             } else {
                 assertEquals(0, model.getJoinTableSimplifierData().size());

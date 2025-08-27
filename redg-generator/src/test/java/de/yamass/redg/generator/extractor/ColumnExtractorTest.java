@@ -61,7 +61,7 @@ public class ColumnExtractorTest {
         assertEquals("id", model.getName());
         assertEquals("ID", model.getDbName());
         assertEquals("DEMO_USER", model.getDbTableName());
-        assertEquals("DECIMAL", model.getSqlType());
+        assertEquals("NUMERIC", model.getSqlType());
         assertEquals("java.math.BigDecimal", model.getJavaTypeName());
         assertTrue(model.isNotNull());
     }
@@ -90,13 +90,13 @@ public class ColumnExtractorTest {
 
     @Test
     public void testExtractColumnModelForKeywordColumn() throws Exception {
-        Column column = extractColumnFromDemoDb("DEMO_USER", "DAY");
+        Column column = extractColumnFromDemoDb("DEMO_USER", "DAY_TS");
 
         ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
                 new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
         ColumnModel model = extractor.extractColumnModel(column);
 
-        assertEquals("DAY", model.getDbName());
+        assertEquals("DAY_TS", model.getDbName());
     }
 
     private Column extractColumnFromDemoDb(String tableName, String columnName) throws Exception {

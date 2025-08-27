@@ -91,7 +91,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>SQL type</td>
-     *         <td>DECIMAL</td>
+     *         <td>NUMERIC</td>
      *     </tr>
      *     <tr>
      *         <td>Not nullable?</td>
@@ -135,7 +135,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>SQL type</td>
-     *         <td>DECIMAL</td>
+     *         <td>NUMERIC</td>
      *     </tr>
      *     <tr>
      *         <td>Not nullable?</td>
@@ -177,7 +177,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>SQL type</td>
-     *         <td>VARCHAR</td>
+     *         <td>CHARACTER VARYING</td>
      *     </tr>
      *     <tr>
      *         <td>Not nullable?</td>
@@ -221,7 +221,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>SQL type</td>
-     *         <td>VARCHAR</td>
+     *         <td>CHARACTER VARYING</td>
      *     </tr>
      *     <tr>
      *         <td>Not nullable?</td>
@@ -263,7 +263,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>SQL type</td>
-     *         <td>VARCHAR</td>
+     *         <td>CHARACTER VARYING</td>
      *     </tr>
      *     <tr>
      *         <td>Not nullable?</td>
@@ -304,7 +304,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>SQL type</td>
-     *         <td>VARCHAR</td>
+     *         <td>CHARACTER VARYING</td>
      *     </tr>
      *     <tr>
      *         <td>Not nullable?</td>
@@ -346,7 +346,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>SQL type</td>
-     *         <td>VARCHAR</td>
+     *         <td>CHARACTER VARYING</td>
      *     </tr>
      *     <tr>
      *         <td>Not nullable?</td>
@@ -387,7 +387,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>SQL type</td>
-     *         <td>VARCHAR</td>
+     *         <td>CHARACTER VARYING</td>
      *     </tr>
      *     <tr>
      *         <td>Not nullable?</td>
@@ -418,7 +418,7 @@ public class GDemoUser implements RedGEntity {
     }
 
     public GUserWorksAtCompanies addUserWorksAtCompaniesRelation(GDemoCompany companyIdDemoCompany) {
-        GUserWorksAtCompanies rel = new GUserWorksAtCompanies(this.redG, companyIdDemoCompany, this);
+        GUserWorksAtCompanies rel = new GUserWorksAtCompanies(this.redG, this, companyIdDemoCompany);
         this.redG.addEntity(rel);
         return rel;
     }
@@ -433,16 +433,16 @@ public class GDemoUser implements RedGEntity {
                         "" +
                         "%s, %s, %s, %s)",
                 this.redG.getSqlValuesFormatter().formatValue(this.id(),
-                        "DECIMAL", "\"RT-CG-JT\".PUBLIC.DEMO_USER",
+                        "NUMERIC", "\"RT-CG-JT\".PUBLIC.DEMO_USER",
                         "DEMO_USER", "ID"),
                 this.redG.getSqlValuesFormatter().formatValue(this.username(),
-                        "VARCHAR", "\"RT-CG-JT\".PUBLIC.DEMO_USER",
+                        "CHARACTER VARYING", "\"RT-CG-JT\".PUBLIC.DEMO_USER",
                         "DEMO_USER", "USERNAME"),
                 this.redG.getSqlValuesFormatter().formatValue(this.firstName(),
-                        "VARCHAR", "\"RT-CG-JT\".PUBLIC.DEMO_USER",
+                        "CHARACTER VARYING", "\"RT-CG-JT\".PUBLIC.DEMO_USER",
                         "DEMO_USER", "FIRST_NAME"),
                 this.redG.getSqlValuesFormatter().formatValue(this.lastName(),
-                        "VARCHAR", "\"RT-CG-JT\".PUBLIC.DEMO_USER",
+                        "CHARACTER VARYING", "\"RT-CG-JT\".PUBLIC.DEMO_USER",
                         "DEMO_USER", "LAST_NAME")
         );
     }
@@ -469,14 +469,14 @@ public class GDemoUser implements RedGEntity {
 
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[]{
-                new AttributeMetaInfo("ID", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "DECIMAL", 3, java.math.BigDecimal.class, true),
-                new AttributeMetaInfo("USERNAME", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "VARCHAR", 12, java.lang.String.class, true),
-                new AttributeMetaInfo("FIRST_NAME", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "VARCHAR", 12, java.lang.String.class, false),
-                new AttributeMetaInfo("LAST_NAME", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "VARCHAR", 12, java.lang.String.class, false)
+                new AttributeMetaInfo("ID", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true),
+                new AttributeMetaInfo("USERNAME", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, true),
+                new AttributeMetaInfo("FIRST_NAME", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false),
+                new AttributeMetaInfo("LAST_NAME", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false)
         };
     }
 
-    private static String serializedTableModel = "rO0ABXNyACBkZS55YW1hc3MucmVkZy5tb2RlbHMuVGFibGVNb2RlbL+0Cs2MvQwOAgAKWgAYaGFzQ29sdW1uc0FuZEZvcmVpZ25LZXlzTAAJY2xhc3NOYW1ldAASTGphdmEvbGFuZy9TdHJpbmc7TAAHY29sdW1uc3QAEExqYXZhL3V0aWwvTGlzdDtMAAtmb3JlaWduS2V5c3EAfgACTAATaW5jb21pbmdGb3JlaWduS2V5c3EAfgACTAAXam9pblRhYmxlU2ltcGxpZmllckRhdGF0AA9MamF2YS91dGlsL01hcDtMAARuYW1lcQB+AAFMAAtwYWNrYWdlTmFtZXEAfgABTAALc3FsRnVsbE5hbWVxAH4AAUwAB3NxbE5hbWVxAH4AAXhwAHQACUdEZW1vVXNlcnNyABNqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHAAAAAEdwQAAAAEc3IAIWRlLnlhbWFzcy5yZWRnLm1vZGVscy5Db2x1bW5Nb2RlbIDpepgPjS7uAgANWgARZXhwbGljaXRBdHRyaWJ1dGVaAAdub3ROdWxsWgAQcGFydE9mRm9yZWlnbktleVoAEHBhcnRPZlByaW1hcnlLZXlJAApzcWxUeXBlSW50WgAGdW5pcXVlTAASY29udmVuaWVuY2VTZXR0ZXJzcQB+AAJMAA9kYkZ1bGxUYWJsZU5hbWVxAH4AAUwABmRiTmFtZXEAfgABTAALZGJUYWJsZU5hbWVxAH4AAUwADGphdmFUeXBlTmFtZXEAfgABTAAEbmFtZXEAfgABTAAHc3FsVHlwZXEAfgABeHAAAQABAAAAAwFzcgAfamF2YS51dGlsLkNvbGxlY3Rpb25zJEVtcHR5TGlzdHq4F7Q8p57eAgAAeHB0ABsiUlQtQ0ctSlQiLlBVQkxJQy5ERU1PX1VTRVJ0AAJJRHQACURFTU9fVVNFUnQAFGphdmEubWF0aC5CaWdEZWNpbWFsdAACaWR0AAdERUNJTUFMc3EAfgAIAAEAAAAAAAwAcQB+AAtxAH4ADHQACFVTRVJOQU1FcQB+AA50ABBqYXZhLmxhbmcuU3RyaW5ndAAIdXNlcm5hbWV0AAdWQVJDSEFSc3EAfgAIAAAAAAAAAAwAcQB+AAtxAH4ADHQACkZJUlNUX05BTUVxAH4ADnEAfgAUdAAJZmlyc3ROYW1lcQB+ABZzcQB+AAgAAAAAAAAADABxAH4AC3EAfgAMdAAJTEFTVF9OQU1FcQB+AA5xAH4AFHQACGxhc3ROYW1lcQB+ABZ4c3EAfgAGAAAAAHcEAAAAAHhzcQB+AAYAAAABdwQAAAABc3IALWRlLnlhbWFzcy5yZWRnLm1vZGVscy5JbmNvbWluZ0ZvcmVpZ25LZXlNb2RlbPDRJAkuTQf9AgAFWgAHbm90TnVsbEwADWF0dHJpYnV0ZU5hbWVxAH4AAUwAGHJlZmVyZW5jaW5nQXR0cmlidXRlTmFtZXEAfgABTAAVcmVmZXJlbmNpbmdFbnRpdHlOYW1lcQB+AAFMABdyZWZlcmVuY2luZ0phdmFUeXBlTmFtZXEAfgABeHABdAAmdXNlcldvcmtzQXRDb21wYW5pZXNzRm9yVXNlcklkRGVtb1VzZXJ0AA51c2VySWREZW1vVXNlcnQAFFVzZXJXb3Jrc0F0Q29tcGFuaWVzdAAVR1VzZXJXb3Jrc0F0Q29tcGFuaWVzeHNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAABdAAVR1VzZXJXb3Jrc0F0Q29tcGFuaWVzc3IALmRlLnlhbWFzcy5yZWRnLm1vZGVscy5Kb2luVGFibGVTaW1wbGlmaWVyTW9kZWxD63PkU0saQgIAA0wAEWNvbnN0cnVjdG9yUGFyYW1zcQB+AAJMAAxtZXRob2RQYXJhbXNxAH4AA0wABG5hbWVxAH4AAXhwc3EAfgAGAAAAAncEAAAAAnQAFGNvbXBhbnlJZERlbW9Db21wYW55dAAEdGhpc3hzcQB+ACU/QAAAAAAADHcIAAAAEAAAAAF0AAxHRGVtb0NvbXBhbnlxAH4AK3h0ABRVc2VyV29ya3NBdENvbXBhbmllc3h0AAhEZW1vVXNlcnQAGGRlLnlhbWFzcy5yZWRnLmdlbmVyYXRlZHEAfgAMcQB+AA4=";
+    private static String serializedTableModel = "rO0ABXNyACBkZS55YW1hc3MucmVkZy5tb2RlbHMuVGFibGVNb2RlbL+0Cs2MvQwOAgAKWgAYaGFzQ29sdW1uc0FuZEZvcmVpZ25LZXlzTAAJY2xhc3NOYW1ldAASTGphdmEvbGFuZy9TdHJpbmc7TAAHY29sdW1uc3QAEExqYXZhL3V0aWwvTGlzdDtMAAtmb3JlaWduS2V5c3EAfgACTAATaW5jb21pbmdGb3JlaWduS2V5c3EAfgACTAAXam9pblRhYmxlU2ltcGxpZmllckRhdGF0AA9MamF2YS91dGlsL01hcDtMAARuYW1lcQB+AAFMAAtwYWNrYWdlTmFtZXEAfgABTAALc3FsRnVsbE5hbWVxAH4AAUwAB3NxbE5hbWVxAH4AAXhwAHQACUdEZW1vVXNlcnNyABNqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHAAAAAEdwQAAAAEc3IAIWRlLnlhbWFzcy5yZWRnLm1vZGVscy5Db2x1bW5Nb2RlbIDpepgPjS7uAgANWgARZXhwbGljaXRBdHRyaWJ1dGVaAAdub3ROdWxsWgAQcGFydE9mRm9yZWlnbktleVoAEHBhcnRPZlByaW1hcnlLZXlJAApzcWxUeXBlSW50WgAGdW5pcXVlTAASY29udmVuaWVuY2VTZXR0ZXJzcQB+AAJMAA9kYkZ1bGxUYWJsZU5hbWVxAH4AAUwABmRiTmFtZXEAfgABTAALZGJUYWJsZU5hbWVxAH4AAUwADGphdmFUeXBlTmFtZXEAfgABTAAEbmFtZXEAfgABTAAHc3FsVHlwZXEAfgABeHAAAQABAAAAAgFzcgAfamF2YS51dGlsLkNvbGxlY3Rpb25zJEVtcHR5TGlzdHq4F7Q8p57eAgAAeHB0ABsiUlQtQ0ctSlQiLlBVQkxJQy5ERU1PX1VTRVJ0AAJJRHQACURFTU9fVVNFUnQAFGphdmEubWF0aC5CaWdEZWNpbWFsdAACaWR0AAdOVU1FUklDc3EAfgAIAAEAAAAAAAwAcQB+AAtxAH4ADHQACFVTRVJOQU1FcQB+AA50ABBqYXZhLmxhbmcuU3RyaW5ndAAIdXNlcm5hbWV0ABFDSEFSQUNURVIgVkFSWUlOR3NxAH4ACAAAAAAAAAAMAHEAfgALcQB+AAx0AApGSVJTVF9OQU1FcQB+AA5xAH4AFHQACWZpcnN0TmFtZXEAfgAWc3EAfgAIAAAAAAAAAAwAcQB+AAtxAH4ADHQACUxBU1RfTkFNRXEAfgAOcQB+ABR0AAhsYXN0TmFtZXEAfgAWeHNxAH4ABgAAAAB3BAAAAAB4c3EAfgAGAAAAAXcEAAAAAXNyAC1kZS55YW1hc3MucmVkZy5tb2RlbHMuSW5jb21pbmdGb3JlaWduS2V5TW9kZWzw0SQJLk0H/QIABVoAB25vdE51bGxMAA1hdHRyaWJ1dGVOYW1lcQB+AAFMABhyZWZlcmVuY2luZ0F0dHJpYnV0ZU5hbWVxAH4AAUwAFXJlZmVyZW5jaW5nRW50aXR5TmFtZXEAfgABTAAXcmVmZXJlbmNpbmdKYXZhVHlwZU5hbWVxAH4AAXhwAXQAJnVzZXJXb3Jrc0F0Q29tcGFuaWVzc0ZvclVzZXJJZERlbW9Vc2VydAAOdXNlcklkRGVtb1VzZXJ0ABRVc2VyV29ya3NBdENvbXBhbmllc3QAFUdVc2VyV29ya3NBdENvbXBhbmllc3hzcgARamF2YS51dGlsLkhhc2hNYXAFB9rBwxZg0QMAAkYACmxvYWRGYWN0b3JJAAl0aHJlc2hvbGR4cD9AAAAAAAAMdwgAAAAQAAAAAXQAFUdVc2VyV29ya3NBdENvbXBhbmllc3NyAC5kZS55YW1hc3MucmVkZy5tb2RlbHMuSm9pblRhYmxlU2ltcGxpZmllck1vZGVsQ+tz5FNLGkICAANMABFjb25zdHJ1Y3RvclBhcmFtc3EAfgACTAAMbWV0aG9kUGFyYW1zcQB+AANMAARuYW1lcQB+AAF4cHNxAH4ABgAAAAJ3BAAAAAJ0AAR0aGlzdAAUY29tcGFueUlkRGVtb0NvbXBhbnl4c3EAfgAlP0AAAAAAAAx3CAAAABAAAAABdAAMR0RlbW9Db21wYW55cQB+ACx4dAAUVXNlcldvcmtzQXRDb21wYW5pZXN4dAAIRGVtb1VzZXJ0ABhkZS55YW1hc3MucmVkZy5nZW5lcmF0ZWRxAH4ADHEAfgAO";
     private static TableModel tableModel;
 
     public static String getSerializedTableModel() {

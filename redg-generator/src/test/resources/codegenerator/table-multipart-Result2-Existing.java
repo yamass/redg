@@ -64,10 +64,10 @@ public class ExistingGDemoCompany extends GDemoCompany {
         return String.format("SELECT COUNT(*) FROM \"DEMO_COMPANY\" WHERE " +
                         "\"COUNTRY_CODE\" = %s AND \"NAME\" = %s",
                 this.redG.getSqlValuesFormatter().formatValue(super.countryCode(),
-                        "VARCHAR", "DEMO_COMPANY",
+                        "CHARACTER VARYING", "DEMO_COMPANY",
                         "DEMO_COMPANY", "COUNTRY_CODE"),
                 this.redG.getSqlValuesFormatter().formatValue(super.name(),
-                        "VARCHAR", "DEMO_COMPANY",
+                        "CHARACTER VARYING", "DEMO_COMPANY",
                         "DEMO_COMPANY", "NAME")
         );
     }
@@ -90,8 +90,8 @@ public class ExistingGDemoCompany extends GDemoCompany {
     @Override
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[] {
-                new AttributeMetaInfo("COUNTRY_CODE", "DEMO_COMPANY", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY", "VARCHAR", 12, java.lang.String.class, true),
-                new AttributeMetaInfo("NAME", "DEMO_COMPANY", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY", "VARCHAR", 12, java.lang.String.class, true)
+                new AttributeMetaInfo("COUNTRY_CODE", "DEMO_COMPANY", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true),
+                new AttributeMetaInfo("NAME", "DEMO_COMPANY", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true)
         };
     }
 }
