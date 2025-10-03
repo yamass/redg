@@ -58,7 +58,6 @@
         <mavenPluginAnnotationsVersion>3.3</mavenPluginAnnotationsVersion>
         <schemacrawlerVersion>16.27.1</schemacrawlerVersion>
         <stringtemplateVersion>4.0.8</stringtemplateVersion>
-        <junitVersion>4.13.2</junitVersion>
         <mavenVersion>3.9.9</mavenVersion>
         <mavenProjectVersion>2.2.1</mavenProjectVersion>
         <jacksonVersion>2.19.2</jacksonVersion>
@@ -156,21 +155,7 @@
             </dependency>
 
             <!-- Test dependencies -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junitVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockitoVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertjVersion}</version>
-            </dependency>
+         
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-compat</artifactId>
@@ -217,6 +202,30 @@
             <groupId>org.jspecify</groupId>
             <artifactId>jspecify</artifactId>
             <version>1.0.0</version>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.13.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>5.13.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockitoVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertjVersion}</version>
         </dependency>
     </dependencies>
 
