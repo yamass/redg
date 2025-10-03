@@ -83,12 +83,8 @@ public class RedGDatabaseUtil {
             for (int i = 0; i < values.length; i++) {
                 try {
                     AttributeMetaInfo[] preparedStatementValueMetaInfo = obj.getPreparedStatementValuesMetaInfos();
-                    if (values[i] == null) {
-                        statement.setNull(i + 1, preparedStatementValueMetaInfo[i].getSqlTypeInt());
-                    } else {
-                        preparedStatementParameterSetter.setParameter(statement,
-                                i + 1, values[i], preparedStatementValueMetaInfo[i], connection);
-                    }
+                    preparedStatementParameterSetter.setParameter(
+                            statement, i + 1, values[i], preparedStatementValueMetaInfo[i], connection);
                 } catch (SQLException e) {
                     throw new InsertionFailedException("Setting value for statement failed", e);
                 }

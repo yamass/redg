@@ -16,14 +16,14 @@
 
 package de.yamass.redg.runtime.transformer;
 
+import de.yamass.redg.runtime.AttributeMetaInfo;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
-
-import de.yamass.redg.runtime.AttributeMetaInfo;
 
 /**
  * Default transformer that does no transformation. It simply outputs the input.
@@ -36,11 +36,13 @@ public class DefaultPreparedStatementParameterSetter implements PreparedStatemen
      * {@inheritDoc}
      */
     @Override
-    public void setParameter(PreparedStatement statement, int parameterIndex, final Object o, final AttributeMetaInfo attributeMetaInfo, final Connection connection) throws SQLException {
-        if (!(o instanceof String) && STRING_SQL_TYPES.contains(attributeMetaInfo.getSqlTypeInt())) {
-            statement.setObject(parameterIndex, o.toString(), attributeMetaInfo.getSqlTypeInt());
+    public void setParameter(PreparedStatement statement, int parameterIndex, Object value, AttributeMetaInfo attributeMetaInfo, Connection connection) throws SQLException {
+        if (value == null) {
+            statement.setNull(parameterIndex, attributeMetaInfo.getSqlTypeInt());
+        } else if (!(value instanceof String) && STRING_SQL_TYPES.contains(attributeMetaInfo.getSqlTypeInt())) {
+            statement.setObject(parameterIndex, value.toString(), attributeMetaInfo.getSqlTypeInt());
         } else {
-            statement.setObject(parameterIndex, o, attributeMetaInfo.getSqlTypeInt());
+            statement.setObject(parameterIndex, value, attributeMetaInfo.getSqlTypeInt());
         }
     }
 }

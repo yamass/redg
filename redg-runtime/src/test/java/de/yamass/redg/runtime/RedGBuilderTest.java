@@ -63,7 +63,7 @@ public class RedGBuilderTest {
     public void testBuilder_Customization() throws Exception {
         final PreparedStatementParameterSetter setter = new PreparedStatementParameterSetter() {
             @Override
-            public void setParameter(final PreparedStatement statement, final int parameterIndex, final Object object, final AttributeMetaInfo attributeMetaInfo, final Connection connection) throws SQLException {
+            public void setParameter(final PreparedStatement statement, final int parameterIndex, final Object value, final AttributeMetaInfo attributeMetaInfo, final Connection connection) throws SQLException {
 
             }
         };

@@ -17,6 +17,7 @@
 package de.yamass.redg.runtime.transformer;
 
 import de.yamass.redg.runtime.AttributeMetaInfo;
+import org.jspecify.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,10 +35,10 @@ public interface PreparedStatementParameterSetter {
      *
      * @param statement         The statement to set the parameter on
      * @param parameterIndex    The parameter index
-     * @param object            The object to transform
+     * @param value             The value to transform, or null.
      * @param attributeMetaInfo Meta information about the attribute
      * @param connection        The JDBC connection. Can be used to create objects like {@link java.sql.Clob} or {@link java.sql.Blob}
      * @throws SQLException Gets thrown if some SQL error occurred
      */
-    void setParameter(PreparedStatement statement, int parameterIndex, Object object, AttributeMetaInfo attributeMetaInfo, final Connection connection) throws SQLException;
+    void setParameter(PreparedStatement statement, int parameterIndex, @Nullable Object value, AttributeMetaInfo attributeMetaInfo, final Connection connection) throws SQLException;
 }
