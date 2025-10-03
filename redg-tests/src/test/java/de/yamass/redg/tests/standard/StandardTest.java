@@ -6,29 +6,30 @@ import de.yamass.redg.generated.standard.RedG;
 import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.tests.Helpers;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Timestamp;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+class StandardTest {
 
-public class StandardTest {
-
-    @Before
+    @BeforeEach
     public void initializeDatabase() throws Exception {
         Class.forName("org.h2.Driver");
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-standard", "", "");
-        assertNotNull(dataSource);
+        Assertions.assertNotNull(dataSource);
         final File sqlFile = Helpers.getResourceAsFile("standard-schema.sql");
         DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlFile});
     }
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         final Connection connection = JdbcConnectionPool.create("jdbc:h2:mem:redg-standard", "", "")
                 .getConnection();
 
@@ -45,33 +46,33 @@ public class StandardTest {
         ResultSet rs = statement.executeQuery("select * from RESTAURANT");
         rs.next();
         Helpers.assertResultSet(rs, 0, "Susan's Steakhouse");
-        assertFalse(rs.next());
+        Assertions.assertFalse(rs.next());
 
         rs = statement.executeQuery("select count(*) from GUEST");
         rs.next();
         Helpers.assertResultSet(rs, 1);
-        assertFalse(rs.next());
+        Assertions.assertFalse(rs.next());
 
         rs = statement.executeQuery("select * from WAITER");
         rs.next();
         Helpers.assertResultSet(rs, 0, "Sally", 0);
         rs.next();
         Helpers.assertResultSet(rs, 1, "Stefan", 0);
-        assertFalse(rs.next());
+        Assertions.assertFalse(rs.next());
 
         rs = statement.executeQuery("select * from RESERVATION order by TIME");
         rs.next();
         Helpers.assertResultSet(rs, 0, 0, new Timestamp(1L));
         rs.next();
         Helpers.assertResultSet(rs, 0, 0, new Timestamp(1234567890L));
-        assertFalse(rs.next());
+        Assertions.assertFalse(rs.next());
 
         rs = statement.executeQuery("select * from WAITER_RESERVATION order by TIME");
         rs.next();
         Helpers.assertResultSet(rs, 1, 0, 0, new Timestamp(1L));
         rs.next();
         Helpers.assertResultSet(rs, 0, 0, 0, new Timestamp(1234567890L));
-        assertFalse(rs.next());
+        Assertions.assertFalse(rs.next());
     }
 
     private void prepareTestData(final RedG redg) {

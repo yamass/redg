@@ -16,16 +16,16 @@
 
 package de.yamass.redg.runtime;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-public class EntitySorterTest {
+class EntitySorterTest {
     @Test
-    public void entitiesAreSortedByDepths() throws Exception {
+    void entitiesAreSortedByDepths() throws Exception {
         EntitySorter entitySorter = new EntitySorter();
 
         Entity leafEntity1 = new Entity("leafEntity1");
@@ -46,7 +46,7 @@ public class EntitySorterTest {
                 leafEntity3
         ));
 
-        Assert.assertEquals(Arrays.asList(
+        Assertions.assertEquals(Arrays.asList(
                 leafEntity1,
                 leafEntity2,
                 leafEntity3,
@@ -58,7 +58,7 @@ public class EntitySorterTest {
     }
 
     @Test
-    public void entitiesSelfReferenceTest() throws Exception {
+    void entitiesSelfReferenceTest() throws Exception {
         Entity root = new Entity("root");
         root.addDependency(root);
         Entity leaf = new Entity("leaf", root);
@@ -70,7 +70,7 @@ public class EntitySorterTest {
                 leafWithSelf,
                 root));
 
-        Assert.assertEquals(Arrays.asList(
+        Assertions.assertEquals(Arrays.asList(
                 root,
                 leaf,
                 leafWithSelf
@@ -78,7 +78,7 @@ public class EntitySorterTest {
     }
 
     @Test
-    public void existingEntitiesFirst() throws Exception {
+    void existingEntitiesFirst() throws Exception {
         EntitySorter entitySorter = new EntitySorter();
 
         Entity existingEntity1 = new ExistingEntity("existingEntity1");
@@ -101,7 +101,7 @@ public class EntitySorterTest {
                 existingEntity4
         ));
 
-        Assert.assertEquals(Arrays.asList(
+        Assertions.assertEquals(Arrays.asList(
                 existingEntity1,
                 existingEntity2,
                 existingEntity3,

@@ -23,7 +23,8 @@ import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
 import de.yamass.redg.generator.testutil.DatabaseTestUtil;
 import de.yamass.redg.models.ForeignKeyColumnModel;
 import de.yamass.redg.models.ForeignKeyModel;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import schemacrawler.inclusionrule.IncludeAll;
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.ForeignKey;
@@ -33,41 +34,39 @@ import schemacrawler.schema.Table;
 import javax.sql.DataSource;
 import java.io.File;
 
-import static org.junit.Assert.*;
 
-
-public class ForeignKeyExtractorTest {
+class ForeignKeyExtractorTest {
 
     @Test
-    public void testForeignKeyExtraction() throws Exception {
+    void testForeignKeyExtraction() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-fe", "", "");
-        assertNotNull(dataSource);
+        Assertions.assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
-        assertNotNull(tempFile);
+        Assertions.assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
-        assertNotNull(db);
+        Assertions.assertNotNull(db);
 
         Schema s = db.lookupSchema("\"RT-FE\".PUBLIC").orElse(null);
-        assertNotNull(s);
+        Assertions.assertNotNull(s);
         Table t = db.lookupTable(s, "DEMO_USER").orElse(null);
-        assertNotNull(t);
-        assertEquals(1, t.getImportedForeignKeys().size());
+        Assertions.assertNotNull(t);
+        Assertions.assertEquals(1, t.getImportedForeignKeys().size());
         ForeignKey fk = (ForeignKey) t.getImportedForeignKeys().toArray()[0];
-        assertNotNull(fk);
+        Assertions.assertNotNull(fk);
 
         ForeignKeyExtractor extractor = new ForeignKeyExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
                 new DefaultExplicitAttributeDecider(),"My");
         ForeignKeyModel model = extractor.extractForeignKeyModel(fk);
-        assertEquals("MyDemoCompany", model.getJavaTypeName());
-        assertEquals("worksAtDemoCompany", model.getName());
-        assertEquals(1, model.getReferences().size());
-        assertTrue(model.getReferences().containsKey("WORKS_AT"));
+        Assertions.assertEquals("MyDemoCompany", model.getJavaTypeName());
+        Assertions.assertEquals("worksAtDemoCompany", model.getName());
+        Assertions.assertEquals(1, model.getReferences().size());
+        Assertions.assertTrue(model.getReferences().containsKey("WORKS_AT"));
         ForeignKeyColumnModel columnModel = model.getReferences().get("WORKS_AT");
-        assertEquals("id", columnModel.getPrimaryKeyAttributeName());
-        assertEquals("worksAt", columnModel.getLocalName());
-        assertEquals("java.math.BigDecimal", columnModel.getLocalType());
-        assertEquals("WORKS_AT", columnModel.getDbName());
-        assertEquals("DEMO_USER", columnModel.getDbTableName());
+        Assertions.assertEquals("id", columnModel.getPrimaryKeyAttributeName());
+        Assertions.assertEquals("worksAt", columnModel.getLocalName());
+        Assertions.assertEquals("java.math.BigDecimal", columnModel.getLocalType());
+        Assertions.assertEquals("WORKS_AT", columnModel.getDbName());
+        Assertions.assertEquals("DEMO_USER", columnModel.getDbTableName());
     }
 }

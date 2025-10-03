@@ -5,8 +5,9 @@ import de.yamass.redg.generated.recurse.RedG;
 import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.tests.Helpers;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -14,22 +15,19 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+class RecurseTest {
 
-public class RecurseTest {
-
-    @Before
+    @BeforeEach
     public void initializeDatabase() throws Exception {
         Class.forName("org.h2.Driver");
         final DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-recurse", "", "");
-        assertNotNull(dataSource);
+        Assertions.assertNotNull(dataSource);
         final File sqlFile = Helpers.getResourceAsFile("recurse-schema.sql");
         DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlFile});
     }
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         final Connection connection = JdbcConnectionPool.create("jdbc:h2:mem:redg-recurse", "", "")
                 .getConnection();
 
@@ -52,7 +50,7 @@ public class RecurseTest {
         Helpers.assertResultSet(rs, 2, "Child 2", 0);
         rs.next();
         Helpers.assertResultSet(rs, 3, "Child 3", 2);
-        assertFalse(rs.next());
+        Assertions.assertFalse(rs.next());
     }
 
     private void prepareTestData(final RedG redg) {

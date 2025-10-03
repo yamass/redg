@@ -4,8 +4,9 @@ import de.yamass.redg.generated.escape.RedG;
 import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.tests.Helpers;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -13,21 +14,19 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static org.junit.Assert.assertNotNull;
+class EscapeTest {
 
-public class EscapeTest {
-
-    @Before
+    @BeforeEach
     public void initializeDatabase() throws Exception {
         Class.forName("org.h2.Driver");
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-escape", "", "");
-        assertNotNull(dataSource);
+        Assertions.assertNotNull(dataSource);
         final File sqlFile = Helpers.getResourceAsFile("escape-schema.sql");
         DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlFile});
     }
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         final Connection connection = JdbcConnectionPool.create("jdbc:h2:mem:redg-escape", "", "")
                 .getConnection();
 

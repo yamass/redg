@@ -16,27 +16,22 @@
 
 package de.yamass.redg.generator.explicitattributedecider;
 
+import de.yamass.redg.generator.extractor.explicitattributedecider.JsonFileExplicitAttributeDecider;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import schemacrawler.schema.Column;
+import schemacrawler.schema.ColumnReference;
+import schemacrawler.schema.ForeignKey;
+import schemacrawler.schema.Table;
+
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import de.yamass.redg.generator.extractor.explicitattributedecider.JsonFileExplicitAttributeDecider;
-
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.ColumnReference;
-import schemacrawler.schema.Table;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-public class JsonFileExplicitAttributeDeciderTest {
+class JsonFileExplicitAttributeDeciderTest {
     @Test
-    public void isExplicitAttribute() throws Exception {
+    void isExplicitAttribute() throws Exception {
         JsonFileExplicitAttributeDecider decider =
                 new JsonFileExplicitAttributeDecider(new InputStreamReader(getClass().getResourceAsStream("JsonFileExplicitAttributeDeciderTest.json")));
 
@@ -45,14 +40,14 @@ public class JsonFileExplicitAttributeDeciderTest {
         Column columnMock = Mockito.mock(Column.class);
         Mockito.when(columnMock.getName()).thenReturn("EXPLICIT");
         Mockito.when(columnMock.getParent()).thenReturn(tableMock);
-        Assert.assertTrue(decider.isExplicitAttribute(columnMock));
+        Assertions.assertTrue(decider.isExplicitAttribute(columnMock));
 
         Mockito.when(columnMock.getName()).thenReturn("NONEXPLICIT");
-        Assert.assertFalse(decider.isExplicitAttribute(columnMock));
+        Assertions.assertFalse(decider.isExplicitAttribute(columnMock));
     }
 
     @Test
-    public void isExplicitAttributeDefinitionMissing() throws Exception {
+    void isExplicitAttributeDefinitionMissing() throws Exception {
         JsonFileExplicitAttributeDecider decider =
                 new JsonFileExplicitAttributeDecider(new InputStreamReader(getClass().getResourceAsStream("JsonFileExplicitAttributeDeciderTest2.json")));
         Table tableMock = Mockito.mock(Table.class);
@@ -60,14 +55,14 @@ public class JsonFileExplicitAttributeDeciderTest {
         Column columnMock = Mockito.mock(Column.class);
         Mockito.when(columnMock.getName()).thenReturn("EXPLICIT");
         Mockito.when(columnMock.getParent()).thenReturn(tableMock);
-        Assert.assertFalse(decider.isExplicitAttribute(columnMock));
+        Assertions.assertFalse(decider.isExplicitAttribute(columnMock));
 
         Mockito.when(columnMock.getName()).thenReturn("NONEXPLICIT");
-        Assert.assertFalse(decider.isExplicitAttribute(columnMock));
+        Assertions.assertFalse(decider.isExplicitAttribute(columnMock));
     }
 
     @Test
-    public void isExplicitForeignKey() throws Exception {
+    void isExplicitForeignKey() throws Exception {
         JsonFileExplicitAttributeDecider decider =
                 new JsonFileExplicitAttributeDecider(new InputStreamReader(getClass().getResourceAsStream("JsonFileExplicitAttributeDeciderTest.json")));
         Table tableMock = Mockito.mock(Table.class);
@@ -85,7 +80,7 @@ public class JsonFileExplicitAttributeDeciderTest {
 
         Mockito.when(fk1Mock.getColumnReferences()).thenReturn(Collections.singletonList(fkcr1Mock));
 
-        assertFalse(decider.isExplicitForeignKey(fk1Mock));
+        Assertions.assertFalse(decider.isExplicitForeignKey(fk1Mock));
 
         ForeignKey fk2Mock = Mockito.mock(ForeignKey.class);
 
@@ -107,7 +102,7 @@ public class JsonFileExplicitAttributeDeciderTest {
 
         Mockito.when(fk2Mock.getColumnReferences()).thenReturn(Arrays.asList(fkcr2Mock, fkcr3Mock));
 
-        assertTrue(decider.isExplicitForeignKey(fk2Mock));
+        Assertions.assertTrue(decider.isExplicitForeignKey(fk2Mock));
     }
 
 }

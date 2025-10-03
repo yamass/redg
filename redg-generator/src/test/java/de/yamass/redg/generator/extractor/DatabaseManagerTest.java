@@ -18,39 +18,34 @@ package de.yamass.redg.generator.extractor;
 
 import de.yamass.redg.generator.Helpers;
 import de.yamass.redg.generator.testutil.DatabaseTestUtil;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.io.File;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-public class DatabaseManagerTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class DatabaseManagerTest {
 
     @Test
-    public void testExecutePreparationScripts_NoScripts() throws Exception {
+    void testExecutePreparationScripts_NoScripts() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg", "", "");
-        assertNotNull(dataSource);
+        Assertions.assertNotNull(dataSource);
 
         DatabaseManager.executePreparationScripts(dataSource, null);
         DatabaseManager.executePreparationScripts(dataSource, new File[0]);
     }
 
     @Test
-    public void testExecutePreparationScripts_ScriptsInvalidSQL() throws Exception {
-        thrown.expect(SQLException.class);
-        thrown.expectMessage("CREATE TABLE NOPENOPENOPE");
+    void testExecutePreparationScripts_ScriptsInvalidSQL() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg", "", "");
-        assertNotNull(dataSource);
-
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{Helpers.getResourceAsFile("invalid.sql")});
+        Assertions.assertNotNull(dataSource);
+        assertThatThrownBy(() -> DatabaseManager.executePreparationScripts(dataSource, new File[]{Helpers.getResourceAsFile("invalid.sql")}))
+                .isInstanceOf(SQLException.class)
+                .hasMessageContaining("CREATE TABLE NOPENOPENOPE");
     }
 
 }

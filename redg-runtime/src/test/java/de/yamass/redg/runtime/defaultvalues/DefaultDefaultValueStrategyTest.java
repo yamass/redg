@@ -17,8 +17,8 @@
 package de.yamass.redg.runtime.defaultvalues;
 
 import de.yamass.redg.models.ColumnModel;
-import org.junit.*;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 import java.math.BigDecimal;
@@ -29,15 +29,12 @@ import java.time.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 public class DefaultDefaultValueStrategyTest {
 
     public static final Map<Class<?>, Object> defaultMappings = new HashMap<>();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     static {
         defaultMappings.put(String.class, "-");
@@ -66,165 +63,170 @@ public class DefaultDefaultValueStrategyTest {
     }
 
     @Test
-    public void testStrategy() {
+    void testStrategy() {
         DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
         ColumnModel columnModel = new ColumnModel();
 
         columnModel.setNotNull(false);
-        assertEquals(null, strategy.getDefaultValue(columnModel, String.class));
+        Assertions.assertEquals(null, strategy.getDefaultValue(columnModel, String.class));
 
         defaultMappings.forEach((key, value) -> {
             final ColumnModel cm = new ColumnModel();
             cm.setNotNull(true);
             cm.setJavaTypeName(key.getName());
-            assertEquals(value, strategy.getDefaultValue(cm, key));
+            Assertions.assertEquals(value, strategy.getDefaultValue(cm, key));
         });
     }
 
     @Test
-    public void testStrategy_Primitive() {
+    void testStrategy_Primitive() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setJavaTypeName("int");
-        Assert.assertEquals(0, new DefaultDefaultValueStrategy().getDefaultValue(cm, int.class).intValue());
+        Assertions.assertEquals(0, new DefaultDefaultValueStrategy().getDefaultValue(cm, int.class).intValue());
     }
 
     @Test
-    public void testStrategy_NoValue() {
-        thrown.expect(NoDefaultValueException.class);
-        thrown.expectMessage("No default value for type");
+    void testStrategy_NoValue() {
         DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
-        strategy.getDefaultValue(cm, Color.class);
+        assertThatThrownBy(() -> strategy.getDefaultValue(cm, Color.class))
+                .isInstanceOf(NoDefaultValueException.class)
+                .hasMessageContaining("No default value for type");
     }
 
     @Test
-    public void testStrategy_UniqueString() {
+    void testStrategy_UniqueString() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(true);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
         for (int i = 0; i < 100; i++) {
-            assertEquals(Long.toString(i, 36), strategy.getDefaultValue(cm, String.class));
+            Assertions.assertEquals(Long.toString(i, 36), strategy.getDefaultValue(cm, String.class));
         }
 
     }
 
     @Test
-    public void testStrategy_UniqueNumber() {
+    void testStrategy_UniqueNumber() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(true);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
         for (int i = 0; i < 200; i++) {
-            assertEquals(i, (int) strategy.getDefaultValue(cm, Integer.class));
+            Assertions.assertEquals(i, (int) strategy.getDefaultValue(cm, Integer.class));
         }
     }
 
     @Test
-    public void testStrategy_UniqueChar() {
+    void testStrategy_UniqueChar() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(true);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
         for (int i = 0; i < Character.MAX_VALUE; i++) {
-            assertEquals((char) (i + 1), (char) strategy.getDefaultValue(cm, char.class));
+            Assertions.assertEquals((char) (i + 1), (char) strategy.getDefaultValue(cm, char.class));
         }
-        thrown.expect(NoDefaultValueException.class);
-        strategy.getDefaultValue(cm, Character.class);
+        assertThatThrownBy(() -> strategy.getDefaultValue(cm, Character.class))
+                .isInstanceOf(NoDefaultValueException.class);
+
     }
 
     @Test
-    public void testStrategy_UniqueBoolean() {
+    void testStrategy_UniqueBoolean() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(true);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
-        assertFalse(strategy.getDefaultValue(cm, boolean.class));
-        assertTrue(strategy.getDefaultValue(cm, Boolean.class));
+        Assertions.assertFalse(strategy.getDefaultValue(cm, boolean.class));
+        Assertions.assertTrue(strategy.getDefaultValue(cm, Boolean.class));
 
-        thrown.expect(NoDefaultValueException.class);
-        strategy.getDefaultValue(cm, boolean.class);
+        assertThatThrownBy(() -> strategy.getDefaultValue(cm, boolean.class))
+                .isInstanceOf(NoDefaultValueException.class);
+
     }
 
     @Test
-    public void testStrategy_UniqueDate() {
-        final ColumnModel cm = new ColumnModel();
-        cm.setNotNull(true);
-        cm.setUnique(true);
-        final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
-        for (int i = 0; i < 200; i++) {
-            assertEquals(i, strategy.getDefaultValue(cm, Date.class).getTime());
-        }
-    }
-
-    @Test
-    public void testStrategy_UniqueZonedDateTime() {
+    void testStrategy_UniqueDate() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(true);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
         for (int i = 0; i < 200; i++) {
-            assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(i), ZoneId.systemDefault()), strategy.getDefaultValue(cm, ZonedDateTime.class));
+            Assertions.assertEquals(i, strategy.getDefaultValue(cm, Date.class).getTime());
         }
     }
 
     @Test
-    public void testStrategy_UniqueEnum() {
+    void testStrategy_UniqueZonedDateTime() {
+        final ColumnModel cm = new ColumnModel();
+        cm.setNotNull(true);
+        cm.setUnique(true);
+        final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
+        for (int i = 0; i < 200; i++) {
+            Assertions.assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(i), ZoneId.systemDefault()), strategy.getDefaultValue(cm, ZonedDateTime.class));
+        }
+    }
+
+    @Test
+    void testStrategy_UniqueEnum() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(true);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
         for (int i = 0; i < TestEnum.values().length; i++) {
-            assertEquals(TestEnum.values()[i], strategy.getDefaultValue(cm, TestEnum.class));
+            Assertions.assertEquals(TestEnum.values()[i], strategy.getDefaultValue(cm, TestEnum.class));
         }
 
-        thrown.expect(NoDefaultValueException.class);
-        strategy.getDefaultValue(cm, TestEnum.class);
+        assertThatThrownBy(() -> strategy.getDefaultValue(cm, TestEnum.class))
+                .isInstanceOf(NoDefaultValueException.class);
     }
 
     @Test
-    public void testStrategy_Enum() {
+    void testStrategy_Enum() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(false);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
         for (int i = 0; i < 100; i++) {
-            assertEquals(TestEnum.A, strategy.getDefaultValue(cm, TestEnum.class));
+            Assertions.assertEquals(TestEnum.A, strategy.getDefaultValue(cm, TestEnum.class));
         }
     }
 
     @Test
-    public void testStrategy_NoUniquePossible() {
+    void testStrategy_NoUniquePossible() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(true);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
-        thrown.expect(NoDefaultValueException.class);
-        strategy.getDefaultValue(cm, Object.class);
+        assertThatThrownBy(() -> strategy.getDefaultValue(cm, Object.class))
+                .isInstanceOf(NoDefaultValueException.class);
+
     }
 
     @Test
-    public void testStrategy_EmptyUniqueEnum() {
+    void testStrategy_EmptyUniqueEnum() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(true);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
 
-        thrown.expect(NoDefaultValueException.class);
-        strategy.getDefaultValue(cm, EmptyEnum.class);
+        assertThatThrownBy(() -> strategy.getDefaultValue(cm, EmptyEnum.class))
+                .isInstanceOf(NoDefaultValueException.class);
+
     }
 
     @Test
-    public void testStrategy_EmptyEnum() {
+    void testStrategy_EmptyEnum() {
         final ColumnModel cm = new ColumnModel();
         cm.setNotNull(true);
         cm.setUnique(false);
         final DefaultDefaultValueStrategy strategy = new DefaultDefaultValueStrategy();
 
-        thrown.expect(NoDefaultValueException.class);
-        strategy.getDefaultValue(cm, EmptyEnum.class);
+        assertThatThrownBy(() -> strategy.getDefaultValue(cm, EmptyEnum.class))
+                .isInstanceOf(NoDefaultValueException.class);
+
     }
 
     public enum TestEnum {

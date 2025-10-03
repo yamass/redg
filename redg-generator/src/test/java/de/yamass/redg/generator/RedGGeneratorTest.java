@@ -19,9 +19,8 @@ package de.yamass.redg.generator;
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
 import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.generator.testutil.DatabaseTestUtil;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 import schemacrawler.inclusionrule.ExcludeAll;
 import schemacrawler.inclusionrule.IncludeAll;
 
@@ -31,20 +30,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
-
-public class RedGGeneratorTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class RedGGeneratorTest {
 
     @Test
-    public void testGenerateCode_Working() throws Exception {
+    void testGenerateCode_Working() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
-        assertNotNull(tempFile);
+        org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
 
         Path p = Files.createTempDirectory("redg-test");
@@ -61,49 +54,50 @@ public class RedGGeneratorTest {
                 false);
 
         Path mainFile = Paths.get(p.toAbsolutePath().toString(), "de", "yamass", "redg", "generated", "RedG.java");
-        assertTrue(Files.exists(mainFile));
+        org.junit.jupiter.api.Assertions.assertTrue(Files.exists(mainFile));
 
         Path classFileUser = Paths.get(p.toAbsolutePath().toString(), "de", "yamass", "redg", "generated", "GDemoUser.java");
-        assertTrue(Files.exists(mainFile));
+        org.junit.jupiter.api.Assertions.assertTrue(Files.exists(mainFile));
 
         Path classFileCompany = Paths.get(p.toAbsolutePath().toString(), "de", "yamass", "redg", "generated", "GDemoCompany.java");
-        assertTrue(Files.exists(mainFile));
+        org.junit.jupiter.api.Assertions.assertTrue(Files.exists(mainFile));
 
 
     }
 
     @Test
-    public void testGenerateCode_NoTables() throws Exception {
-        thrown.expect(RedGGenerationException.class);
-        thrown.expectMessage("Crawling failed");
+    void testGenerateCode_NoTables() throws Exception {
 
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all2", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
-        assertNotNull(tempFile);
+        org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
 
         Path p = Files.createTempDirectory("redg-test");
-        RedGGenerator.generateCode(dataSource,
-                new ExcludeAll(),
-                new ExcludeAll(),
-                null,
-                "",
-                p,
-                null,
-                null,
-                null,
-                null,
-                false);
+
+        Assertions.assertThatThrownBy(() -> {
+                    RedGGenerator.generateCode(dataSource,
+                            new ExcludeAll(),
+                            new ExcludeAll(),
+                            null,
+                            "",
+                            p,
+                            null,
+                            null,
+                            null,
+                            null,
+                            false);
+                }).isInstanceOf(RedGGenerationException.class)
+                .hasMessage("Crawling failed");
+
     }
 
     @Test
-    public void testGenerateCode_CannotWriteFolder() throws Exception {
-        thrown.expect(RedGGenerationException.class);
-        thrown.expectMessage("Creation of package folder structure failed");
+    void testGenerateCode_CannotWriteFolder() throws Exception {
 
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all3", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
-        assertNotNull(tempFile);
+        org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
         DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
 
         Path p;
@@ -117,16 +111,20 @@ public class RedGGeneratorTest {
             // failing unit test
             p = Paths.get("/dev/redg");
         }
-        RedGGenerator.generateCode(dataSource,
-                new IncludeAll(),
-                new IncludeAll(),
-                null,
-                "",
-                p,
-                null,
-                null,
-                null,
-                null,
-                false);
+
+        Assertions.assertThatThrownBy(() -> {
+            RedGGenerator.generateCode(dataSource,
+                    new IncludeAll(),
+                    new IncludeAll(),
+                    null,
+                    "",
+                    p,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false);
+        }) .isInstanceOf(RedGGenerationException.class)
+                .hasMessage("Creation of package folder structure failed");
     }
 }

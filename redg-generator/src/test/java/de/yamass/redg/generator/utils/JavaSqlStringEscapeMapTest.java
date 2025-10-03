@@ -1,6 +1,6 @@
 package de.yamass.redg.generator.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -8,10 +8,10 @@ import java.util.Date;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class JavaSqlStringEscapeMapTest {
+class JavaSqlStringEscapeMapTest {
 
     @Test
-    public void get() {
+    void get() {
         JavaSqlStringEscapeMap defaultMap = new JavaSqlStringEscapeMap();
         assertThat(defaultMap.get("asdf")).isEqualTo("\\\"asdf\\\"");
         assertThat(defaultMap.get("ASDF")).isEqualTo("\\\"ASDF\\\"");
@@ -29,7 +29,7 @@ public class JavaSqlStringEscapeMapTest {
     }
 
     @Test
-    public void containsKey() {
+    void containsKey() {
         JavaSqlStringEscapeMap map = new JavaSqlStringEscapeMap();
         assertThat(map.containsKey("A")).isTrue();
         assertThat(map.containsKey("Longer String")).isTrue();

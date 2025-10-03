@@ -22,10 +22,7 @@ import de.yamass.redg.generator.testutil.DatabaseTestUtil;
 import de.yamass.redg.models.ForeignKeyModel;
 import de.yamass.redg.models.TableModel;
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import schemacrawler.inclusionrule.IncludeAll;
 import schemacrawler.inclusionrule.RegularExpressionInclusionRule;
 import schemacrawler.schema.Catalog;
@@ -35,16 +32,13 @@ import schemacrawler.schema.Table;
 import javax.sql.DataSource;
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 
-
-public class TableExtractorTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class TableExtractorTest {
 
     @Test
-    public void testExtractTable() throws Exception {
+    void testExtractTable() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-te", "", "");
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
@@ -72,7 +66,7 @@ public class TableExtractorTest {
     }
 
     @Test
-    public void testExtractTableCompositeForeignKey() throws Exception {
+    void testExtractTableCompositeForeignKey() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-te", "", "");
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-exchange-rate.sql");
@@ -92,72 +86,66 @@ public class TableExtractorTest {
         TableModel exchangeRateTableModel = extractor.extractTableModel(exchangeRateTable);
         TableModel exchangeRefTableModel = extractor.extractTableModel(exchangeRefTable);
 
-        Assert.assertEquals(1, exchangeRefTableModel.getPrimaryKeyColumns().size());
-        Assert.assertEquals("ID", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getDbName());
-        Assert.assertEquals("NUMERIC", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getSqlType());
-        Assert.assertEquals("java.math.BigDecimal", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getJavaTypeName());
-        Assert.assertTrue(exchangeRefTableModel.getForeignKeyColumns().isEmpty());
+        assertEquals(1, exchangeRefTableModel.getPrimaryKeyColumns().size());
+        assertEquals("ID", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getDbName());
+        assertEquals("NUMERIC", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getSqlType());
+        assertEquals("java.math.BigDecimal", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getJavaTypeName());
+        assertTrue(exchangeRefTableModel.getForeignKeyColumns().isEmpty());
 
-        Assert.assertEquals(1, exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().size());
-        Assert.assertEquals("NAME", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getDbName());
-        Assert.assertEquals("CHARACTER VARYING", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
-        Assert.assertEquals("java.lang.String", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getJavaTypeName());
+        assertEquals(1, exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().size());
+        assertEquals("NAME", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getDbName());
+        assertEquals("CHARACTER VARYING", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
+        assertEquals("java.lang.String", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getJavaTypeName());
 
-        Assert.assertEquals(1, exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().size());
-        Assert.assertEquals("FIRST_NAME", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getDbName());
-        Assert.assertEquals("CHARACTER VARYING", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
-        Assert.assertEquals("java.lang.String", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getJavaTypeName());
+        assertEquals(1, exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().size());
+        assertEquals("FIRST_NAME", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getDbName());
+        assertEquals("CHARACTER VARYING", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
+        assertEquals("java.lang.String", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getJavaTypeName());
 
-        Assert.assertEquals(2, exchangeRateTableModel.getForeignKeyColumns().size());
-        Assert.assertEquals(1, exchangeRateTableModel.getIncomingForeignKeys().size());
-        Assert.assertEquals("composite", exchangeRateTableModel.getIncomingForeignKeys().get(0).getReferencingAttributeName());
+        assertEquals(2, exchangeRateTableModel.getForeignKeyColumns().size());
+        assertEquals(1, exchangeRateTableModel.getIncomingForeignKeys().size());
+        assertEquals("composite", exchangeRateTableModel.getIncomingForeignKeys().get(0).getReferencingAttributeName());
 
-        Assert.assertEquals("composite", exchangeRateTableModel.getIncomingForeignKeys().get(0).getReferencingAttributeName());
+        assertEquals("composite", exchangeRateTableModel.getIncomingForeignKeys().get(0).getReferencingAttributeName());
 
         ForeignKeyModel compositeForeignKeyModel = exchangeRateTableModel.getForeignKeys().stream()
                 .filter(fk -> fk.getName().equals("composite"))
                 .findFirst().orElse(null);
 
-        Assert.assertNotNull(compositeForeignKeyModel);
+        assertNotNull(compositeForeignKeyModel);
 
-        Assert.assertEquals(compositeForeignKeyModel.getReferences().size(), 2);
+        assertEquals(compositeForeignKeyModel.getReferences().size(), 2);
 
         Assertions
                 .assertThat(compositeForeignKeyModel.getReferences().keySet())
                 .containsExactlyInAnyOrder("REFERENCE_ID", "PREV_FIRST_NAME");
 
-        Assert.assertFalse(compositeForeignKeyModel.isNotNull());
+        org.junit.jupiter.api.Assertions.assertFalse(compositeForeignKeyModel.isNotNull());
     }
 
     @Test
-    public void testConstructorWrongClassPrefix() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Class prefix is invalid");
-
-        new TableExtractor("123", "com.test", null, null, null, null);
+    void testConstructorWrongClassPrefix() throws Exception {
+        assertThatThrownBy(() -> new TableExtractor("123", "com.test", null, null, null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Class prefix is invalid");
     }
 
     @Test
-    public void testConstructorWrongPackage() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Package name is invalid");
-
-        new TableExtractor("", "com.123.test", null, null, null, null);
+    void testConstructorWrongPackage() throws Exception {
+        assertThatThrownBy(() -> new TableExtractor("", "com.123.test", null, null, null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Package name is invalid");
     }
 
     @Test
-    public void testConstructorDefaultPackage() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("default package may not be used");
-
-        new TableExtractor("", "", null, null, null, null);
+    void testConstructorDefaultPackage() throws Exception {
+        assertThatThrownBy(() -> new TableExtractor("", "", null, null, null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("default package may not be used");
     }
 
     @Test
-    public void testExtractWithExcludedReferencedTable() throws Exception {
-        thrown.expect(RedGGenerationException.class);
-        thrown.expectMessage("foreign key is in an excluded table");
-
+    void testExtractWithExcludedReferencedTable() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-te-f", "", "");
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
@@ -170,6 +158,8 @@ public class TableExtractorTest {
         Table t = db.lookupTable(s, "DEMO_USER").orElse(null);
         assertNotNull(t);
 
-        MetadataExtractor.extract(db);
+        assertThatThrownBy(() -> MetadataExtractor.extract(db))
+                .isInstanceOf(RedGGenerationException.class)
+                .hasMessageContaining("foreign key is in an excluded table");
     }
 }

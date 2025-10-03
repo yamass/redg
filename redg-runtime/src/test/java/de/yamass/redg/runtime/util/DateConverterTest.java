@@ -16,7 +16,8 @@
 
 package de.yamass.redg.runtime.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -27,9 +28,7 @@ import java.time.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
-public class DateConverterTest {
+class DateConverterTest {
 
     private static final Map<Class<?>, Object> defaultMappings = new HashMap<>();
 
@@ -52,39 +51,39 @@ public class DateConverterTest {
     private static final OffsetDateTime EXPECTED_DATE = OffsetDateTime.of(2017, 1, 2, 0, 0, 0, 0, ZoneOffset.UTC);
 
     @Test
-    public void testParseInstant() throws Exception {
-        assertEquals(EXPECTED_DATETIME, DateConverter.parseInstant("2017-01-02T03:04:05.000Z", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
-        assertEquals(EXPECTED_DATETIME, DateConverter.parseInstant("2017-01-02T03:04:05", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
-        assertEquals(EXPECTED_DATE, DateConverter.parseInstant("2017-01-02", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
-        assertEquals(EXPECTED_DATETIME2, DateConverter.parseInstant("2017-01-02-03:00", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
+    void testParseInstant() throws Exception {
+        Assertions.assertEquals(EXPECTED_DATETIME, DateConverter.parseInstant("2017-01-02T03:04:05.000Z", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
+        Assertions.assertEquals(EXPECTED_DATETIME, DateConverter.parseInstant("2017-01-02T03:04:05", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
+        Assertions.assertEquals(EXPECTED_DATE, DateConverter.parseInstant("2017-01-02", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
+        Assertions.assertEquals(EXPECTED_DATETIME2, DateConverter.parseInstant("2017-01-02-03:00", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
     }
 
     @Test
-    public void testParseInstantWithNonIsoDate() throws Exception {
-        assertEquals(EXPECTED_DATETIME, DateConverter.parseInstant("2017-01-02 03:04:05.000", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
+    void testParseInstantWithNonIsoDate() throws Exception {
+        Assertions.assertEquals(EXPECTED_DATETIME, DateConverter.parseInstant("2017-01-02 03:04:05.000", ZoneOffset.UTC).atOffset(ZoneOffset.UTC));
     }
 
     @Test
-    public void testConvertDate() {
-        assertEquals(new java.util.Date(0), DateConverter.convertDate("1970-01-01T00:00:00Z", java.util.Date.class));
-        assertEquals(new java.sql.Date(0), DateConverter.convertDate("1970-01-01T00:00:00Z", java.sql.Date.class));
-        assertEquals(new Time(0), DateConverter.convertDate("1970-01-01T00:00:00Z", Time.class));
-        assertEquals(new Timestamp(0), DateConverter.convertDate("1970-01-01T00:00:00Z", Timestamp.class));
-        assertEquals(LocalTime.of(0, 0, 0), DateConverter.convertDate("00:00:00", LocalTime.class));
-        assertEquals(LocalDate.of(1970, 1, 1), DateConverter.convertDate("1970-01-01", LocalDate.class));
-        assertEquals(LocalDateTime.of(1970, 1, 1, 0, 0, 0, 0), DateConverter.convertDate("1970-01-01T00:00:00", LocalDateTime.class));
-        assertEquals(ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC), DateConverter.convertDate("1970-01-01T00:00:00Z", ZonedDateTime.class));
-        assertEquals(OffsetDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC), DateConverter.convertDate("1970-01-01T00:00:00Z", OffsetDateTime.class));
-        assertEquals(OffsetTime.of(0, 0, 0, 0, ZoneOffset.UTC), DateConverter.convertDate("00:00:00Z", OffsetTime.class));
-        assertNull(DateConverter.convertDate("asdf", String.class));
+    void testConvertDate() {
+        Assertions.assertEquals(new java.util.Date(0), DateConverter.convertDate("1970-01-01T00:00:00Z", java.util.Date.class));
+        Assertions.assertEquals(new Date(0), DateConverter.convertDate("1970-01-01T00:00:00Z", Date.class));
+        Assertions.assertEquals(new Time(0), DateConverter.convertDate("1970-01-01T00:00:00Z", Time.class));
+        Assertions.assertEquals(new Timestamp(0), DateConverter.convertDate("1970-01-01T00:00:00Z", Timestamp.class));
+        Assertions.assertEquals(LocalTime.of(0, 0, 0), DateConverter.convertDate("00:00:00", LocalTime.class));
+        Assertions.assertEquals(LocalDate.of(1970, 1, 1), DateConverter.convertDate("1970-01-01", LocalDate.class));
+        Assertions.assertEquals(LocalDateTime.of(1970, 1, 1, 0, 0, 0, 0), DateConverter.convertDate("1970-01-01T00:00:00", LocalDateTime.class));
+        Assertions.assertEquals(ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC), DateConverter.convertDate("1970-01-01T00:00:00Z", ZonedDateTime.class));
+        Assertions.assertEquals(OffsetDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC), DateConverter.convertDate("1970-01-01T00:00:00Z", OffsetDateTime.class));
+        Assertions.assertEquals(OffsetTime.of(0, 0, 0, 0, ZoneOffset.UTC), DateConverter.convertDate("00:00:00Z", OffsetTime.class));
+        Assertions.assertNull(DateConverter.convertDate("asdf", String.class));
 
-        assertEquals(new java.util.Date(0), DateConverter.convertDateFallbackToDefaultTimeZone("1970-01-01T00:00:00Z", java.util.Date.class));
+        Assertions.assertEquals(new java.util.Date(0), DateConverter.convertDateFallbackToDefaultTimeZone("1970-01-01T00:00:00Z", java.util.Date.class));
     }
 
     @Test
-    public void testPrivateConstructor() throws Exception {
+    void testPrivateConstructor() throws Exception {
         Constructor c = DateConverter.class.getDeclaredConstructor();
-        assertTrue(Modifier.isPrivate(c.getModifiers()));
+        Assertions.assertTrue(Modifier.isPrivate(c.getModifiers()));
 
         c.setAccessible(true);
         c.newInstance();

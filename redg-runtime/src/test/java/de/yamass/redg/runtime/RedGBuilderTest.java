@@ -24,136 +24,128 @@ import de.yamass.redg.runtime.insertvalues.DefaultSQLValuesFormatter;
 import de.yamass.redg.runtime.insertvalues.SQLValuesFormatter;
 import de.yamass.redg.runtime.transformer.DefaultPreparedStatementParameterSetter;
 import de.yamass.redg.runtime.transformer.PreparedStatementParameterSetter;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Java6Assertions.assertThatThrownBy;
 
 
-public class RedGBuilderTest {
+class RedGBuilderTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Test
-    public void testBuilder_AllDefault() {
-        MyRedG redG = new RedGBuilder<>(MyRedG.class)
-                .build();
-        assertTrue(redG.getDefaultValueStrategy() instanceof DefaultDefaultValueStrategy);
-        assertTrue(redG.getDummyFactory() instanceof DefaultDummyFactory);
-        assertTrue(redG.getSqlValuesFormatter() instanceof DefaultSQLValuesFormatter);
-        assertTrue(redG.getPreparedStatementParameterSetter() instanceof DefaultPreparedStatementParameterSetter);
-    }
+	@Test
+	void testBuilder_AllDefault() {
+		MyRedG redG = new RedGBuilder<>(MyRedG.class)
+				.build();
+		Assertions.assertTrue(redG.getDefaultValueStrategy() instanceof DefaultDefaultValueStrategy);
+		Assertions.assertTrue(redG.getDummyFactory() instanceof DefaultDummyFactory);
+		Assertions.assertTrue(redG.getSqlValuesFormatter() instanceof DefaultSQLValuesFormatter);
+		Assertions.assertTrue(redG.getPreparedStatementParameterSetter() instanceof DefaultPreparedStatementParameterSetter);
+	}
 
 
-    @Test
-    public void testBuilder_ClassPrivate() {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Could not instantiate RedG instance");
-        new RedGBuilder<>(PrivateRedG.class).build();
-    }
+	@Test
+	void testBuilder_ClassPrivate() {
+		assertThatThrownBy(() -> new RedGBuilder<>(PrivateRedG.class).build())
+				.isInstanceOf(RuntimeException.class)
+				.hasMessageContaining("Could not instantiate RedG instance");
+	}
 
-    @Test
-    public void testBuilder_Customization() throws Exception {
-        final PreparedStatementParameterSetter setter = new PreparedStatementParameterSetter() {
-            @Override
-            public void setParameter(final PreparedStatement statement, final int parameterIndex, final Object value, final AttributeMetaInfo attributeMetaInfo, final Connection connection) throws SQLException {
+	@Test
+	void testBuilder_Customization() throws Exception {
+		final PreparedStatementParameterSetter setter = new PreparedStatementParameterSetter() {
+			@Override
+			public void setParameter(final PreparedStatement statement, final int parameterIndex, final Object value, final AttributeMetaInfo attributeMetaInfo, final Connection connection) throws SQLException {
 
-            }
-        };
-        final DummyFactory dummyFactory = new DummyFactory() {
-            @Override
-            public <T extends RedGEntity> T getDummy(final AbstractRedG redG, final Class<T> dummyClass) {
-                return null;
-            }
+			}
+		};
+		final DummyFactory dummyFactory = new DummyFactory() {
+			@Override
+			public <T extends RedGEntity> T getDummy(final AbstractRedG redG, final Class<T> dummyClass) {
+				return null;
+			}
 
-            @Override
-            public boolean isDummy(final RedGEntity entity) {
-                return false;
-            }
-        };
-        final SQLValuesFormatter formatter = new SQLValuesFormatter() {
-            @Override
-            public <T> String formatValue(final T value, final String sqlDataType, final String fullTableName, final String tableName, final String columnName) {
-                return null;
-            }
-        };
+			@Override
+			public boolean isDummy(final RedGEntity entity) {
+				return false;
+			}
+		};
+		final SQLValuesFormatter formatter = new SQLValuesFormatter() {
+			@Override
+			public <T> String formatValue(final T value, final String sqlDataType, final String fullTableName, final String tableName, final String columnName) {
+				return null;
+			}
+		};
 
-        MyRedG redG = new RedGBuilder<>(MyRedG.class)
-                .withDefaultValueStrategy(new PluggableDefaultValueStrategy())
-                .withDummyFactory(dummyFactory)
-                .withPreparedStatementParameterSetter(setter)
-                .withSqlValuesFormatter(formatter)
-                .build();
-        assertTrue(redG.getDefaultValueStrategy() instanceof PluggableDefaultValueStrategy);
-        assertEquals(dummyFactory, redG.getDummyFactory());
-        assertEquals(setter, redG.getPreparedStatementParameterSetter());
-        assertEquals(formatter, redG.getSqlValuesFormatter());
-    }
+		MyRedG redG = new RedGBuilder<>(MyRedG.class)
+				.withDefaultValueStrategy(new PluggableDefaultValueStrategy())
+				.withDummyFactory(dummyFactory)
+				.withPreparedStatementParameterSetter(setter)
+				.withSqlValuesFormatter(formatter)
+				.build();
+		Assertions.assertTrue(redG.getDefaultValueStrategy() instanceof PluggableDefaultValueStrategy);
+		Assertions.assertEquals(dummyFactory, redG.getDummyFactory());
+		Assertions.assertEquals(setter, redG.getPreparedStatementParameterSetter());
+		Assertions.assertEquals(formatter, redG.getSqlValuesFormatter());
+	}
 
-    @Test
-    public void testBuilder_ErrorOnReUse() throws Exception {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Using the builder after build() was called is not allowed!");
-        RedGBuilder builder = new RedGBuilder<>(MyRedG.class);
-        builder.build();
-        builder.withSqlValuesFormatter(null);
-    }
+	@Test
+	void testBuilder_ErrorOnReUse() throws Exception {
+		RedGBuilder builder = new RedGBuilder<>(MyRedG.class);
+		builder.build();
+		assertThatThrownBy(() -> builder.withSqlValuesFormatter(null))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessageContaining("Using the builder after build() was called is not allowed!");
+	}
 
-    @Test
-    public void testBuilder_ErrorOnReUse2() {
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Using the builder after build() was called is not allowed!");
+	@Test
+	void testBuilder_ErrorOnReUse2() {
+		RedGBuilder builder = new RedGBuilder<>(MyRedG.class);
+		builder.build();
+		assertThatThrownBy(() -> builder.withDefaultValueStrategy(null))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("Using the builder after build() was called is not allowed!");
+	}
 
-        RedGBuilder builder = new RedGBuilder<>(MyRedG.class);
-        builder.build();
-        builder.withDefaultValueStrategy(null);
-    }
+	@Test
+	void testBuilder_ErrorOnReUse3() {
+		RedGBuilder builder = new RedGBuilder<>(MyRedG.class);
+		builder.build();
+		assertThatThrownBy(() -> builder.withPreparedStatementParameterSetter(null))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("Using the builder after build() was called is not allowed!");
+	}
 
-    @Test
-    public void testBuilder_ErrorOnReUse3() {
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Using the builder after build() was called is not allowed!");
+	@Test
+	void testBuilder_ErrorOnReUse4() {
+		RedGBuilder builder = new RedGBuilder<>(MyRedG.class);
+		builder.build();
+		assertThatThrownBy(() -> builder.withDummyFactory(null))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("Using the builder after build() was called is not allowed!");
+	}
 
-        RedGBuilder builder = new RedGBuilder<>(MyRedG.class);
-        builder.build();
-        builder.withPreparedStatementParameterSetter(null);
-    }
+	public static class MyRedG extends AbstractRedG {
 
-    @Test
-    public void testBuilder_ErrorOnReUse4() {
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Using the builder after build() was called is not allowed!");
+		@Override
+		public String getVisualizationJson() {
+			return "nope";
+		}
+	}
 
-        RedGBuilder builder = new RedGBuilder<>(MyRedG.class);
-        builder.build();
-        builder.withDummyFactory(null);
-    }
+	public static class PrivateRedG extends AbstractRedG {
 
-    public static class MyRedG extends AbstractRedG {
+		private PrivateRedG() {
 
-        @Override
-        public String getVisualizationJson() {
-            return "nope";
-        }
-    }
+		}
 
-    public static class PrivateRedG extends AbstractRedG {
-
-        private PrivateRedG() {
-
-        }
-
-        @Override
-        public String getVisualizationJson() {
-            return "nope";
-        }
-    }
+		@Override
+		public String getVisualizationJson() {
+			return "nope";
+		}
+	}
 
 }

@@ -2,14 +2,14 @@ package de.yamass.redg.runtime.defaultvalues.pluggable;
 
 
 import de.yamass.redg.models.ColumnModel;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ConditionalProviderTest {
+class ConditionalProviderTest {
 
     @Test
-    public void testMatchAll() throws Exception {
+    void testMatchAll() throws Exception {
         ConditionalProvider provider = new ConditionalProvider(new DefaultDefaultValueProvider(), ".*", ".*", ".*");
 
         assertThat(provider.willProvide(getModel("A", "B", "C.B"))).isTrue();
@@ -17,7 +17,7 @@ public class ConditionalProviderTest {
     }
 
     @Test
-    public void testMatchPrefix() throws Exception {
+    void testMatchPrefix() throws Exception {
         ConditionalProvider provider = new ConditionalProvider(new DefaultDefaultValueProvider(), ".*\\.REDG.*", "REDG.*", "REDG.*");
 
         assertThat(provider.willProvide(getModel("A", "B", "C.B"))).isFalse();
@@ -35,7 +35,7 @@ public class ConditionalProviderTest {
     }
 
     @Test
-    public void testMatchFullTable() throws Exception {
+    void testMatchFullTable() throws Exception {
         ConditionalProvider provider = new ConditionalProvider(new DefaultDefaultValueProvider(), ".*\\.REDG.*", null, null);
 
         assertThat(provider.willProvide(getModel("A", "B", "C.B"))).isFalse();
@@ -47,7 +47,7 @@ public class ConditionalProviderTest {
     }
 
     @Test
-    public void testMatchTable() throws Exception {
+    void testMatchTable() throws Exception {
         ConditionalProvider provider = new ConditionalProvider(new DefaultDefaultValueProvider(), null, "REDG.*", null);
 
         assertThat(provider.willProvide(getModel("A", "B", "C.B"))).isFalse();
@@ -59,7 +59,7 @@ public class ConditionalProviderTest {
     }
 
     @Test
-    public void testMatchColumn() throws Exception {
+    void testMatchColumn() throws Exception {
         ConditionalProvider provider = new ConditionalProvider(new DefaultDefaultValueProvider(), null, null, "REDG.*");
 
         assertThat(provider.willProvide(getModel("A", "B", "C.B"))).isFalse();
@@ -71,7 +71,7 @@ public class ConditionalProviderTest {
     }
 
     @Test
-    public void testGetDefaultValue() {
+    void testGetDefaultValue() {
         ConditionalProvider provider = new ConditionalProvider(new NoProvider(), null, null, null);
 
         assertThat(provider.getDefaultValue(getModel("A", "B", "C.B"), String.class)).isNull();

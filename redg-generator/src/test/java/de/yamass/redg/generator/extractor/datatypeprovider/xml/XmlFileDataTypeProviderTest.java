@@ -18,8 +18,8 @@ package de.yamass.redg.generator.extractor.datatypeprovider.xml;
 
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ColumnDataType;
@@ -35,30 +35,30 @@ import java.util.Collections;
 
 import static org.mockito.Mockito.when;
 
-public class XmlFileDataTypeProviderTest {
+class XmlFileDataTypeProviderTest {
     @Test
-    public void testDeserializeXml() throws Exception {
+    void testDeserializeXml() throws Exception {
         InputStream stream = this.getClass().getResourceAsStream("XmlFileDataTypeProviderTest.xml");
         InputStreamReader reader = new InputStreamReader(stream, "UTF-8");
 
         TypeMappings mappings = XmlFileDataTypeProvider.deserializeXml(reader);
 
-        Assert.assertEquals(mappings.getTableTypeMappings().size(), 1);
+        Assertions.assertEquals(mappings.getTableTypeMappings().size(), 1);
         TableTypeMapping tableTypeMapping = mappings.getTableTypeMappings().get(0);
-        Assert.assertEquals(tableTypeMapping.getTableName(), "MY_TABLE");
-        Assert.assertEquals(tableTypeMapping.getColumnTypeMappings().size(), 1);
+        Assertions.assertEquals(tableTypeMapping.getTableName(), "MY_TABLE");
+        Assertions.assertEquals(tableTypeMapping.getColumnTypeMappings().size(), 1);
         ColumnTypeMapping columnTypeMapping = tableTypeMapping.getColumnTypeMappings().get(0);
-        Assert.assertEquals(columnTypeMapping.getColumnName(), "MY_FLAG");
-        Assert.assertEquals(columnTypeMapping.getJavaType(), "java.lang.Boolean");
+        Assertions.assertEquals(columnTypeMapping.getColumnName(), "MY_FLAG");
+        Assertions.assertEquals(columnTypeMapping.getJavaType(), "java.lang.Boolean");
 
-        Assert.assertEquals(mappings.getDefaultTypeMappings().size(), 1);
+        Assertions.assertEquals(mappings.getDefaultTypeMappings().size(), 1);
         DefaultTypeMapping defaultTypeMapping = mappings.getDefaultTypeMappings().get(0);
-        Assert.assertEquals(defaultTypeMapping.getSqlType(), "DECIMAL(1)");
-        Assert.assertEquals(defaultTypeMapping.getJavaType(), "java.lang.Boolean");
+        Assertions.assertEquals(defaultTypeMapping.getSqlType(), "DECIMAL(1)");
+        Assertions.assertEquals(defaultTypeMapping.getJavaType(), "java.lang.Boolean");
     }
 
     @Test
-    public void testXStream() throws IOException {
+    void testXStream() throws IOException {
         TypeMappings typeMappings = new TypeMappings();
 
         TableTypeMapping tableTypeMapping = new TableTypeMapping();
@@ -80,7 +80,7 @@ public class XmlFileDataTypeProviderTest {
     }
 
     @Test
-    public void testGetDataTypeByName() throws Exception {
+    void testGetDataTypeByName() throws Exception {
         TypeMappings typeMappings = new TypeMappings();
         typeMappings.setTableTypeMappings(Arrays.asList(
                 new TableTypeMapping(".+", Collections.singletonList(new ColumnTypeMapping("ACTIVE", "java.lang.Boolean"))),
@@ -88,16 +88,16 @@ public class XmlFileDataTypeProviderTest {
         ));
         XmlFileDataTypeProvider dataTypeProvider = new XmlFileDataTypeProvider(typeMappings, new DefaultDataTypeProvider());
 
-        Assert.assertEquals(dataTypeProvider.getDataTypeByName("FOO", "ACTIVE"), "java.lang.Boolean");
-        Assert.assertEquals(dataTypeProvider.getDataTypeByName("BAR", "ACTIVE"), "java.lang.Boolean");
-        Assert.assertEquals(dataTypeProvider.getDataTypeByName("BAR", "INACTIVE"), null);
+        Assertions.assertEquals(dataTypeProvider.getDataTypeByName("FOO", "ACTIVE"), "java.lang.Boolean");
+        Assertions.assertEquals(dataTypeProvider.getDataTypeByName("BAR", "ACTIVE"), "java.lang.Boolean");
+        Assertions.assertEquals(dataTypeProvider.getDataTypeByName("BAR", "INACTIVE"), null);
 
-        Assert.assertEquals(dataTypeProvider.getDataTypeByName("JOIN_TABLE", "FOO_ID"), "java.math.BigDecimal");
-        Assert.assertEquals(dataTypeProvider.getDataTypeByName("JOIN_TABLE", "BAR"), null);
+        Assertions.assertEquals(dataTypeProvider.getDataTypeByName("JOIN_TABLE", "FOO_ID"), "java.math.BigDecimal");
+        Assertions.assertEquals(dataTypeProvider.getDataTypeByName("JOIN_TABLE", "BAR"), null);
     }
 
     @Test
-    public void testGetDataTypeBySqlName() throws Exception {
+    void testGetDataTypeBySqlName() throws Exception {
         TypeMappings typeMappings = new TypeMappings();
         typeMappings.setDefaultTypeMappings(Arrays.asList(
                 new DefaultTypeMapping("DECIMAL", "java.lang.Long"),
@@ -126,27 +126,27 @@ public class XmlFileDataTypeProviderTest {
 
         XmlFileDataTypeProvider dataTypeProvider = new XmlFileDataTypeProvider(typeMappings, new DefaultDataTypeProvider());
 
-        Assert.assertEquals("java.lang.Boolean", dataTypeProvider.getDataTypeBySqlType(column1));
-        Assert.assertEquals("java.lang.Long", dataTypeProvider.getDataTypeBySqlType(column2));
-        Assert.assertEquals("java.sql.Timestamp", dataTypeProvider.getDataTypeBySqlType(column3));
+        Assertions.assertEquals("java.lang.Boolean", dataTypeProvider.getDataTypeBySqlType(column1));
+        Assertions.assertEquals("java.lang.Long", dataTypeProvider.getDataTypeBySqlType(column2));
+        Assertions.assertEquals("java.sql.Timestamp", dataTypeProvider.getDataTypeBySqlType(column3));
     }
 
     @Test
-    public void testCanHandleMissingTableTypeMappings() throws Exception {
+    void testCanHandleMissingTableTypeMappings() throws Exception {
         TypeMappings typeMappings = new TypeMappings();
         typeMappings.setDefaultTypeMappings(Collections.emptyList());
         XmlFileDataTypeProvider dataTypeProvider = new XmlFileDataTypeProvider(typeMappings, new DefaultDataTypeProvider());
 
-        Assert.assertEquals("java.lang.Integer", dataTypeProvider.getCanonicalDataTypeName(createColumnMock()));
+        Assertions.assertEquals("java.lang.Integer", dataTypeProvider.getCanonicalDataTypeName(createColumnMock()));
     }
 
     @Test
-    public void testCanHandleMissingDefaultTypeMappings() throws Exception {
+    void testCanHandleMissingDefaultTypeMappings() throws Exception {
         TypeMappings typeMappings = new TypeMappings();
         typeMappings.setTableTypeMappings(Collections.emptyList());
         XmlFileDataTypeProvider dataTypeProvider = new XmlFileDataTypeProvider(typeMappings, new DefaultDataTypeProvider());
 
-        Assert.assertEquals("java.lang.Integer", dataTypeProvider.getCanonicalDataTypeName(createColumnMock()));
+        Assertions.assertEquals("java.lang.Integer", dataTypeProvider.getCanonicalDataTypeName(createColumnMock()));
     }
 
     private Column createColumnMock() {
@@ -172,7 +172,7 @@ public class XmlFileDataTypeProviderTest {
         actual = actual.replaceAll("[\\r\\n]+", " ");
         expected = expected.replaceAll("\\s+", "");
         actual = actual.replaceAll("\\s+", "");
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     private String readResource(String resourceName) throws IOException {

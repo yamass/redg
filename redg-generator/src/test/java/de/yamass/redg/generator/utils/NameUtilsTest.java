@@ -16,31 +16,30 @@
 
 package de.yamass.redg.generator.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
 
-
-public class NameUtilsTest {
+class NameUtilsTest {
 
     @Test
-    public void testFirstCharacterToLowerCase() {
-        assertEquals("hello", NameUtils.firstCharacterToLowerCase("hello"));
-        assertEquals("hello", NameUtils.firstCharacterToLowerCase("Hello"));
-        assertEquals("hELLO", NameUtils.firstCharacterToLowerCase("HELLO"));
-        assertEquals("4heLLo", NameUtils.firstCharacterToLowerCase("4heLLo"));
-        assertEquals("", NameUtils.firstCharacterToLowerCase(""));
-        assertEquals(null, NameUtils.firstCharacterToLowerCase(null));
+    void testFirstCharacterToLowerCase() {
+        Assertions.assertEquals("hello", NameUtils.firstCharacterToLowerCase("hello"));
+        Assertions.assertEquals("hello", NameUtils.firstCharacterToLowerCase("Hello"));
+        Assertions.assertEquals("hELLO", NameUtils.firstCharacterToLowerCase("HELLO"));
+        Assertions.assertEquals("4heLLo", NameUtils.firstCharacterToLowerCase("4heLLo"));
+        Assertions.assertEquals("", NameUtils.firstCharacterToLowerCase(""));
+        Assertions.assertEquals(null, NameUtils.firstCharacterToLowerCase(null));
     }
 
     @Test
-    public void testFirstCharacterToUpperCase() {
-        assertEquals("Hello", NameUtils.firstCharacterToUpperCase("hello"));
-        assertEquals("Hello", NameUtils.firstCharacterToUpperCase("Hello"));
-        assertEquals("HELLO", NameUtils.firstCharacterToUpperCase("HELLO"));
-        assertEquals("4heLLo", NameUtils.firstCharacterToUpperCase("4heLLo"));
-        assertEquals("", NameUtils.firstCharacterToUpperCase(""));
-        assertEquals(null, NameUtils.firstCharacterToUpperCase(null));
+    void testFirstCharacterToUpperCase() {
+        Assertions.assertEquals("Hello", NameUtils.firstCharacterToUpperCase("hello"));
+        Assertions.assertEquals("Hello", NameUtils.firstCharacterToUpperCase("Hello"));
+        Assertions.assertEquals("HELLO", NameUtils.firstCharacterToUpperCase("HELLO"));
+        Assertions.assertEquals("4heLLo", NameUtils.firstCharacterToUpperCase("4heLLo"));
+        Assertions.assertEquals("", NameUtils.firstCharacterToUpperCase(""));
+        Assertions.assertEquals(null, NameUtils.firstCharacterToUpperCase(null));
     }
 
 }

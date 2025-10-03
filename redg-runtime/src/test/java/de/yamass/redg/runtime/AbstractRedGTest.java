@@ -28,9 +28,8 @@ import de.yamass.redg.runtime.mocks.MockEntity2;
 import de.yamass.redg.runtime.mocks.MockRedG;
 import de.yamass.redg.runtime.transformer.DefaultPreparedStatementParameterSetter;
 import de.yamass.redg.runtime.transformer.PreparedStatementParameterSetter;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.sql.*;
 import java.util.List;
@@ -38,29 +37,25 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-public class AbstractRedGTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+class AbstractRedGTest {
 
     @Test
-    public void testDefaultValueStrategySetGet() {
+    void testDefaultValueStrategySetGet() {
         PluggableDefaultValueStrategy strategy = new PluggableDefaultValueStrategy();
         MockRedG mockRedG = new MockRedG();
 
-        assertTrue(mockRedG.getDefaultValueStrategy() instanceof DefaultDefaultValueStrategy);
+        Assertions.assertTrue(mockRedG.getDefaultValueStrategy() instanceof DefaultDefaultValueStrategy);
         mockRedG.setDefaultValueStrategy(strategy);
-        assertEquals(strategy, mockRedG.getDefaultValueStrategy());
+        Assertions.assertEquals(strategy, mockRedG.getDefaultValueStrategy());
         mockRedG.setDefaultValueStrategy(null);
-        assertTrue(mockRedG.getDefaultValueStrategy() instanceof DefaultDefaultValueStrategy);
+        Assertions.assertTrue(mockRedG.getDefaultValueStrategy() instanceof DefaultDefaultValueStrategy);
     }
 
     @Test
-    public void testGetEntities() throws Exception {
+    void testGetEntities() throws Exception {
         MockRedG mockRedG = new MockRedG();
         RedGEntity e = new MockEntity1();
         mockRedG.addEntity(e);
@@ -68,16 +63,16 @@ public class AbstractRedGTest {
     }
 
     @Test
-    public void testGetEntities_Immutable() throws Exception {
-        this.expectedException.expect(UnsupportedOperationException.class);
+    void testGetEntities_Immutable() {
         MockRedG mockRedG = new MockRedG();
         RedGEntity e = new MockEntity1();
         mockRedG.addEntity(e);
-        mockRedG.getEntities().clear();
+        assertThatThrownBy(() -> mockRedG.getEntities().clear())
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
-    public void testSetDummyFactory() throws Exception {
+    void testSetDummyFactory() throws Exception {
         MockRedG mockRedG = new MockRedG();
         DummyFactory df = new DefaultDummyFactory();
         mockRedG.setDummyFactory(df);
@@ -87,15 +82,15 @@ public class AbstractRedGTest {
     }
 
     @Test
-    public void testSetDummyFactory_AfterEntityAdd() throws Exception {
-        this.expectedException.expect(IllegalStateException.class);
+    void testSetDummyFactory_AfterEntityAdd() throws Exception {
         MockRedG mockRedG = new MockRedG();
         mockRedG.addEntity(new MockEntity1());
-        mockRedG.setDummyFactory(null);
+        assertThatThrownBy(() -> mockRedG.setDummyFactory(null))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void testSetPSPS() throws Exception {
+    void testSetPSPS() throws Exception {
         MockRedG mockRedG = new MockRedG();
         PreparedStatementParameterSetter psps = new DefaultPreparedStatementParameterSetter();
         mockRedG.setPreparedStatementParameterSetter(psps);
@@ -105,15 +100,15 @@ public class AbstractRedGTest {
     }
 
     @Test
-    public void testSetPSPS_AfterEntityAdd() throws Exception {
-        this.expectedException.expect(IllegalStateException.class);
+    void testSetPSPS_AfterEntityAdd() throws Exception {
         MockRedG mockRedG = new MockRedG();
         mockRedG.addEntity(new MockEntity1());
-        mockRedG.setPreparedStatementParameterSetter(null);
+        assertThatThrownBy(() -> mockRedG.setPreparedStatementParameterSetter(null))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void testSetDVS() throws Exception {
+    void testSetDVS() throws Exception {
         MockRedG mockRedG = new MockRedG();
         DefaultValueStrategy dvs = new DefaultDefaultValueStrategy();
         mockRedG.setDefaultValueStrategy(dvs);
@@ -123,15 +118,15 @@ public class AbstractRedGTest {
     }
 
     @Test
-    public void testSetDVS_AfterEntityAdd() throws Exception {
-        this.expectedException.expect(IllegalStateException.class);
+    void testSetDVS_AfterEntityAdd() throws Exception {
         MockRedG mockRedG = new MockRedG();
         mockRedG.addEntity(new MockEntity1());
-        mockRedG.setDefaultValueStrategy(null);
+        assertThatThrownBy(() -> mockRedG.setDefaultValueStrategy(null))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void testSetSVF() throws Exception {
+    void testSetSVF() throws Exception {
         MockRedG mockRedG = new MockRedG();
         SQLValuesFormatter svf = new DefaultSQLValuesFormatter();
         mockRedG.setSqlValuesFormatter(svf);
@@ -141,29 +136,29 @@ public class AbstractRedGTest {
     }
 
     @Test
-    public void testSetSVF_AfterEntityAdd() throws Exception {
-        this.expectedException.expect(IllegalStateException.class);
+    void testSetSVF_AfterEntityAdd() throws Exception {
         MockRedG mockRedG = new MockRedG();
         mockRedG.addEntity(new MockEntity1());
-        mockRedG.setSqlValuesFormatter(null);
+        assertThatThrownBy(() -> mockRedG.setSqlValuesFormatter(null))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    public void testInsertValuesFormatterSetGet() {
+    void testInsertValuesFormatterSetGet() {
         MockRedG mockRedG = new MockRedG();
         DefaultSQLValuesFormatter formatter = new DefaultSQLValuesFormatter();
 
-        assertTrue(mockRedG.getSqlValuesFormatter() instanceof DefaultSQLValuesFormatter);
-        assertNotEquals(formatter, mockRedG.getSqlValuesFormatter());
+        Assertions.assertTrue(mockRedG.getSqlValuesFormatter() instanceof DefaultSQLValuesFormatter);
+        Assertions.assertNotEquals(formatter, mockRedG.getSqlValuesFormatter());
         mockRedG.setSqlValuesFormatter(formatter);
-        assertEquals(formatter, mockRedG.getSqlValuesFormatter());
+        Assertions.assertEquals(formatter, mockRedG.getSqlValuesFormatter());
         mockRedG.setSqlValuesFormatter(null);
-        assertTrue(mockRedG.getSqlValuesFormatter() instanceof DefaultSQLValuesFormatter);
-        assertNotEquals(formatter, mockRedG.getSqlValuesFormatter());
+        Assertions.assertTrue(mockRedG.getSqlValuesFormatter() instanceof DefaultSQLValuesFormatter);
+        Assertions.assertNotEquals(formatter, mockRedG.getSqlValuesFormatter());
     }
 
     @Test
-    public void testFindSingleEntity() {
+    void testFindSingleEntity() {
         MockRedG mockRedG = new MockRedG();
         MockEntity1 entity1 = new MockEntity1();
         MockEntity2 entity2 = new MockEntity2();
@@ -171,40 +166,40 @@ public class AbstractRedGTest {
         mockRedG.addEntity(entity1);
         mockRedG.addEntity(entity2);
 
-        assertEquals(entity1, mockRedG.findSingleEntity(MockEntity1.class, e -> e.toString().equals("MockEntity1")));
-        assertEquals(entity2, mockRedG.findSingleEntity(MockEntity2.class, e -> e.toString().equals("MockEntity2")));
+        Assertions.assertEquals(entity1, mockRedG.findSingleEntity(MockEntity1.class, e -> e.toString().equals("MockEntity1")));
+        Assertions.assertEquals(entity2, mockRedG.findSingleEntity(MockEntity2.class, e -> e.toString().equals("MockEntity2")));
 
         boolean exceptionThrown = false;
         try {
-            assertNull(mockRedG.findSingleEntity(MockEntity1.class, e -> false));
+            Assertions.assertNull(mockRedG.findSingleEntity(MockEntity1.class, e -> false));
         } catch (IllegalArgumentException e) {
             exceptionThrown = true;
         }
-        assertTrue(exceptionThrown);
+        Assertions.assertTrue(exceptionThrown);
     }
 
     @Test
-    public void testFindAllObjects() {
+    void testFindAllObjects() {
         MockRedG mockRedG = new MockRedG();
         List<MockEntity1> entities = IntStream.rangeClosed(1, 20).mapToObj(i -> new MockEntity1()).collect(Collectors.toList());
         entities.forEach(mockRedG::addEntity);
 
-        assertEquals(entities, mockRedG.findEntities(MockEntity1.class, e -> true));
-        assertTrue(mockRedG.findEntities(MockEntity2.class, e -> true).isEmpty());
+        Assertions.assertEquals(entities, mockRedG.findEntities(MockEntity1.class, e -> true));
+        Assertions.assertTrue(mockRedG.findEntities(MockEntity2.class, e -> true).isEmpty());
     }
 
     @Test
-    public void testGenerateInsertStatements() {
+    void testGenerateInsertStatements() {
         MockRedG mockRedG = new MockRedG();
         List<MockEntity1> entities = IntStream.rangeClosed(1, 20).mapToObj(i -> new MockEntity1()).collect(Collectors.toList());
         List<String> results = IntStream.rangeClosed(1, 20).mapToObj(i -> "INSERT").collect(Collectors.toList());
         entities.forEach(mockRedG::addEntity);
 
-        assertEquals(results, mockRedG.generateSQLStatements());
+        Assertions.assertEquals(results, mockRedG.generateSQLStatements());
     }
 
     @Test
-    public void testInsertConnection() throws Exception {
+    void testInsertConnection() throws Exception {
         Connection connection = getConnection("conn");
         Statement stmt = connection.createStatement();
         stmt.execute("CREATE TABLE TEST (CONTENT VARCHAR2(50 CHARACTERS))");
@@ -218,7 +213,7 @@ public class AbstractRedGTest {
 
         ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM TEST");
         rs.next();
-        assertEquals(20, rs.getInt(1));
+        Assertions.assertEquals(20, rs.getInt(1));
     }
 
     private Connection getConnection(String suffix) throws ClassNotFoundException, SQLException {

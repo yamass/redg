@@ -16,65 +16,65 @@
 
 package de.yamass.redg.generator.extractor.datatypeprovider;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import schemacrawler.schema.Column;
 
-public class NoPrimitiveTypesDataTypeProviderWrapperTest {
+class NoPrimitiveTypesDataTypeProviderWrapperTest {
     @Test
-    public void getDataTypeBoolean() throws Exception {
+    void getDataTypeBoolean() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "boolean");
-        Assert.assertEquals("java.lang.Boolean", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Boolean", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
     @Test
-    public void getDataTypeCharacter() throws Exception {
+    void getDataTypeCharacter() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "char");
-        Assert.assertEquals("java.lang.Character", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Character", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
     @Test
-    public void getDataTypeByte() throws Exception {
+    void getDataTypeByte() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "byte");
-        Assert.assertEquals("java.lang.Byte", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Byte", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
     @Test
-    public void getDataTypeShort() throws Exception {
+    void getDataTypeShort() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "short");
-        Assert.assertEquals("java.lang.Short", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Short", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
     @Test
-    public void getDataTypeInteger() throws Exception {
+    void getDataTypeInteger() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "int");
-        Assert.assertEquals("java.lang.Integer", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Integer", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
     @Test
-    public void getDataTypeLong() throws Exception {
+    void getDataTypeLong() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "long");
-        Assert.assertEquals("java.lang.Long", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Long", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
     @Test
-    public void getDataTypeFloat() throws Exception {
+    void getDataTypeFloat() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "float");
-        Assert.assertEquals("java.lang.Float", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Float", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
     @Test
-    public void getDataTypeDouble() throws Exception {
+    void getDataTypeDouble() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "double");
-        Assert.assertEquals("java.lang.Double", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Double", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
     @Test
-    public void getDataTypeNonPrimitiveType() throws Exception {
+    void getDataTypeNonPrimitiveType() throws Exception {
         NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "java.lang.Double");
-        Assert.assertEquals("java.lang.Double", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        Assertions.assertEquals("java.lang.Double", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
     }
 
 }

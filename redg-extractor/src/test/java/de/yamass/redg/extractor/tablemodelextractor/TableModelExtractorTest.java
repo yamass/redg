@@ -16,24 +16,24 @@
 
 package de.yamass.redg.extractor.tablemodelextractor;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 
-public class TableModelExtractorTest {
+class TableModelExtractorTest {
 
     // TODO: do not rely on external files
     @Test
-    @Ignore
-    public void extractTableModelsFromSourceCode() throws Exception {
+    @Disabled
+    void extractTableModelsFromSourceCode() throws Exception {
         TableModelExtractor.extractTableModelsFromSourceCode(Paths.get("D:\\redg\\redg-playground\\target\\generated-test-sources\\redg"),
                 "de.yamass.redg.generated", "G");
     }
 
     @Test
-    @Ignore
-    public void extractTableModelFromClasses() throws Exception {
+    @Disabled
+    void extractTableModelFromClasses() throws Exception {
         TableModelExtractor.extractTableModelFromClasses(Paths.get("D:\\redg\\redg-playground\\target\\test-classes"),
                 "de.yamass.redg.generated", "G");
     }

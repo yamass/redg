@@ -9,8 +9,8 @@ import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.runtime.AbstractRedG;
 import de.yamass.redg.tests.Helpers;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import javax.tools.JavaCompiler;
@@ -29,9 +29,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class ExtractorTest {
+class ExtractorTest {
 
-    @Before
+    @BeforeEach
     public void initializeDatabase() throws Exception {
         Class.forName("org.h2.Driver");
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-source", "", "");
@@ -43,7 +43,7 @@ public class ExtractorTest {
     }
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-source", "", "");
 
         final DataExtractor dataExtractor = new DataExtractor();

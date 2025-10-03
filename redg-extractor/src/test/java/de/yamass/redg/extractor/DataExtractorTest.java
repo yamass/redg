@@ -1,17 +1,17 @@
 package de.yamass.redg.extractor;
 
 import de.yamass.redg.models.TableModel;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class DataExtractorTest {
+class DataExtractorTest {
 
     @Test
-    public void testGetFullSqlName() throws Exception {
+    void testGetFullSqlName() throws Exception {
         final TableModel tm1 = new TableModel();
         tm1.setSqlFullName("TEST.TABLE");
         assertThat(wrapGetFullTableName(new DataExtractor(), tm1)).isEqualTo("TEST.TABLE");

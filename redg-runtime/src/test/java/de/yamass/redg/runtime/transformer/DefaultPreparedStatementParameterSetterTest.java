@@ -16,19 +16,18 @@
 
 package de.yamass.redg.runtime.transformer;
 
+import de.yamass.redg.runtime.AttributeMetaInfo;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.sql.PreparedStatement;
 import java.sql.Types;
 
-import org.junit.Test;
-import org.mockito.Mockito;
 
-import de.yamass.redg.runtime.AttributeMetaInfo;
-
-
-public class DefaultPreparedStatementParameterSetterTest {
+class DefaultPreparedStatementParameterSetterTest {
 
     @Test
-    public void testTransform() throws Exception {
+    void testTransform() throws Exception {
         PreparedStatement preparedStatementMock = Mockito.mock(PreparedStatement.class);
 
         DefaultPreparedStatementParameterSetter parameterSetter = new DefaultPreparedStatementParameterSetter();

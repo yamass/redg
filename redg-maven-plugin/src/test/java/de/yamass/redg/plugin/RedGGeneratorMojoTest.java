@@ -16,28 +16,26 @@
 
 package de.yamass.redg.plugin;
 
-
-import io.takari.maven.testing.TestMavenRuntime;
-import io.takari.maven.testing.TestResources;
-import org.junit.Rule;
-import org.junit.Test;
+import io.takari.maven.testing.TestMavenRuntime5;
+import io.takari.maven.testing.TestResources5;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.File;
 
+class RedGGeneratorMojoTest {
 
-public class RedGGeneratorMojoTest {
+	@RegisterExtension
+	final TestResources5 resources = new TestResources5();
 
-    @Rule
-    public final TestResources resources = new TestResources();
+	@RegisterExtension
+	final TestMavenRuntime5 maven = new TestMavenRuntime5();
 
-    @Rule
-    public final TestMavenRuntime maven = new TestMavenRuntime();
-
-    @Test
-    public void test() throws Exception {
-        File baseDir = resources.getBasedir("full-project-test");
-        maven.executeMojo(baseDir, "redg", TestHelpers.getArrayParameters("sqlScripts", "test.sql"));
-        // TODO: actually test something
-    }
+	@Test
+	void test() throws Exception {
+		File baseDir = resources.getBasedir("full-project-test");
+		maven.executeMojo(baseDir, "redg", TestHelpers.getArrayParameters("sqlScripts", "test.sql"));
+		// TODO: actually test something
+	}
 
 }

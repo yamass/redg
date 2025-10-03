@@ -16,24 +16,23 @@
 
 package de.yamass.redg.generator.extractor.conveniencesetterprovider.xml;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import schemacrawler.schema.Column;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import schemacrawler.schema.Column;
-
-public class XmlFileConvenienceSetterProviderTest {
+class XmlFileConvenienceSetterProviderTest {
     @Test
-    public void getConvenienceSetters() throws Exception {
+    void getConvenienceSetters() throws Exception {
         InputStream stream = this.getClass().getResourceAsStream("XmlFileConvencienceSetterProviderTest.xml");
         InputStreamReader reader = new InputStreamReader(stream, "UTF-8");
 
         XmlFileConvenienceSetterProvider provider = new XmlFileConvenienceSetterProvider(reader);
 
-        Assert.assertEquals(1, provider.getConvenienceSetters(Mockito.mock(Column.class), "java.util.Date").size());
+        Assertions.assertEquals(1, provider.getConvenienceSetters(Mockito.mock(Column.class), "java.util.Date").size());
     }
 
 }

@@ -2,19 +2,19 @@ package de.yamass.redg.runtime.defaultvalues.pluggable.buildermatchers;
 
 import de.yamass.redg.models.ColumnModel;
 import de.yamass.redg.runtime.defaultvalues.TestUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 
-public class MatchersTest {
+class MatchersTest {
 
     @Test
-    public void tableName() {
+    void tableName() {
         final ColumnModel cm = TestUtils.getCM("", "table", "", String.class, true);
         final ColumnModel cm2 = TestUtils.getCM("", "wrong", "", String.class, true);
         assertThat(Matchers.tableName("table"::equals))
@@ -23,7 +23,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void fullTableName() {
+    void fullTableName() {
         final ColumnModel cm = TestUtils.getCM("table", "", "", String.class, true);
         final ColumnModel cm2 = TestUtils.getCM("wrong", "", "", String.class, true);
         assertThat(Matchers.fullTableName("table"::equals))
@@ -32,7 +32,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void columnName() {
+    void columnName() {
         final ColumnModel cm = TestUtils.getCM("", "", "column", String.class, true);
         final ColumnModel cm2 = TestUtils.getCM("", "", "wrong", String.class, true);
         assertThat(Matchers.columnName("column"::equals))
@@ -41,7 +41,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void type() {
+    void type() {
         final ColumnModel cm = TestUtils.getCM("", "", "", String.class, true);
         final ColumnModel cm2 = TestUtils.getCM("", "", "", Integer.class, true);
         assertThat(Matchers.type(String.class::equals))
@@ -50,7 +50,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void notNull() {
+    void notNull() {
         final ColumnModel cm = TestUtils.getCM("", "", "", String.class, true);
         final ColumnModel cm2 = TestUtils.getCM("", "", "", String.class, false);
         assertThat(Matchers.notNull(Boolean::booleanValue))
@@ -59,7 +59,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void isNotNull() {
+    void isNotNull() {
         final ColumnModel cm = TestUtils.getCM("", "", "", String.class, true);
         final ColumnModel cm2 = TestUtils.getCM("", "", "", String.class, false);
         assertThat(Matchers.isNotNull())
@@ -68,7 +68,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void isUnique() {
+    void isUnique() {
         final ColumnModel cm = TestUtils.getCM("", "", "", String.class, true);
         cm.setUnique(true);
         final ColumnModel cm2 = TestUtils.getCM("", "", "", String.class, false);
@@ -79,7 +79,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void isPrimary() {
+    void isPrimary() {
         final ColumnModel cm = TestUtils.getCM("", "", "", String.class, true);
         cm.setPartOfPrimaryKey(true);
         final ColumnModel cm2 = TestUtils.getCM("", "", "", String.class, false);
@@ -90,7 +90,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void allOf() {
+    void allOf() {
         final ColumnModel cm = TestUtils.getCM("", "", "", String.class, true);
         cm.setPartOfPrimaryKey(true);
         cm.setUnique(true);
@@ -109,7 +109,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void anyOf() {
+    void anyOf() {
         final ColumnModel cm = TestUtils.getCM("", "", "", String.class, true);
         cm.setPartOfPrimaryKey(true);
         cm.setUnique(true);
@@ -128,7 +128,7 @@ public class MatchersTest {
     }
 
     @Test
-    public void oneOf() {
+    void oneOf() {
         final ColumnModel cm = TestUtils.getCM("", "", "", String.class, true);
         cm.setPartOfPrimaryKey(true);
         cm.setUnique(true);
@@ -147,9 +147,9 @@ public class MatchersTest {
     }
 
     @Test
-    public void testPrivateConstructor() throws Exception {
+    void testPrivateConstructor() throws Exception {
         Constructor c = Matchers.class.getDeclaredConstructor();
-        assertTrue(Modifier.isPrivate(c.getModifiers()));
+        Assertions.assertTrue(Modifier.isPrivate(c.getModifiers()));
 
         c.setAccessible(true);
         c.newInstance();

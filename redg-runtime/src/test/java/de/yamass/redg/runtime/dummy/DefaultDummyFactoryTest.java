@@ -17,113 +17,107 @@
 package de.yamass.redg.runtime.dummy;
 
 import de.yamass.redg.runtime.AbstractRedG;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.spy;
 
 
-public class DefaultDummyFactoryTest {
+class DefaultDummyFactoryTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+	@Test
+	void testGetDummy_createNew() throws Exception {
+		AbstractRedG redG = spy(AbstractRedG.class);
 
-    @Test
-    public void testGetDummy_createNew() throws Exception {
-        AbstractRedG redG = spy(AbstractRedG.class);
+		DefaultDummyFactory factory = new DefaultDummyFactory();
+		Assertions.assertNotNull(factory);
 
-        DefaultDummyFactory factory = new DefaultDummyFactory();
-        assertNotNull(factory);
+		TestRedGEntity1 entity1 = factory.getDummy(redG, TestRedGEntity1.class);
+		Assertions.assertNotNull(entity1);
+		Assertions.assertTrue(factory.isDummy(entity1));
 
-        TestRedGEntity1 entity1 = factory.getDummy(redG, TestRedGEntity1.class);
-        assertNotNull(entity1);
-        assertTrue(factory.isDummy(entity1));
+		//assure it was properly added
+		Assertions.assertEquals(entity1, redG.findSingleEntity(TestRedGEntity1.class, e -> true));
+	}
 
-        //assure it was properly added
-        assertEquals(entity1, redG.findSingleEntity(TestRedGEntity1.class, e -> true));
-    }
+	@Test
+	void testGetDummy_reuseCachedObject() throws Exception {
+		AbstractRedG redG = spy(AbstractRedG.class);
 
-    @Test
-    public void testGetDummy_reuseCachedObject() throws Exception {
-        AbstractRedG redG = spy(AbstractRedG.class);
+		DefaultDummyFactory factory = new DefaultDummyFactory();
+		Assertions.assertNotNull(factory);
 
-        DefaultDummyFactory factory = new DefaultDummyFactory();
-        assertNotNull(factory);
+		TestRedGEntity1 entity1 = factory.getDummy(redG, TestRedGEntity1.class);
+		Assertions.assertNotNull(entity1);
 
-        TestRedGEntity1 entity1 = factory.getDummy(redG, TestRedGEntity1.class);
-        assertNotNull(entity1);
+		TestRedGEntity1 entity2 = factory.getDummy(redG, TestRedGEntity1.class);
+		Assertions.assertNotNull(entity1);
 
-        TestRedGEntity1 entity2 = factory.getDummy(redG, TestRedGEntity1.class);
-        assertNotNull(entity1);
+		//assure it was properly added
+		Assertions.assertEquals(entity1, entity2);
+	}
 
-        //assure it was properly added
-        assertEquals(entity1, entity2);
-    }
+	@Test
+	void testGetDummy_transitiveDependencies() throws Exception {
+		AbstractRedG redG = spy(AbstractRedG.class);
 
-    @Test
-    public void testGetDummy_transitiveDependencies() throws Exception {
-        AbstractRedG redG = spy(AbstractRedG.class);
+		DefaultDummyFactory factory = new DefaultDummyFactory();
+		Assertions.assertNotNull(factory);
 
-        DefaultDummyFactory factory = new DefaultDummyFactory();
-        assertNotNull(factory);
+		TestRedGEntity2 entity2 = factory.getDummy(redG, TestRedGEntity2.class);
+		Assertions.assertNotNull(entity2);
 
-        TestRedGEntity2 entity2 = factory.getDummy(redG, TestRedGEntity2.class);
-        assertNotNull(entity2);
+		Assertions.assertTrue(redG.findSingleEntity(TestRedGEntity1.class, e -> true) != null);
+		Assertions.assertTrue(redG.findSingleEntity(TestRedGEntity2.class, e -> true) != null);
+	}
 
-        assertTrue(redG.findSingleEntity(TestRedGEntity1.class, e -> true) != null);
-        assertTrue(redG.findSingleEntity(TestRedGEntity2.class, e -> true) != null);
-    }
+	@Test
+	void testGetDummy_NoFittingConstructor() throws Exception {
+		AbstractRedG redG = spy(AbstractRedG.class);
 
-    @Test
-    public void testGetDummy_NoFittingConstructor() throws Exception {
-        thrown.expect(DummyCreationException.class);
-        thrown.expectMessage("Could not find a fitting constructor");
-        AbstractRedG redG = spy(AbstractRedG.class);
+		DefaultDummyFactory factory = new DefaultDummyFactory();
+		Assertions.assertNotNull(factory);
 
-        DefaultDummyFactory factory = new DefaultDummyFactory();
-        assertNotNull(factory);
+		assertThatThrownBy(() -> factory.getDummy(redG, TestRedGEntity4.class))
+				.isInstanceOf(DummyCreationException.class)
+				.hasMessageContaining("Could not find a fitting constructor");
+	}
 
-        factory.getDummy(redG, TestRedGEntity4.class);
-    }
+	@Test
+	void testGetDummy_NoFittingConstructor2() throws Exception {
+		AbstractRedG redG = spy(AbstractRedG.class);
 
-    @Test
-    public void testGetDummy_NoFittingConstructor2() throws Exception {
-        thrown.expect(DummyCreationException.class);
-        thrown.expectMessage("Could not find a fitting constructor");
-        AbstractRedG redG = spy(AbstractRedG.class);
+		DefaultDummyFactory factory = new DefaultDummyFactory();
+		Assertions.assertNotNull(factory);
 
-        DefaultDummyFactory factory = new DefaultDummyFactory();
-        assertNotNull(factory);
+		assertThatThrownBy(() -> factory.getDummy(redG, TestRedGEntity6.class))
+				.isInstanceOf(DummyCreationException.class)
+				.hasMessageContaining("Could not find a fitting constructor");
+	}
 
-        factory.getDummy(redG, TestRedGEntity6.class);
-    }
+	@Test
+	void testGetDummy_NoFittingConstructor3() throws Exception {
+		AbstractRedG redG = spy(AbstractRedG.class);
 
-    @Test
-    public void testGetDummy_NoFittingConstructor3() throws Exception {
-        thrown.expect(DummyCreationException.class);
-        thrown.expectMessage("Could not find a fitting constructor");
-        AbstractRedG redG = spy(AbstractRedG.class);
+		DefaultDummyFactory factory = new DefaultDummyFactory();
+		Assertions.assertNotNull(factory);
 
-        DefaultDummyFactory factory = new DefaultDummyFactory();
-        assertNotNull(factory);
+		assertThatThrownBy(() -> factory.getDummy(redG, TestRedGEntity7.class))
+				.isInstanceOf(DummyCreationException.class)
+				.hasMessageContaining("Could not find a fitting constructor");
+	}
 
-        factory.getDummy(redG, TestRedGEntity7.class);
-    }
+	@Test
+	void testGetDummy_InstantiationFails() throws Exception {
+		AbstractRedG redG = spy(AbstractRedG.class);
 
-    @Test
-    public void testGetDummy_InstantiationFails() throws Exception {
-        thrown.expect(DummyCreationException.class);
-        thrown.expectMessage("Instantiation of the dummy failed");
-        AbstractRedG redG = spy(AbstractRedG.class);
+		DefaultDummyFactory factory = new DefaultDummyFactory();
+		Assertions.assertNotNull(factory);
 
-        DefaultDummyFactory factory = new DefaultDummyFactory();
-        assertNotNull(factory);
-
-        factory.getDummy(redG, TestRedGEntity5.class);
-    }
+		assertThatThrownBy(() -> factory.getDummy(redG, TestRedGEntity5.class))
+				.isInstanceOf(DummyCreationException.class)
+				.hasMessageContaining("Instantiation of the dummy failed");
+	}
 
 }

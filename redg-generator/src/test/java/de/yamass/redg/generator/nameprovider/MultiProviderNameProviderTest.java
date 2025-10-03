@@ -18,24 +18,19 @@ package de.yamass.redg.generator.nameprovider;
 
 import de.yamass.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
 import de.yamass.redg.generator.extractor.nameprovider.NameProvider;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.ForeignKey;
 import schemacrawler.schema.Table;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-public class MultiProviderNameProviderTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class MultiProviderNameProviderTest {
 
     private final Table webUser = DummyDatabaseStructureProvider.getDummyTable("WEB_USER");
     private final Table webTransactions = DummyDatabaseStructureProvider.getDummyTable("WEB_TRANSACTIONS");
@@ -47,31 +42,28 @@ public class MultiProviderNameProviderTest {
     private final ForeignKey blogFk = DummyDatabaseStructureProvider.getMultiPartForeignKey("FK_BLOG_POST_CREATOR_USER", "User");
 
     @Test
-    public void testAppendProviderAfterUsage() {
-        thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("providers after a name");
-
+    void testAppendProviderAfterUsage() {
         MultiProviderNameProvider provider = new MultiProviderNameProvider();
         provider.getClassNameForTable(webUser);
         NameProvider extraProvider = mock(NameProvider.class);
-        provider.appendProvider(extraProvider);
+        assertThatThrownBy(() -> provider.appendProvider(extraProvider))
+                .isInstanceOf(UnsupportedOperationException.class)
+                .hasMessageContaining("providers after a name");
     }
 
     @Test
-    public void testPrependProviderAfterUsage() {
-        thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("providers after a name");
-
+    void testPrependProviderAfterUsage() {
         MultiProviderNameProvider provider = new MultiProviderNameProvider();
         provider.getClassNameForTable(webUser);
         NameProvider extraProvider = mock(NameProvider.class);
-        provider.prependProvider(extraProvider);
+
+        assertThatThrownBy(() -> provider.prependProvider(extraProvider))
+                .isInstanceOf(UnsupportedOperationException.class)
+                .hasMessageContaining("providers after a name");
     }
 
-
-
     @Test
-    public void testClassNameGeneration() {
+    void testClassNameGeneration() {
         MultiProviderNameProvider provider = new MultiProviderNameProvider();
 
         NameProvider extraProvider = mock(NameProvider.class);
@@ -86,7 +78,7 @@ public class MultiProviderNameProviderTest {
     }
 
     @Test
-    public void testMethodNameGeneration() {
+    void testMethodNameGeneration() {
         MultiProviderNameProvider provider = new MultiProviderNameProvider();
 
         NameProvider extraProvider = mock(NameProvider.class);
@@ -101,7 +93,7 @@ public class MultiProviderNameProviderTest {
     }
 
     @Test
-    public void testForeignKeyNameGeneration() {
+    void testForeignKeyNameGeneration() {
         MultiProviderNameProvider provider = new MultiProviderNameProvider();
 
         NameProvider extraProvider = mock(NameProvider.class);

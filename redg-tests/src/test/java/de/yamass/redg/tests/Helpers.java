@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Helpers {
 
