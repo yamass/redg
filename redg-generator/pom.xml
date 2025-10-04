@@ -39,21 +39,14 @@
             <groupId>us.fatehi</groupId>
             <artifactId>schemacrawler</artifactId>
         </dependency>
-        <!-- Licensing for somewhat unclear. Maven Central lists them as EPL1.0 / GPL / LGPL, yet the mysql version includes
-        the mysql JDBC driver, which is licensed as GPL. To prevent problems these simply have to be included by the user.
         <dependency>
             <groupId>us.fatehi</groupId>
-            <artifactId>schemacrawler-oracle</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>us.fatehi</groupId>
-            <artifactId>schemacrawler-db2</artifactId>
+            <artifactId>schemacrawler-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>us.fatehi</groupId>
             <artifactId>schemacrawler-mysql</artifactId>
         </dependency>
-        -->
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>ST4</artifactId>
@@ -81,16 +74,42 @@
         </dependency>
 
         <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- TEST DEPENDENCIES -->
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.8</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mariadb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.5.6</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

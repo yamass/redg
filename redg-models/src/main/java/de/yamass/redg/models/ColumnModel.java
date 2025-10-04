@@ -119,6 +119,9 @@ public class ColumnModel implements Serializable{
         this.notNull = notNull;
     }
 
+    /**
+     * See java.sql.Types
+     */
     public int getSqlTypeInt() {
         return sqlTypeInt;
     }

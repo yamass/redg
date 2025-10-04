@@ -31,19 +31,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class DatabaseManagerTest {
 
     @Test
-    void testExecutePreparationScripts_NoScripts() throws Exception {
+    void testExecuteScripts_NoScripts() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg", "", "");
         Assertions.assertNotNull(dataSource);
 
-        DatabaseManager.executePreparationScripts(dataSource, null);
-        DatabaseManager.executePreparationScripts(dataSource, new File[0]);
+        DatabaseManager.executeScripts(dataSource, null);
+        DatabaseManager.executeScripts(dataSource, new File[0]);
     }
 
     @Test
-    void testExecutePreparationScripts_ScriptsInvalidSQL() throws Exception {
+    void testExecuteScripts_ScriptsInvalidSQL() throws Exception {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg", "", "");
         Assertions.assertNotNull(dataSource);
-        assertThatThrownBy(() -> DatabaseManager.executePreparationScripts(dataSource, new File[]{Helpers.getResourceAsFile("invalid.sql")}))
+        assertThatThrownBy(() -> DatabaseManager.executeScripts(dataSource, new File[]{Helpers.getResourceAsFile("invalid.sql")}))
                 .isInstanceOf(SQLException.class)
                 .hasMessageContaining("CREATE TABLE NOPENOPENOPE");
     }

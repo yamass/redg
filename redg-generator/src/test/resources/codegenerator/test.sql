@@ -1,8 +1,11 @@
 -- Test
 
+create type my_enum as enum ('A', 'B', 'C');
+
 CREATE TABLE DEMO_COMPANY (
   ID   NUMBER(19)        NOT NULL,
   NAME VARCHAR2(30 CHARACTERS) NOT NULL,
+  ENUM_VALUE my_enum,
 
   CONSTRAINT pk_DEMO_COMPANY PRIMARY KEY (ID)
 );

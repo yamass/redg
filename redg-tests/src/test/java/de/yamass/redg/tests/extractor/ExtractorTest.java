@@ -37,9 +37,9 @@ class ExtractorTest {
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-source", "", "");
         assertThat(dataSource).isNotNull();
         final File sqlSchemaFile = Helpers.getResourceAsFile("extractor-schema.sql");
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlSchemaFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{sqlSchemaFile});
         final File sqlDataFile = Helpers.getResourceAsFile("extractor-data.sql");
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlDataFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{sqlDataFile});
     }
 
     @Test
@@ -75,7 +75,7 @@ class ExtractorTest {
 
         final DataSource targetDataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-target", "", "");
         final File sqlSchemaFile = Helpers.getResourceAsFile("extractor-schema.sql");
-        DatabaseManager.executePreparationScripts(targetDataSource, new File[]{sqlSchemaFile});
+        DatabaseManager.executeScripts(targetDataSource, new File[]{sqlSchemaFile});
 
         final Connection targetConnection = targetDataSource.getConnection();
         redG.insertDataIntoDatabase(targetConnection);

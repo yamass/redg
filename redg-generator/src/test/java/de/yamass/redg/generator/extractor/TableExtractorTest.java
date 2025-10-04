@@ -43,7 +43,7 @@ class TableExtractorTest {
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
@@ -71,7 +71,7 @@ class TableExtractorTest {
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-exchange-rate.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
@@ -150,7 +150,7 @@ class TableExtractorTest {
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new RegularExpressionInclusionRule(".*USER.*"));
         assertNotNull(db);
         Schema s = db.lookupSchema("\"RT-TE-F\".PUBLIC").orElse(null);

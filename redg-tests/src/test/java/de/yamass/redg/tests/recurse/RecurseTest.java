@@ -23,7 +23,7 @@ class RecurseTest {
         final DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-recurse", "", "");
         Assertions.assertNotNull(dataSource);
         final File sqlFile = Helpers.getResourceAsFile("recurse-schema.sql");
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{sqlFile});
     }
 
     @Test

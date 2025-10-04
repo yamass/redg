@@ -22,7 +22,7 @@ class EscapeTest {
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-escape", "", "");
         Assertions.assertNotNull(dataSource);
         final File sqlFile = Helpers.getResourceAsFile("escape-schema.sql");
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{sqlFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{sqlFile});
     }
 
     @Test

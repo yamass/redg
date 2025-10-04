@@ -36,76 +36,76 @@ import java.io.File;
 
 class ColumnExtractorTest {
 
-    private static Catalog catalog;
+	private static Catalog catalog;
 
-    @BeforeAll
-    public static void setUp() throws Exception {
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-cet", "", "");
-        Assertions.assertNotNull(dataSource);
-        File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
-        Assertions.assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
-        catalog = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
-        Assertions.assertNotNull(catalog);
-    }
+	@BeforeAll
+	public static void setUp() throws Exception {
+		DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-cet", "", "");
+		Assertions.assertNotNull(dataSource);
+		File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
+		Assertions.assertNotNull(tempFile);
+		DatabaseManager.executeScripts(dataSource, tempFile);
+		catalog = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
+		Assertions.assertNotNull(catalog);
+	}
 
-    @Test
-    void testColumnExtraction() throws Exception {
-        Column column = extractColumnFromDemoDb("DEMO_USER", "ID");
+	@Test
+	void testColumnExtraction() throws Exception {
+		Column column = extractColumnFromDemoDb("DEMO_USER", "ID");
 
-        ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
-                new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
-        ColumnModel model = extractor.extractColumnModel(column);
+		ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
+				new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
+		ColumnModel model = extractor.extractColumnModel(column);
 
-        Assertions.assertEquals("id", model.getName());
-        Assertions.assertEquals("ID", model.getDbName());
-        Assertions.assertEquals("DEMO_USER", model.getDbTableName());
-        Assertions.assertEquals("NUMERIC", model.getSqlType());
-        Assertions.assertEquals("java.math.BigDecimal", model.getJavaTypeName());
-        Assertions.assertTrue(model.isNotNull());
-    }
+		Assertions.assertEquals("id", model.getName());
+		Assertions.assertEquals("ID", model.getDbName());
+		Assertions.assertEquals("DEMO_USER", model.getDbTableName());
+		Assertions.assertEquals("NUMERIC", model.getSqlType());
+		Assertions.assertEquals("java.math.BigDecimal", model.getJavaTypeName());
+		Assertions.assertTrue(model.isNotNull());
+	}
 
-    @Test
-    void testExtractColumnModelForExpliciteAttribute() throws Exception {
-        Column column = extractColumnFromDemoDb("DEMO_USER", "DTYPE");
+	@Test
+	void testExtractColumnModelForExpliciteAttribute() throws Exception {
+		Column column = extractColumnFromDemoDb("DEMO_USER", "DTYPE");
 
-        ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
-                new ExplicitAttributeDecider() {
-                    @Override
-                    public boolean isExplicitAttribute(final Column column) {
-                        return column.getName().equals("DTYPE");
-                    }
+		ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
+				new ExplicitAttributeDecider() {
+					@Override
+					public boolean isExplicitAttribute(final Column column) {
+						return column.getName().equals("DTYPE");
+					}
 
-                    @Override
-                    public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
-                        return false;
-                    }
-                }, new DefaultConvenienceSetterProvider());
-        ColumnModel columnModel = extractor.extractColumnModel(column);
+					@Override
+					public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
+						return false;
+					}
+				}, new DefaultConvenienceSetterProvider());
+		ColumnModel columnModel = extractor.extractColumnModel(column);
 
-        Assertions.assertEquals("DTYPE", columnModel.getDbName());
-        Assertions.assertTrue(columnModel.isExplicitAttribute());
-    }
+		Assertions.assertEquals("DTYPE", columnModel.getDbName());
+		Assertions.assertTrue(columnModel.isExplicitAttribute());
+	}
 
-    @Test
-    void testExtractColumnModelForKeywordColumn() throws Exception {
-        Column column = extractColumnFromDemoDb("DEMO_USER", "DAY_TS");
+	@Test
+	void testExtractColumnModelForKeywordColumn() throws Exception {
+		Column column = extractColumnFromDemoDb("DEMO_USER", "DAY_TS");
 
-        ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
-                new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
-        ColumnModel model = extractor.extractColumnModel(column);
+		ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
+				new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
+		ColumnModel model = extractor.extractColumnModel(column);
 
-        Assertions.assertEquals("DAY_TS", model.getDbName());
-    }
+		Assertions.assertEquals("DAY_TS", model.getDbName());
+	}
 
-    private Column extractColumnFromDemoDb(String tableName, String columnName) throws Exception {
-        Schema s = catalog.lookupSchema("\"RT-CET\".PUBLIC").orElse(null);
-        Assertions.assertNotNull(s);
-        Table t = catalog.lookupTable(s, tableName).orElse(null);
-        Assertions.assertNotNull(t);
-        Column c = t.lookupColumn(columnName).orElse(null);
-        Assertions.assertNotNull(c);
+	private Column extractColumnFromDemoDb(String tableName, String columnName) throws Exception {
+		Schema s = catalog.lookupSchema("\"RT-CET\".PUBLIC").orElse(null);
+		Assertions.assertNotNull(s);
+		Table t = catalog.lookupTable(s, tableName).orElse(null);
+		Assertions.assertNotNull(t);
+		Column c = t.lookupColumn(columnName).orElse(null);
+		Assertions.assertNotNull(c);
 
-        return c;
-    }
+		return c;
+	}
 }

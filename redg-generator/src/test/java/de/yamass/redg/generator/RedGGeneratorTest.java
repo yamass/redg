@@ -38,7 +38,7 @@ class RedGGeneratorTest {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
 
         Path p = Files.createTempDirectory("redg-test");
         RedGGenerator.generateCode(dataSource,
@@ -71,7 +71,7 @@ class RedGGeneratorTest {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all2", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
 
         Path p = Files.createTempDirectory("redg-test");
 
@@ -98,7 +98,7 @@ class RedGGeneratorTest {
         DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all3", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
 
         Path p;
         if (System.getProperty("os.name").toLowerCase().contains("win")) {

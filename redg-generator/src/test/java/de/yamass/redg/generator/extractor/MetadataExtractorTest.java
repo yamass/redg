@@ -39,7 +39,7 @@ class MetadataExtractorTest {
         Assertions.assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-join-table.sql");
         Assertions.assertNotNull(tempFile);
-        DatabaseManager.executePreparationScripts(dataSource, new File[]{tempFile});
+        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         Assertions.assertNotNull(db);
 

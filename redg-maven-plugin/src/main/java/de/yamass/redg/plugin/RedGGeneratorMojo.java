@@ -87,7 +87,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
     @Parameter(defaultValue = "target/generated-test-sources/redg")
     private File outputDirectory;
 
-    @Parameter(defaultValue = "${project}")
+    @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
     @Parameter
@@ -123,7 +123,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
         HikariDataSource dataSource = new HikariDataSource(config);
 
 		try {
-            DatabaseManager.executePreparationScripts(dataSource, sqlScripts);
+            DatabaseManager.executeScripts(dataSource, sqlScripts);
         } catch (IOException | SQLException e) {
             throw new MojoFailureException("Could not execute SQL scripts: " + e, e);
         }
