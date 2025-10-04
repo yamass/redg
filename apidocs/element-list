@@ -1,4 +1,4 @@
-unnamed package
+de.yamass.redg_maven_plugin
 de.yamass.redg.extractor
 de.yamass.redg.extractor.filter
 de.yamass.redg.extractor.generationmodes
@@ -22,6 +22,7 @@ de.yamass.redg.generator.extractor.utils
 de.yamass.redg.generator.utils
 de.yamass.redg.jpa
 de.yamass.redg.models
+de.yamass.redg.models.type
 de.yamass.redg.plugin
 de.yamass.redg.plugin.util
 de.yamass.redg.runtime
