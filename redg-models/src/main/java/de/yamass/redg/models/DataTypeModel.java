@@ -48,8 +48,7 @@ public class DataTypeModel implements java.io.Serializable {
 	/**
 	 * The java type this data type is typically mapped to through JDBC.
 	 * This is not necessarily the type used for code generation!
-	 *
-	 * @see schemacrawler.utility.TypeMap
+	 * See schemacrawler.utility.TypeMap
 	 */
 	private final Class<?> defaultJavaClass;
 

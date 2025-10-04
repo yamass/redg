@@ -27,10 +27,10 @@ public class DefaultDataTypeProvider implements DataTypeProvider {
     /**
      * Simply returns the data type advised by SchemaCrawler.
      *
+     * This needs to be based on columns because the column definition adds parameters to the type! E.g. VARCHAR(10), NUMBER(22, 2).
+     *
      * @param column The current column
      * @return The data type advised by SchemaCrawler
-     *
-     * @implNote This needs to be based on columns, since the column definition adds parameters to the type! E.g. VARCHAR(10), NUMBER(22, 2).
      */
     @Override
     public @NonNull String getCanonicalDataTypeName(Column column) {

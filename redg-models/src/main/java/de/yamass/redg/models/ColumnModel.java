@@ -34,14 +34,14 @@ public class ColumnModel implements Serializable{
     /**
      * The java data type of this column.
      * Note that the java-side type that will be generated is NOT taken from here but {@link #javaTypeName}!
+     * See schemacrawler.utility.TypeMap
      * @see #javaTypeName
-     * @see schemacrawler.utility.TypeMap
      */
     private DataTypeModel dataType;
 
     /**
      * The canonical name of the java-side type to actually use, as configured by
-     * {@link de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider}.
+     * {@code de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider}.
      */
     private String javaTypeName;
     private boolean notNull;
