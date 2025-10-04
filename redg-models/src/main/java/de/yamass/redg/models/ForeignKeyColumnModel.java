@@ -27,7 +27,7 @@ public class ForeignKeyColumnModel implements Serializable{
     private String dbName;
     private String dbTableName;
     private String dbFullTableName;
-    private String sqlType;
+    private String dbTypeName;
     private int sqlTypeInt;
 
     public ForeignKeyColumnModel() {
@@ -81,12 +81,12 @@ public class ForeignKeyColumnModel implements Serializable{
         this.dbFullTableName = dbFullTableName;
     }
 
-    public String getSqlType() {
-        return sqlType;
+    public String getDbTypeName() {
+        return dbTypeName;
     }
 
-    public void setSqlType(final String sqlType) {
-        this.sqlType = sqlType;
+    public void setDbTypeName(final String dbTypeName) {
+        this.dbTypeName = dbTypeName;
     }
 
     public int getSqlTypeInt() {

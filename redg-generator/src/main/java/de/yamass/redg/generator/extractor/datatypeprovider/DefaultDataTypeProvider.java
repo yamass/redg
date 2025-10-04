@@ -16,6 +16,7 @@
 
 package de.yamass.redg.generator.extractor.datatypeprovider;
 
+import org.jspecify.annotations.NonNull;
 import schemacrawler.schema.Column;
 
 /**
@@ -24,14 +25,15 @@ import schemacrawler.schema.Column;
 public class DefaultDataTypeProvider implements DataTypeProvider {
 
     /**
-     * Simply returns the data type advised by SchemaCrawler. This will be fine in most cases, but some SQL types (e.g. NUMBER(1) for boolean) might need a
-     * different strategy.
+     * Simply returns the data type advised by SchemaCrawler.
      *
      * @param column The current column
      * @return The data type advised by SchemaCrawler
+     *
+     * @implNote This needs to be based on columns, since the column definition adds parameters to the type! E.g. VARCHAR(10), NUMBER(22, 2).
      */
     @Override
-    public String getCanonicalDataTypeName(final Column column) {
+    public @NonNull String getCanonicalDataTypeName(Column column) {
         return column.getColumnDataType().getTypeMappedClass().getCanonicalName();
     }
 }

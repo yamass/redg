@@ -91,12 +91,12 @@ tableBuilderSupplier(table) ::= <<
  * \</table>
  */
 public <table.className> add<table.name>(<\\>
-            <table.explicitAttributes:{it | Supplier\<<it.javaTypeName>\> <it.name>};separator=", "><\\>
-            <if(table.explicitAttributes && table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | Supplier\<<it.javaTypeName>\> <it.name>};separator=", ">) {
+            <table.explicitAttributes:{it | Supplier\<<it.javaTypeName>\> <it.javaPropertyName>};separator=", "><\\>
+            <if(table.explicitAttributes && table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | Supplier\<<it.javaTypeName>\> <it.javaPropertyName>};separator=", ">) {
     <table.className> obj = new <table.className>(true, this);
     this.entitySelfReference = obj;
-    <table.explicitAttributes:{it | obj.<it.name>(<it.name>.get());};separator="\n">
-    <table.notNullForeignKeys:{it | obj.<it.name>(<it.name>.get());};separator="\n">
+    <table.explicitAttributes:{it | obj.<it.javaPropertyName>(<it.javaPropertyName>.get());};separator="\n">
+    <table.notNullForeignKeys:{it | obj.<it.javaPropertyName>(<it.javaPropertyName>.get());};separator="\n">
     this.addEntity(obj);
     this.entitySelfReference = null;
     return obj;
@@ -125,8 +125,8 @@ tableBuilderExisting(table) ::= <<
  * \</table>
  */
 <if(table.primaryKeyColumns)>
-public <table.className> existing<table.name>(<table.primaryKeyColumns:{it|<it.javaTypeName> <it.name>};separator=", ">) {
-    <table.className> obj = new Existing<table.className>(this<if(table.primaryKeyColumns)>, <endif><table.primaryKeyColumns:{it|<it.name>};separator=", ">);
+public <table.className> existing<table.name>(<table.primaryKeyColumns:{it|<it.javaTypeName> <it.javaPropertyName>};separator=", ">) {
+    <table.className> obj = new Existing<table.className>(this<if(table.primaryKeyColumns)>, <endif><table.primaryKeyColumns:{it|<it.javaPropertyName>};separator=", ">);
     this.addEntity(obj);
     return obj;
 }
@@ -153,11 +153,11 @@ tableBuilder(table) ::= <<
  * \</table>
  */
 public <table.className> add<table.name>(<\\>
-            <table.explicitAttributes:{it | <it.javaTypeName> <it.name>};separator=", "><\\>
-            <if(table.explicitAttributes && table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | <it.javaTypeName> <it.name>};separator=", ">) {
+            <table.explicitAttributes:{it | <it.javaTypeName> <it.javaPropertyName>};separator=", "><\\>
+            <if(table.explicitAttributes && table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | <it.javaTypeName> <it.javaPropertyName>};separator=", ">) {
     <table.className> obj = new <table.className>(this<\\>
-            <if(table.explicitAttributes)>, <endif><table.explicitAttributes:{it | <it.name>};separator=", "><\\>
-            <if(table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | <it.name>};separator=", ">);
+            <if(table.explicitAttributes)>, <endif><table.explicitAttributes:{it | <it.javaPropertyName>};separator=", "><\\>
+            <if(table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | <it.javaPropertyName>};separator=", ">);
     this.addEntity(obj);
     return obj;
 }<\n>
@@ -233,14 +233,14 @@ public class <table.className> implements RedGEntity {
 
     // do not manually make this public and instantiate it directly. Use the RedG Main class
     <table.className>(AbstractRedG redG<\\>
-            <if(table.explicitAttributes)>, <endif><table.explicitAttributes:{it | <it.javaTypeName> <it.name>};separator=", "><\\>
-            <if(table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | <it.javaTypeName> <it.name>};separator=", ">) {
+            <if(table.explicitAttributes)>, <endif><table.explicitAttributes:{it | <it.javaTypeName> <it.javaPropertyName>};separator=", "><\\>
+            <if(table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | <it.javaTypeName> <it.javaPropertyName>};separator=", ">) {
         this.redG = redG;
-        <table.explicitAttributes:{it | this.<it.name> = <it.name>;};separator="\n">
-        <if(enableVisualizationSupport)><table.explicitAttributes:{it | this.modifiedFields.add("<it.name>");};separator="/n"><endif>
+        <table.explicitAttributes:{it | this.<it.javaPropertyName> = <it.javaPropertyName>;};separator="\n">
+        <if(enableVisualizationSupport)><table.explicitAttributes:{it | this.modifiedFields.add("<it.javaPropertyName>");};separator="/n"><endif>
         <table.notNullForeignKeys:setWithNullCheck()>
         try {
-            <table.nonExplicitNonFKAttributes:{it | this.<it.name> = redG.getDefaultValueStrategy().getDefaultValue(getTableModel().getColumnBySQLName("<escape.(it.dbName)>"), <it.javaTypeName>.class);<\n>}>
+            <table.nonExplicitNonFKAttributes:{it | this.<it.javaPropertyName> = redG.getDefaultValueStrategy().getDefaultValue(getTableModel().getColumnBySQLName("<escape.(it.dbName)>"), <it.javaTypeName>.class);<\n>}>
         } catch (Exception e) {
             throw new RuntimeException("Could not get default value", e);
         }
@@ -248,12 +248,12 @@ public class <table.className> implements RedGEntity {
 
     <if(table.explicitAttributes)>
     <table.className>(AbstractRedG redG<\\>
-           <if(table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | <it.javaTypeName> <it.name>};separator=", ">) {
+           <if(table.notNullForeignKeys)>, <endif><table.notNullForeignKeys:{it | <it.javaTypeName> <it.javaPropertyName>};separator=", ">) {
         // dummy constructor (without explicit attributes)
         this(
                 redG,
                 <table.explicitAttributes:{it | redG.getDefaultValueStrategy().getDefaultValue(getTableModel().getColumnBySQLName("<escape.(it.dbName)>"), <it.javaTypeName>.class)}; separator=",\n"><if(table.notNullForeignKeys)>,<endif>
-                <table.notNullForeignKeys:{it | <it.name>};separator=",\n">
+                <table.notNullForeignKeys:{it | <it.javaPropertyName>};separator=",\n">
         );
     }
     <endif>
@@ -264,7 +264,7 @@ public class <table.className> implements RedGEntity {
         this.redG = redG;
         if (generateDefaultValues) {
             try {
-                <table.nonExplicitNonFKAttributes:{it | this.<it.name> = redG.getDefaultValueStrategy().getDefaultValue(getTableModel().getColumnBySQLName("<escape.(it.dbName)>"), <it.javaTypeName>.class);<\n>}>
+                <table.nonExplicitNonFKAttributes:{it | this.<it.javaPropertyName> = redG.getDefaultValueStrategy().getDefaultValue(getTableModel().getColumnBySQLName("<escape.(it.dbName)>"), <it.javaTypeName>.class);<\n>}>
             } catch (Exception e) {
                 throw new RuntimeException("Could not get default value", e);
             }
@@ -320,7 +320,7 @@ public class <table.className> implements RedGEntity {
         return new Object[]{
                 <table.notNullForeignKeys:foreignKeyInsertStmtValues();separator=",\n"><if(firstRowComma)>,<endif>
                 <table.nullableForeignKeys:foreignKeyInsertStmtValuesNullable();separator=",\n"><if(secondRowComma)>,<endif>
-                <table.nonForeignKeyColumns:{c|this.<c.name>()};separator=",\n">
+                <table.nonForeignKeyColumns:{c|this.<c.javaPropertyName>()};separator=",\n">
         };
     }
 
@@ -391,15 +391,15 @@ public <k> add<model.name>Relation(<model.methodParams.keys:{k|<k> <model.method
 }
 >>
 
-setWithNullCheck(col) ::= <<
-if (<col.name> == null) {
-    throw new IllegalArgumentException("<col.name> may not be null!");
+setWithNullCheck(ref) ::= <<
+if (<ref.javaPropertyName> == null) {
+    throw new IllegalArgumentException("<ref.javaPropertyName> may not be null!");
 }
-this.<col.name> = <col.name>;<\n><\n>
+this.<ref.javaPropertyName> = <ref.javaPropertyName>;<\n><\n>
 >>
 
 tableClassAttribute(column, className) ::= <<
-private <column.javaTypeName> <column.name>;
+private <column.javaTypeName> <column.javaPropertyName>;
 
 /**
 <if (column.dbName)>
@@ -422,7 +422,7 @@ private <column.javaTypeName> <column.name>;
  *     \</tr>
  *     \<tr>
  *         \<td>SQL type\</td>
- *         \<td><column.sqlType>\</td>
+ *         \<td><column.dbTypeName>\</td>
  *     \</tr>
  *     \<tr>
  *         \<td>Not nullable?\</td>
@@ -441,14 +441,14 @@ private <column.javaTypeName> <column.name>;
  * This is a foreign key referencing {@link <column.javaTypeName>}
 <endif>
  */
-public <className> <column.name>(<column.javaTypeName> value) {
+public <className> <column.javaPropertyName>(<column.javaTypeName> value) {
     <if(column.notNull && !column.primitiveType)>
     if (value == null) {
-        throw new IllegalArgumentException("Setting <column.name> to null violates a NOT NULL constraint!");
+        throw new IllegalArgumentException("Setting <column.javaPropertyName> to null violates a NOT NULL constraint!");
     }
     <endif>
-    this.<column.name> = value;
-    <if(enableVisualizationSupport)>this.modifiedFields.add("<column.name>");<endif>
+    this.<column.javaPropertyName> = value;
+    <if(enableVisualizationSupport)>this.modifiedFields.add("<column.javaPropertyName>");<endif>
     return this;
 }
 
@@ -473,7 +473,7 @@ public <className> <column.name>(<column.javaTypeName> value) {
  *     \</tr>
  *     \<tr>
  *         \<td>SQL type\</td>
- *         \<td><column.sqlType>\</td>
+ *         \<td><column.dbTypeName>\</td>
  *     \</tr>
  *     \<tr>
  *         \<td>Not nullable?\</td>
@@ -492,8 +492,8 @@ public <className> <column.name>(<column.javaTypeName> value) {
  * This is a foreign key referencing {@link <column.javaTypeName>}
 <endif>
  */
-public <column.javaTypeName> <column.name>() {
-    return this.<column.name>;
+public <column.javaTypeName> <column.javaPropertyName>() {
+    return this.<column.javaPropertyName>;
 }
 <\n>
 >>
@@ -524,7 +524,7 @@ convenienceSetter(convenienceSetter, column, className) ::= <<
  *     \</tr>
  *     \<tr>
  *         \<td>SQL type\</td>
- *         \<td><column.sqlType>\</td>
+ *         \<td><column.dbTypeName>\</td>
  *     \</tr>
  *     \<tr>
  *         \<td>Not nullable?\</td>
@@ -543,14 +543,14 @@ convenienceSetter(convenienceSetter, column, className) ::= <<
  * This is a foreign key referencing {@link <column.javaTypeName>}
 <endif>
  */
-public <className> <column.name>(<convenienceSetter.setterJavaTypeName> value) {
+public <className> <column.javaPropertyName>(<convenienceSetter.setterJavaTypeName> value) {
     <if(column.notNull && !convenienceSetter.primitiveType)>
     if (value == null) {
-        throw new IllegalArgumentException("Setting <column.name> to null violates a NOT NULL constraint!");
+        throw new IllegalArgumentException("Setting <column.javaPropertyName> to null violates a NOT NULL constraint!");
     }
     <endif>
-    this.<column.name> = <convenienceSetter.fullyQualifiedConverterMethodName>(value, <column.javaTypeName>.class);
-    <if(enableVisualizationSupport)>this.modifiedFields.add("<column.name>");<endif>
+    this.<column.javaPropertyName> = <convenienceSetter.fullyQualifiedConverterMethodName>(value, <column.javaTypeName>.class);
+    <if(enableVisualizationSupport)>this.modifiedFields.add("<column.javaPropertyName>");<endif>
     return this;
 }
 <\n>
@@ -569,51 +569,51 @@ foreignKeyInsertStmtPlaceholder(foreignKey) ::= <<
 >>
 
 foreignKeyInsertValues(foreignKey) ::= <<
-<foreignKey.references.keys:{k|this.redG.getSqlValuesFormatter().formatValue(this.<foreignKey.name>.<foreignKey.references.(k).primaryKeyAttributeName>(),
-        "<foreignKey.references.(k).sqlType>", "<escape.(foreignKey.references.(k).dbFullTableName)>",
+<foreignKey.references.keys:{k|this.redG.getSqlValuesFormatter().formatValue(this.<foreignKey.javaPropertyName>.<foreignKey.references.(k).primaryKeyAttributeName>(),
+        "<foreignKey.references.(k).dbTypeName>", "<escape.(foreignKey.references.(k).dbFullTableName)>",
         "<escape.(foreignKey.references.(k).dbTableName)>", "<escape.(foreignKey.references.(k).dbName)>")};separator=",\n">
 >>
 
 foreignKeyInsertValuesNullable(foreignKey) ::= <<
-<foreignKey.references.keys:{k|this.redG.getSqlValuesFormatter().formatValue((this.<foreignKey.name> != null) ? this.<foreignKey.name>.<foreignKey.references.(k).primaryKeyAttributeName>() : null,
-        "<foreignKey.references.(k).sqlType>", "<escape.(foreignKey.references.(k).dbFullTableName)>",
+<foreignKey.references.keys:{k|this.redG.getSqlValuesFormatter().formatValue((this.<foreignKey.javaPropertyName> != null) ? this.<foreignKey.javaPropertyName>.<foreignKey.references.(k).primaryKeyAttributeName>() : null,
+        "<foreignKey.references.(k).dbTypeName>", "<escape.(foreignKey.references.(k).dbFullTableName)>",
         "<escape.(foreignKey.references.(k).dbTableName)>", "<escape.(foreignKey.references.(k).dbName)>")};separator=",\n">
 >>
 
 foreignKeyInsertStmtValues(foreignKey) ::= <<
-<foreignKey.references.keys:{k|this.<foreignKey.name>.<foreignKey.references.(k).primaryKeyAttributeName>()};separator=",\n">
+<foreignKey.references.keys:{k|this.<foreignKey.javaPropertyName>.<foreignKey.references.(k).primaryKeyAttributeName>()};separator=",\n">
 >>
 
 foreignKeyInsertStmtValuesNullable(foreignKey) ::= <<
-<foreignKey.references.keys:{k|(this.<foreignKey.name> != null) ? this.<foreignKey.name>.<foreignKey.references.(k).primaryKeyAttributeName>() : null};separator=",\n">
+<foreignKey.references.keys:{k|(this.<foreignKey.javaPropertyName> != null) ? this.<foreignKey.javaPropertyName>.<foreignKey.references.(k).primaryKeyAttributeName>() : null};separator=",\n">
 >>
 
 foreignKeyInsertValueMetaInfos(foreignKey, notNull) ::= <<
-<foreignKey.references.keys:{k|new AttributeMetaInfo("<escape.(foreignKey.references.(k).dbName)>", "<escape.(foreignKey.references.(k).dbTableName)>", "<escape.(foreignKey.references.(k).dbFullTableName)>", "<escape.(foreignKey.references.(k).sqlType)>", <foreignKey.references.(k).sqlTypeInt>, <foreignKey.references.(k).localType>.class, <notNull>)};separator=",\n">
+<foreignKey.references.keys:{k|new AttributeMetaInfo("<escape.(foreignKey.references.(k).dbName)>", "<escape.(foreignKey.references.(k).dbTableName)>", "<escape.(foreignKey.references.(k).dbFullTableName)>", "<escape.(foreignKey.references.(k).dbTypeName)>", <foreignKey.references.(k).sqlTypeInt>, <foreignKey.references.(k).localType>.class, <notNull>)};separator=",\n">
 >>
 
 columnInsertValueMetaInfo(column) ::= <<
-new AttributeMetaInfo("<escape.(column.dbName)>", "<escape.(column.dbTableName)>", "<escape.(column.dbFullTableName)>", "<escape.(column.sqlType)>", <column.sqlTypeInt>, <column.javaTypeName>.class, <column.notNull>)
+new AttributeMetaInfo("<escape.(column.dbName)>", "<escape.(column.dbTableName)>", "<escape.(column.dbFullTableName)>", "<escape.(column.dbTypeName)>", <column.sqlTypeInt>, <column.javaTypeName>.class, <column.notNull>)
 >>
 
 columnInsertValues(column) ::= <<
-this.redG.getSqlValuesFormatter().formatValue(this.<column.name>(),
-        "<escape.(column.sqlType)>", "<escape.(column.dbFullTableName)>",
+this.redG.getSqlValuesFormatter().formatValue(this.<column.javaPropertyName>(),
+        "<escape.(column.dbTypeName)>", "<escape.(column.dbFullTableName)>",
         "<escape.(column.dbTableName)>", "<escape.(column.dbName)>")
 >>
 
 rawForeignKeyGetters(fKey) ::= <<
-<fKey.references.keys:{k|<rawForeignKeyGetter(fKey.references.(k), fKey.name)>}>
+<fKey.references.keys:{k|<rawForeignKeyGetter(fKey.references.(k), fKey.javaPropertyName)>}>
 >>
 
 rawForeignKeyGettersWithNullCheck(fKey) ::= <<
-<fKey.references.keys:{k|<rawForeignKeyGetterWithNullCheck(fKey.references.(k), fKey.name)>}>
+<fKey.references.keys:{k|<rawForeignKeyGetterWithNullCheck(fKey.references.(k), fKey.javaPropertyName)>}>
 >>
 
 dependenciesGetter(table) ::= <<
 public List\<RedGEntity> getDependencies() {
     List\<RedGEntity> dependencies = new ArrayList\<>();
-    <table.foreignKeys:{fk|if (<fk.name> != null) dependencies.add(<fk.name>);};separator="\n">
+    <table.foreignKeys:{fk|if (<fk.javaPropertyName> != null) dependencies.add(<fk.javaPropertyName>);};separator="\n">
     return dependencies;
 }<\n>
 >>
@@ -639,7 +639,7 @@ rawForeignKeyGetter(ref, varName) ::= <<
  *     \</tr>
  *     \<tr>
  *         \<td>SQL type\</td>
- *         \<td><ref.sqlType>\</td>
+ *         \<td><ref.dbTypeName>\</td>
  *     \</tr>
  * \</table>
  */
@@ -681,10 +681,10 @@ import de.yamass.redg.runtime.*;
  */
 public class Existing<table.className> extends <table.className> {
 
-    Existing<table.className>(AbstractRedG redG<if(table.primaryKeyColumns)>, <endif><table.primaryKeyColumns:{it|<it.javaTypeName> <it.name>};separator=", ">) {
+    Existing<table.className>(AbstractRedG redG<if(table.primaryKeyColumns)>, <endif><table.primaryKeyColumns:{it|<it.javaTypeName> <it.javaPropertyName>};separator=", ">) {
         super(false, redG);
         <if (table.primaryKeyColumns)>
-        <table.primaryKeyColumns:{it|<if(it.partOfForeignKey)>this.<it.name> = <it.name><else>super.<it.name>(<it.name>)<endif>};separator=";\n">;
+        <table.primaryKeyColumns:{it|<if(it.partOfForeignKey)>this.<it.javaPropertyName> = <it.javaPropertyName><else>super.<it.javaPropertyName>(<it.javaPropertyName>)<endif>};separator=";\n">;
         <else>
         throw new UnsupportedOperationException("Cannot reference an existing entity if the table has no primary keys");
         <endif>
@@ -721,7 +721,7 @@ public class Existing<table.className> extends <table.className> {
     @Override
     public Object[] getPreparedStatementValues() {
         return new Object[] {
-                <table.primaryKeyColumns:{c|<if(c.partOfForeignKey)>this.<c.name><else>super.<c.name>()<endif>};separator=",\n">
+                <table.primaryKeyColumns:{c|<if(c.partOfForeignKey)>this.<c.javaPropertyName><else>super.<c.javaPropertyName>()<endif>};separator=",\n">
         };
     }
 
@@ -739,7 +739,7 @@ overrideTableClassAttributes(column, className) ::= <<
  * {@inheritDoc}
  */
 @Override
-public <className> <column.name>(<column.javaTypeName> value) {
+public <className> <column.javaPropertyName>(<column.javaTypeName> value) {
     throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
 }
 
@@ -747,7 +747,7 @@ public <className> <column.name>(<column.javaTypeName> value) {
  * {@inheritDoc}
  */
 @Override
-public <column.javaTypeName> <column.name>() {
+public <column.javaTypeName> <column.javaPropertyName>() {
     throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
 }
 <\n>
@@ -762,7 +762,7 @@ overrideConvenienceSetter(convenienceSetter, column, className) ::= <<
  * {@inheritDoc}
  */
 @Override
-public <className> <column.name>(<convenienceSetter.setterJavaTypeName> value) {
+public <className> <column.javaPropertyName>(<convenienceSetter.setterJavaTypeName> value) {
     throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
 }
 <\n>
@@ -774,7 +774,7 @@ overrideTableClassAttributesPK(column, className) ::= <<
  * {@inheritDoc}
  */
 @Override
-public <className> <column.name>(<column.javaTypeName> value) {
+public <className> <column.javaPropertyName>(<column.javaTypeName> value) {
     throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
 }
 
@@ -782,17 +782,17 @@ public <className> <column.name>(<column.javaTypeName> value) {
  * {@inheritDoc}
  */
 @Override
-public <column.javaTypeName> <column.name>() {
-    return super.<column.name>();
+public <column.javaTypeName> <column.javaPropertyName>() {
+    return super.<column.javaPropertyName>();
 }
 <\n><else>
 // This is an attribute for a primary key that is a foreign key as well
-private <column.javaTypeName> <column.name>;
+private <column.javaTypeName> <column.javaPropertyName>;
 <endif>
 >>
 
 overrideRawForeignKeyGetters(fKey) ::= <<
-<fKey.references.keys:{k|<overrideRawForeignKeyGetter(fKey.references.(k), fKey.name)>}>
+<fKey.references.keys:{k|<overrideRawForeignKeyGetter(fKey.references.(k), fKey.javaPropertyName)>}>
 >>
 
 overrideRawForeignKeyGetter(ref, varName) ::= <<
@@ -803,8 +803,8 @@ public <ref.localType> <ref.localName>() {
 >>
 
 overrideColumnInsertValues(column) ::= <<
-this.redG.getSqlValuesFormatter().formatValue(<if(column.partOfForeignKey)>this.<column.name><else>super.<column.name>()<endif>,
-        "<column.sqlType>", "<escape.(column.dbTableName)>",
+this.redG.getSqlValuesFormatter().formatValue(<if(column.partOfForeignKey)>this.<column.javaPropertyName><else>super.<column.javaPropertyName>()<endif>,
+        "<column.dbTypeName>", "<escape.(column.dbTableName)>",
         "<escape.(column.dbTableName)>", "<escape.(column.dbName)>")
 >>
 

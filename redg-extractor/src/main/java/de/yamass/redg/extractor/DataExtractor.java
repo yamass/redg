@@ -29,6 +29,7 @@ import de.yamass.redg.models.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,8 +39,6 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import javax.sql.DataSource;
 
 public class DataExtractor {
 
@@ -131,7 +130,7 @@ public class DataExtractor {
                                 final Object value = rs.getObject(fkcm.getDbName());
                                 if (value != null) {
                                     referencedEntity.addValues(fkcm.getPrimaryKeyAttributeName(), new EntityModel.ValueModel(
-                                            jcrProvider.getCodeForColumnValue(value, fkcm.getSqlType(), fkcm.getSqlTypeInt(), fkcm.getLocalType()), EntityModel.ValueModel.ForeignKeyState.UNKNOWN));
+                                            jcrProvider.getCodeForColumnValue(value, fkcm.getDbTypeName(), fkcm.getSqlTypeInt(), fkcm.getLocalType()), EntityModel.ValueModel.ForeignKeyState.UNKNOWN));
                                 }
                             } catch (SQLException e) {
                                 throw new RuntimeException(e);
@@ -141,7 +140,7 @@ public class DataExtractor {
                             entityModel.addNotNullRef(referencedEntity);
                         } else {
                             if (referencedEntity.getValues().size() == fkm.getReferences().size()) {
-                                entityModel.addNullableRef(fkm.getName(), referencedEntity);
+                                entityModel.addNullableRef(fkm.getJavaPropertyName(), referencedEntity);
                             }
                         }
 
@@ -158,8 +157,8 @@ public class DataExtractor {
                             value = rs.getObject(cm.getDbName().replace("\"", ""));
                         }
                         if (value != null) {
-                            entityModel.addValues(cm.getName(), new EntityModel.ValueModel(
-                                    jcrProvider.getCodeForColumnValue(value, cm.getSqlType(), cm.getSqlTypeInt(), cm.getJavaTypeName()),
+                            entityModel.addValues(cm.getJavaPropertyName(), new EntityModel.ValueModel(
+                                    jcrProvider.getCodeForColumnValue(value, cm.getSqlTypeName(), cm.getSqlTypeInt(), cm.getJavaTypeName()),
                                     cm.isPartOfForeignKey() ? EntityModel.ValueModel.ForeignKeyState.FK : EntityModel.ValueModel.ForeignKeyState.NON_FK));
                         }
                     }

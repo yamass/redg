@@ -26,7 +26,7 @@ import java.util.Map;
 public class ForeignKeyModel implements Serializable{
 
     private String javaTypeName;
-    private String name;
+    private String javaPropertyName;
     private Map<String, ForeignKeyColumnModel> references;
 
     private boolean notNull = true;
@@ -43,12 +43,12 @@ public class ForeignKeyModel implements Serializable{
         this.javaTypeName = javaTypeName;
     }
 
-    public String getName() {
-        return name;
+    public String getJavaPropertyName() {
+        return javaPropertyName;
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    public void setJavaPropertyName(final String javaPropertyName) {
+        this.javaPropertyName = javaPropertyName;
     }
 
     public Map<String, ForeignKeyColumnModel> getReferences() {

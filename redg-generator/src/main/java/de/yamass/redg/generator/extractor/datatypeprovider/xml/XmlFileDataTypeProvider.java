@@ -16,9 +16,9 @@
 
 package de.yamass.redg.generator.extractor.datatypeprovider.xml;
 
+import com.thoughtworks.xstream.XStream;
 import de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.helpers.DataTypePrecisionHelper;
-import com.thoughtworks.xstream.XStream;
 import schemacrawler.schema.Column;
 
 import java.io.IOException;
@@ -46,78 +46,81 @@ import java.util.Objects;
  * </pre></blockquote>
  */
 public class XmlFileDataTypeProvider implements DataTypeProvider {
-    private TypeMappings typeMappings;
-    private DataTypeProvider fallbackDataTypeProvider;
+	private TypeMappings typeMappings;
+	private DataTypeProvider fallbackDataTypeProvider;
 
-    public XmlFileDataTypeProvider(Reader xmlReader, DataTypeProvider fallbackDataTypeProvider) throws IOException {
-        this(deserializeXml(xmlReader), fallbackDataTypeProvider);
-    }
+	public XmlFileDataTypeProvider(Reader xmlReader, DataTypeProvider fallbackDataTypeProvider) throws IOException {
+		this(deserializeXml(xmlReader), fallbackDataTypeProvider);
+	}
 
-    public XmlFileDataTypeProvider(TypeMappings typeMappings, DataTypeProvider fallbackDataTypeProvider) {
-        this.typeMappings = typeMappings;
-        this.fallbackDataTypeProvider = fallbackDataTypeProvider;
-    }
+	public XmlFileDataTypeProvider(TypeMappings typeMappings, DataTypeProvider fallbackDataTypeProvider) {
+		this.typeMappings = typeMappings;
+		this.fallbackDataTypeProvider = fallbackDataTypeProvider;
+	}
 
-    static TypeMappings deserializeXml(Reader xmlReader) {
-        TypeMappings typeMappings;
-        XStream xStream = createXStream();
-        typeMappings = (TypeMappings) xStream.fromXML(xmlReader, new TypeMappings());
-        return typeMappings;
-    }
+	static TypeMappings deserializeXml(Reader xmlReader) {
+		TypeMappings typeMappings;
+		XStream xStream = createXStream();
+		typeMappings = (TypeMappings) xStream.fromXML(xmlReader, new TypeMappings());
+		return typeMappings;
+	}
 
-    static XStream createXStream() {
-        XStream xStream = new XStream();
-        xStream.processAnnotations(new Class[]{
-                ColumnTypeMapping.class,
-                DefaultTypeMapping.class,
-                TableTypeMapping.class,
-                TypeMappings.class
-        });
-        xStream.useAttributeFor(TableTypeMapping.class, "tableName");
-        xStream.addDefaultImplementation(ArrayList.class, List.class);
-        return xStream;
-    }
+	static XStream createXStream() {
+		XStream xStream = new XStream();
+		xStream.processAnnotations(new Class[]{
+				ColumnTypeMapping.class,
+				DefaultTypeMapping.class,
+				TableTypeMapping.class,
+				TypeMappings.class
+		});
+		xStream.useAttributeFor(TableTypeMapping.class, "tableName");
+		xStream.addDefaultImplementation(ArrayList.class, List.class);
+		return xStream;
+	}
 
-    @Override
-    public String getCanonicalDataTypeName(final Column column) {
-        String dataTypeByName = getDataTypeByName(column.getParent().getName(), column.getName());
-        String dataTypeByType = getDataTypeBySqlType(column);
-        return dataTypeByName != null ? dataTypeByName :
-                dataTypeByType != null ? dataTypeByType : fallbackDataTypeProvider.getCanonicalDataTypeName(column);
-    }
+	@Override
+	public String getCanonicalDataTypeName(final Column column) {
+		String dataTypeByName = getDataTypeByName(column.getParent().getName(), column.getName());
+		String dataTypeByType = getDataTypeBySqlType(column);
+		return dataTypeByName != null ? dataTypeByName :
+				dataTypeByType != null ? dataTypeByType : fallbackDataTypeProvider.getCanonicalDataTypeName(column);
+	}
 
-    String getDataTypeByName(String tableName, String columnName) {
-        if (typeMappings.getTableTypeMappings() == null) {
-            return null;
-        }
+	String getDataTypeByName(String tableName, String columnName) {
+		if (typeMappings.getTableTypeMappings() == null) {
+			return null;
+		}
 
-        return typeMappings.getTableTypeMappings().stream()
-                .filter(tableTypeMapping -> tableName.matches(tableTypeMapping.getTableName()))
-                .flatMap(tableTypeMapping -> tableTypeMapping.getColumnTypeMappings().stream())
-                .filter(columnTypeMapping -> columnName.matches(columnTypeMapping.getColumnName()))
-                .findFirst()
-                .map(ColumnTypeMapping::getJavaType)
-                .orElse(null);
-    }
+		return typeMappings.getTableTypeMappings().stream()
+				.filter(tableTypeMapping -> tableName.matches(tableTypeMapping.getTableName()))
+				.flatMap(tableTypeMapping -> tableTypeMapping.getColumnTypeMappings().stream())
+				.filter(columnTypeMapping -> columnName.matches(columnTypeMapping.getColumnName()))
+				.findFirst()
+				.map(ColumnTypeMapping::getJavaType)
+				.orElse(null);
+	}
 
-    String getDataTypeBySqlType(final Column column) {
-        if (typeMappings.getDefaultTypeMappings() == null) {
-            return null;
-        }
+	String getDataTypeBySqlType(final Column column) {
+		if (typeMappings.getDefaultTypeMappings() == null) {
+			return null;
+		}
 
-        List<String> variants = DataTypePrecisionHelper.getDataTypeWithAllPrecisionVariants(column);
-        return variants.stream()
-                .map(variant ->
-                        typeMappings.getDefaultTypeMappings().stream()
-                                .filter(dtm -> dtm.getSqlType()
-                                        .trim()
-                                        .replaceAll("\\s+", " ") // normalize multiple space characters
-                                        .replaceAll("\\s+(?=[(),])", "") // remove leading spaces before '(', ')' and ','
-                                        .replaceAll("(?<=[(),])\\s+", "") // remove trailing spaces after '(', ')' and ','
-                                        .toUpperCase().equals(variant.toUpperCase()))
-                                .findFirst().orElse(null))
-                .filter(Objects::nonNull)
-                .map(DefaultTypeMapping::getJavaType)
-                .findFirst().orElse(null);
-    }
+		List<String> variants = DataTypePrecisionHelper.getDataTypeWithAllPrecisionVariants(column);
+		return variants.stream()
+				.map(variant ->
+						typeMappings.getDefaultTypeMappings().stream()
+								.filter(dtm -> normalizeSqlType(dtm.getSqlType()).toUpperCase().equals(variant.toUpperCase()))
+								.findFirst().orElse(null))
+				.filter(Objects::nonNull)
+				.map(DefaultTypeMapping::getJavaType)
+				.findFirst().orElse(null);
+	}
+
+	private String normalizeSqlType(String sqlType) {
+		return sqlType
+				.trim()
+				.replaceAll("\\s+", " ") // normalize multiple space characters
+				.replaceAll("\\s+(?=[(),])", "") // remove leading spaces before '(', ')' and ','
+				.replaceAll("(?<=[(),])\\s+", ""); // remove trailing spaces after '(', ')' and ','
+	}
 }

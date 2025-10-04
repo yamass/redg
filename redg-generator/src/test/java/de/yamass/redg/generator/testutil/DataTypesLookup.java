@@ -1,4 +1,4 @@
-package de.yamass.redg.generator;
+package de.yamass.redg.generator.testutil;
 
 public interface DataTypesLookup {
 	String getIntegerType();

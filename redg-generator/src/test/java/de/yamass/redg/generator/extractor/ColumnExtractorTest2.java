@@ -16,7 +16,7 @@
 
 package de.yamass.redg.generator.extractor;
 
-import de.yamass.redg.generator.DatabaseType;
+import de.yamass.redg.generator.testutil.DatabaseType;
 import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
@@ -27,16 +27,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import schemacrawler.inclusionrule.IncludeAll;
-import schemacrawler.schema.Catalog;
-import schemacrawler.schema.Column;
-import schemacrawler.schema.Schema;
-import schemacrawler.schema.Table;
+import schemacrawler.schema.*;
 
 import javax.sql.DataSource;
-
 import java.sql.Types;
 
-import static de.yamass.redg.generator.DatabaseType.*;
+import static de.yamass.redg.generator.testutil.DatabaseType.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DbTest()
@@ -61,13 +57,13 @@ class ColumnExtractorTest2 {
 	void testInt() throws Exception {
 		var catalog = DatabaseManager.crawlDatabase(dataSource, DatabaseTypeTestUtil.testSchemaInclusionRule(databaseType), new IncludeAll());
 
-		ColumnModel model = columnExtractor.extractColumnModel(getColumnFromCatalog(catalog, databaseType, "t", "c"));
+		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "c"));
 
 		assertThat(model.getDbTableName()).isEqualToIgnoringCase("t");
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
-		assertThat(model.getName()).isEqualToIgnoringCase("c");
+		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
-		assertThat(model.getSqlType()).isEqualToIgnoringCase(databaseType.getDataTypesLookup().getIntegerType());
+		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(databaseType.getDataTypesLookup().getIntegerType());
 		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
 		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.INTEGER);
@@ -79,13 +75,31 @@ class ColumnExtractorTest2 {
 	void testVarchar() throws Exception {
 		var catalog = DatabaseManager.crawlDatabase(dataSource, DatabaseTypeTestUtil.testSchemaInclusionRule(databaseType), new IncludeAll());
 
-		ColumnModel model = columnExtractor.extractColumnModel(getColumnFromCatalog(catalog, databaseType, "t", "c"));
+		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "c"));
 
 		assertThat(model.getDbTableName()).isEqualToIgnoringCase("t");
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
-		assertThat(model.getName()).isEqualToIgnoringCase("c");
+		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
-		assertThat(model.getSqlType()).isEqualToIgnoringCase(databaseType.getDataTypesLookup().getVarcharType());
+		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(databaseType.getDataTypesLookup().getVarcharType());
+		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
+		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
+		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR);
+	}
+
+	@TestTemplate
+	@Databases({H2, POSTGRES, MARIADB})
+	@Scripts("de/yamass/redg/generator/extractor/ColumnExtractorTest-enum.sql")
+	void testEnum() throws Exception {
+		var catalog = DatabaseManager.crawlDatabase(dataSource, DatabaseTypeTestUtil.testSchemaInclusionRule(databaseType), new IncludeAll());
+
+		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "c"));
+
+		assertThat(model.getDbTableName()).isEqualToIgnoringCase("t");
+		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
+		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
+		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
+		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase("my_enum");
 		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
 		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR);

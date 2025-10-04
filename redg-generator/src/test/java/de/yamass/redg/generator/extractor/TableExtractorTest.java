@@ -53,7 +53,7 @@ class TableExtractorTest {
         assertNotNull(t);
 
         TableExtractor extractor = new TableExtractor("My", "com.demo.pkg", null, null, null, null);
-        TableModel model = extractor.extractTableModel(t);
+	    TableModel model = extractor.extractTableModel(createDataTypeLookup(db), t);
         assertNotNull(model);
         assertEquals("MyDemoUser", model.getClassName());
         assertEquals("DemoUser", model.getName());
@@ -63,6 +63,10 @@ class TableExtractorTest {
         assertEquals(7, model.getColumns().size()); // Due to #12 the FK-column gets counted as well
         assertEquals(6, model.getNonForeignKeyColumns().size()); // Test for #12 without FK-column
         assertTrue(model.hasColumnsAndForeignKeys());
+    }
+
+    private DataTypeLookup createDataTypeLookup(Catalog db) {
+	    return new AllDataTypesExtractor(new DataTypeExtractor()).extractIntoDataTypeLookup(db);
     }
 
     @Test
@@ -83,23 +87,23 @@ class TableExtractorTest {
         assertNotNull(exchangeRateTable);
 
         TableExtractor extractor = new TableExtractor("My", "com.demo.pkg", null, null, null, null);
-        TableModel exchangeRateTableModel = extractor.extractTableModel(exchangeRateTable);
-        TableModel exchangeRefTableModel = extractor.extractTableModel(exchangeRefTable);
+        TableModel exchangeRateTableModel = extractor.extractTableModel(createDataTypeLookup(db), exchangeRateTable);
+        TableModel exchangeRefTableModel = extractor.extractTableModel(createDataTypeLookup(db), exchangeRefTable);
 
         assertEquals(1, exchangeRefTableModel.getPrimaryKeyColumns().size());
         assertEquals("ID", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getDbName());
-        assertEquals("NUMERIC", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getSqlType());
+        assertEquals("NUMERIC", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getSqlTypeName());
         assertEquals("java.math.BigDecimal", exchangeRefTableModel.getPrimaryKeyColumns().get(0).getJavaTypeName());
         assertTrue(exchangeRefTableModel.getForeignKeyColumns().isEmpty());
 
         assertEquals(1, exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().size());
         assertEquals("NAME", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getDbName());
-        assertEquals("CHARACTER VARYING", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
+        assertEquals("CHARACTER VARYING", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlTypeName());
         assertEquals("java.lang.String", exchangeRefTableModel.getNonPrimaryKeyNonFKColumns().get(0).getJavaTypeName());
 
         assertEquals(1, exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().size());
         assertEquals("FIRST_NAME", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getDbName());
-        assertEquals("CHARACTER VARYING", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlType());
+        assertEquals("CHARACTER VARYING", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getSqlTypeName());
         assertEquals("java.lang.String", exchangeRateTableModel.getNonPrimaryKeyNonFKColumns().get(0).getJavaTypeName());
 
         assertEquals(2, exchangeRateTableModel.getForeignKeyColumns().size());
@@ -109,7 +113,7 @@ class TableExtractorTest {
         assertEquals("composite", exchangeRateTableModel.getIncomingForeignKeys().get(0).getReferencingAttributeName());
 
         ForeignKeyModel compositeForeignKeyModel = exchangeRateTableModel.getForeignKeys().stream()
-                .filter(fk -> fk.getName().equals("composite"))
+                .filter(fk -> fk.getJavaPropertyName().equals("composite"))
                 .findFirst().orElse(null);
 
         assertNotNull(compositeForeignKeyModel);
@@ -158,7 +162,7 @@ class TableExtractorTest {
         Table t = db.lookupTable(s, "DEMO_USER").orElse(null);
         assertNotNull(t);
 
-        assertThatThrownBy(() -> MetadataExtractor.extract(db))
+        assertThatThrownBy(() -> new MetadataExtractor().extract(db))
                 .isInstanceOf(RedGGenerationException.class)
                 .hasMessageContaining("foreign key is in an excluded table");
     }

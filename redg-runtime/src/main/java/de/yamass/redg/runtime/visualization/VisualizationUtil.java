@@ -60,17 +60,17 @@ public class VisualizationUtil {
                 final Set<String> modifiedFields = (Set<String>) getModifiedFields.invoke(entity);
 
                 for (final ColumnModel column : tableModel.getColumns()) {
-                    final Method getter = entity.getClass().getMethod(column.getName());
+                    final Method getter = entity.getClass().getMethod(column.getJavaPropertyName());
                     final Object value = getter.invoke(entity);
-                    final RedGVisualizationField field = new RedGVisualizationField(column.getName(), column.getDbName(), (value != null) ? value.toString() : "null");
-                    if (modifiedFields.contains(column.getName())) {
+                    final RedGVisualizationField field = new RedGVisualizationField(column.getJavaPropertyName(), column.getDbName(), (value != null) ? value.toString() : "null");
+                    if (modifiedFields.contains(column.getJavaPropertyName())) {
                         object.getExplicitFields().add(field);
                     } else {
                         object.getImplicitFields().add(field);
                     }
                 }
                 for (final ForeignKeyModel fkModel : tableModel.getForeignKeys()) {
-                    Method getter = entity.getClass().getMethod(fkModel.getName());
+                    Method getter = entity.getClass().getMethod(fkModel.getJavaPropertyName());
                     RedGEntity refEntity = (RedGEntity) getter.invoke(entity);
                     String sqlNames = fkModel.getReferences().values().stream()
                             .map(ForeignKeyColumnModel::getDbName)
@@ -78,7 +78,7 @@ public class VisualizationUtil {
                     RedGVisualizationRelation relation = new RedGVisualizationRelation(
                             uuid.toString(),
                             (refEntity != null) ? uuidMap.get(refEntity).toString() : "null",
-                            fkModel.getName(),
+                            fkModel.getJavaPropertyName(),
                             sqlNames
                     );
                     visualization.getRelationships().add(relation);

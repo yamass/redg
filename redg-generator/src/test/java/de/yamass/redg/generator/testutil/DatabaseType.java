@@ -1,4 +1,4 @@
-package de.yamass.redg.generator;
+package de.yamass.redg.generator.testutil;
 
 import org.h2.api.H2Type;
 

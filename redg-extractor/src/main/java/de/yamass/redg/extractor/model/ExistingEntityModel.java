@@ -33,7 +33,7 @@ public class ExistingEntityModel extends EntityModel {
         List<ValueModel> result = new ArrayList<>(pkColumns.size());
 
         for (final ColumnModel cm : pkColumns) {
-            result.add(getValues().get(cm.getName()));
+            result.add(getValues().get(cm.getJavaPropertyName()));
         }
 
         return result;

@@ -59,7 +59,7 @@ class ForeignKeyExtractorTest {
                 new DefaultExplicitAttributeDecider(),"My");
         ForeignKeyModel model = extractor.extractForeignKeyModel(fk);
         Assertions.assertEquals("MyDemoCompany", model.getJavaTypeName());
-        Assertions.assertEquals("worksAtDemoCompany", model.getName());
+        Assertions.assertEquals("worksAtDemoCompany", model.getJavaPropertyName());
         Assertions.assertEquals(1, model.getReferences().size());
         Assertions.assertTrue(model.getReferences().containsKey("WORKS_AT"));
         ForeignKeyColumnModel columnModel = model.getReferences().get("WORKS_AT");

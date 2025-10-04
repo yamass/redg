@@ -33,6 +33,8 @@ import schemacrawler.schema.*;
 import javax.sql.DataSource;
 import java.io.File;
 
+import static de.yamass.redg.generator.extractor.ExtractorTestUtil.createDataTypeLookup;
+
 
 class ColumnExtractorTest {
 
@@ -55,12 +57,12 @@ class ColumnExtractorTest {
 
 		ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
 				new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
-		ColumnModel model = extractor.extractColumnModel(column);
+		ColumnModel model = extractor.extractColumnModel(createDataTypeLookup(catalog), column);
 
-		Assertions.assertEquals("id", model.getName());
+		Assertions.assertEquals("id", model.getJavaPropertyName());
 		Assertions.assertEquals("ID", model.getDbName());
 		Assertions.assertEquals("DEMO_USER", model.getDbTableName());
-		Assertions.assertEquals("NUMERIC", model.getSqlType());
+		Assertions.assertEquals("NUMERIC", model.getSqlTypeName());
 		Assertions.assertEquals("java.math.BigDecimal", model.getJavaTypeName());
 		Assertions.assertTrue(model.isNotNull());
 	}
@@ -81,7 +83,7 @@ class ColumnExtractorTest {
 						return false;
 					}
 				}, new DefaultConvenienceSetterProvider());
-		ColumnModel columnModel = extractor.extractColumnModel(column);
+		ColumnModel columnModel = extractor.extractColumnModel(createDataTypeLookup(catalog), column);
 
 		Assertions.assertEquals("DTYPE", columnModel.getDbName());
 		Assertions.assertTrue(columnModel.isExplicitAttribute());
@@ -93,7 +95,7 @@ class ColumnExtractorTest {
 
 		ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
 				new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
-		ColumnModel model = extractor.extractColumnModel(column);
+		ColumnModel model = extractor.extractColumnModel(createDataTypeLookup(catalog), column);
 
 		Assertions.assertEquals("DAY_TS", model.getDbName());
 	}
@@ -108,4 +110,5 @@ class ColumnExtractorTest {
 
 		return c;
 	}
+
 }

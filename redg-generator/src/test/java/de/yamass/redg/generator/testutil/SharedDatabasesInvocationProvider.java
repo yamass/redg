@@ -1,6 +1,5 @@
 package de.yamass.redg.generator.testutil;
 
-import de.yamass.redg.generator.DatabaseType;
 import org.assertj.core.util.Files;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.extension.*;

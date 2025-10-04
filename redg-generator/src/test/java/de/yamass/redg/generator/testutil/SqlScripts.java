@@ -1,6 +1,5 @@
 package de.yamass.redg.generator.testutil;
 
-import de.yamass.redg.generator.DatabaseType;
 import de.yamass.redg.generator.Helpers;
 import de.yamass.redg.generator.extractor.DatabaseManager;
 import org.slf4j.Logger;

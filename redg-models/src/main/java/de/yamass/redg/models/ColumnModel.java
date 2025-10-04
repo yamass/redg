@@ -26,13 +26,24 @@ import java.util.Map;
  */
 public class ColumnModel implements Serializable{
 
-    private String name;
+    private String javaPropertyName;
     private String dbName;
     private String dbTableName;
     private String dbFullTableName;
-    private String sqlType;
+
+    /**
+     * The java data type of this column.
+     * Note that the java-side type that will be generated is NOT taken from here but {@link #javaTypeName}!
+     * @see #javaTypeName
+     * @see schemacrawler.utility.TypeMap
+     */
+    private DataTypeModel dataType;
+
+    /**
+     * The canonical name of the java-side type to actually use, as configured by
+     * {@link de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider}.
+     */
     private String javaTypeName;
-    private int sqlTypeInt;
     private boolean notNull;
     private boolean partOfPrimaryKey;
     private boolean partOfForeignKey;
@@ -59,12 +70,12 @@ public class ColumnModel implements Serializable{
     public ColumnModel() {
     }
 
-    public String getName() {
-        return name;
+    public String getJavaPropertyName() {
+        return javaPropertyName;
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    public void setJavaPropertyName(final String javaPropertyName) {
+        this.javaPropertyName = javaPropertyName;
     }
 
     public String getDbName() {
@@ -91,12 +102,24 @@ public class ColumnModel implements Serializable{
         this.dbFullTableName = dbFullTableName;
     }
 
-    public String getSqlType() {
-        return sqlType;
+    public String getDbTypeName() {
+        return dataType.getName();
     }
 
-    public void setSqlType(final String sqlType) {
-        this.sqlType = sqlType;
+    public String getJavaSqlTypeName() {
+        return dataType.getJavaSqlTypeName();
+    }
+
+    public String getSqlTypeName() {
+        return dataType.getName();
+    }
+
+    public DataTypeModel getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(DataTypeModel dataType) {
+        this.dataType = dataType;
     }
 
     public String getJavaTypeName() {
@@ -123,11 +146,7 @@ public class ColumnModel implements Serializable{
      * See java.sql.Types
      */
     public int getSqlTypeInt() {
-        return sqlTypeInt;
-    }
-
-    public void setSqlTypeInt(final int sqlTypeInt) {
-        this.sqlTypeInt = sqlTypeInt;
+        return dataType.getVendorTypeNumber();
     }
 
     public boolean isPartOfPrimaryKey() {

@@ -78,7 +78,7 @@ public class ForeignKeyExtractor {
             throw new RedGGenerationException("Referenced foreign key is in an excluded table: " + targetTable.getFullName());
         }
         model.setJavaTypeName(this.classPrefix + this.nameProvider.getClassNameForTable(targetTable));
-        model.setName(this.nameProvider.getMethodNameForReference(foreignKey));
+        model.setJavaPropertyName(this.nameProvider.getMethodNameForReference(foreignKey));
         model.setNotNull(foreignKey.getColumnReferences().stream().noneMatch(x -> x.getForeignKeyColumn().isNullable())
                 || explicitAttributeDecider.isExplicitForeignKey(foreignKey));
 
@@ -88,7 +88,7 @@ public class ForeignKeyExtractor {
             columnModel.setPrimaryKeyAttributeName(this.nameProvider.getMethodNameForColumn(reference.getPrimaryKeyColumn()));
             columnModel.setLocalName(this.nameProvider.getMethodNameForForeignKeyColumn(foreignKey, reference.getPrimaryKeyColumn(), reference.getForeignKeyColumn()));
             columnModel.setLocalType(dataTypeProvider.getCanonicalDataTypeName(reference.getForeignKeyColumn()));
-            columnModel.setSqlType(reference.getForeignKeyColumn().getColumnDataType().getName());
+            columnModel.setDbTypeName(reference.getForeignKeyColumn().getColumnDataType().getName());
             columnModel.setSqlTypeInt(reference.getForeignKeyColumn().getColumnDataType().getJavaSqlType().getVendorTypeNumber());
 
             columnModel.setDbName(reference.getForeignKeyColumn().getName());

@@ -43,7 +43,7 @@ class MetadataExtractorTest {
         Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         Assertions.assertNotNull(db);
 
-        List<TableModel> models = MetadataExtractor.extract(db);
+        List<TableModel> models = new MetadataExtractor().extract(db);
         Assertions.assertEquals(3, models.size());
         for (TableModel model : models) {
             if (model.getName().equals("DemoCompany")) {

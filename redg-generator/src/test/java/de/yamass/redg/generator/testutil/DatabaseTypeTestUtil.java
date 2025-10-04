@@ -1,6 +1,5 @@
 package de.yamass.redg.generator.testutil;
 
-import de.yamass.redg.generator.DatabaseType;
 import schemacrawler.inclusionrule.InclusionRule;
 
 public class DatabaseTypeTestUtil {

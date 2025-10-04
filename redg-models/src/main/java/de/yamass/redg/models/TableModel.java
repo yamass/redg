@@ -83,7 +83,7 @@ public class TableModel implements Serializable {
 
     public ColumnModel getColumnByName(final String name) {
         return columns.stream()
-                .filter(c -> c.getName().equals(name))
+                .filter(c -> c.getJavaPropertyName().equals(name))
                 .findFirst().orElse(null);
     }
 

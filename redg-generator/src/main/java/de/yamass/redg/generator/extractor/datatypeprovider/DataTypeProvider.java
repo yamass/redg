@@ -16,6 +16,7 @@
 
 package de.yamass.redg.generator.extractor.datatypeprovider;
 
+import org.jspecify.annotations.NonNull;
 import schemacrawler.schema.Column;
 
 /**
@@ -31,5 +32,5 @@ public interface DataTypeProvider {
      * @param column The current column
      * @return The canonical name of the data type to use for the given column
      */
-    String getCanonicalDataTypeName(Column column);
+    @NonNull String getCanonicalDataTypeName(Column column);
 }

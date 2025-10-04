@@ -16,6 +16,7 @@
 
 package de.yamass.redg.generator;
 
+import de.yamass.redg.generator.extractor.DataTypeExtractor;
 import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.generator.extractor.MetadataExtractor;
 import de.yamass.redg.generator.extractor.TableExtractor;
@@ -56,7 +57,7 @@ public class CodeGeneratorTest {
         Table t = db.getTables(s).stream().filter(table -> table.getName().equals("DEMO_USER")).findFirst().orElse(null);
         Assertions.assertNotNull(t);
 
-        List<TableModel> models = MetadataExtractor.extract(db, new TableExtractor("G", "de.yamass.redg.generated",
+        MetadataExtractor metadataExtractor = new MetadataExtractor(new DataTypeExtractor(), new TableExtractor("G", "de.yamass.redg.generated",
                 new DefaultDataTypeProvider(), new DefaultNameProvider(), new ExplicitAttributeDecider() {
             @Override
             public boolean isExplicitAttribute(final Column column) {
@@ -67,8 +68,8 @@ public class CodeGeneratorTest {
             public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
                 return false;
             }
-        },
-                new DefaultConvenienceSetterProvider()));
+        }, new DefaultConvenienceSetterProvider()));
+        List<TableModel> models = metadataExtractor.extract(db);
         TableModel model = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 
@@ -100,7 +101,7 @@ public class CodeGeneratorTest {
                 .findFirst().orElse(null);
         Assertions.assertNotNull(t);
 
-        List<TableModel> models = MetadataExtractor.extract(db);
+        List<TableModel> models = new MetadataExtractor().extract(db);
         TableModel demoUser = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         TableModel demoCompany = models.stream().filter(m -> Objects.equals("DemoCompany", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(demoUser);
@@ -134,7 +135,7 @@ public class CodeGeneratorTest {
         Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         Assertions.assertNotNull(db);
 
-        List<TableModel> models = MetadataExtractor.extract(db);
+        List<TableModel> models = new MetadataExtractor().extract(db);
 
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateMainClass(models, false);
@@ -151,7 +152,7 @@ public class CodeGeneratorTest {
         Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         Assertions.assertNotNull(db);
 
-        List<TableModel> models = MetadataExtractor.extract(db);
+        List<TableModel> models = new MetadataExtractor().extract(db);
         TableModel model = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 
@@ -186,7 +187,7 @@ public class CodeGeneratorTest {
                     }
                 }
         );
-        List<TableModel> models = MetadataExtractor.extract(db, tableExtractor);
+        List<TableModel> models = new MetadataExtractor(new DataTypeExtractor(), tableExtractor).extract(db);
         TableModel model = models.stream().filter(m -> Objects.equals("DatesTable", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 
@@ -213,19 +214,19 @@ public class CodeGeneratorTest {
         Table t = db.getTables(s).stream().filter(table -> table.getName().equals("DEMO_USER")).findFirst().orElse(null);
         Assertions.assertNotNull(t);
 
-        List<TableModel> models = MetadataExtractor.extract(db, new TableExtractor("G", "de.yamass.redg.generated",
-                new DefaultDataTypeProvider(), new DefaultNameProvider(), new ExplicitAttributeDecider() {
-            @Override
-            public boolean isExplicitAttribute(final Column column) {
-                return column.getName().equals("DTYPE");
-            }
+        List<TableModel> models = new MetadataExtractor(new DataTypeExtractor(), new TableExtractor("G", "de.yamass.redg.generated",
+		        new DefaultDataTypeProvider(), new DefaultNameProvider(), new ExplicitAttributeDecider() {
+	        @Override
+	        public boolean isExplicitAttribute(final Column column) {
+		        return column.getName().equals("DTYPE");
+	        }
 
-            @Override
-            public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
-                return false;
-            }
+	        @Override
+	        public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
+		        return false;
+	        }
         },
-                new DefaultConvenienceSetterProvider()));
+		        new DefaultConvenienceSetterProvider())).extract(db);
         TableModel model = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 
@@ -249,7 +250,7 @@ public class CodeGeneratorTest {
         Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         Assertions.assertNotNull(db);
 
-        List<TableModel> models = MetadataExtractor.extract(db);
+        List<TableModel> models = new MetadataExtractor().extract(db);
 
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateMainClass(models, true);

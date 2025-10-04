@@ -16,14 +16,13 @@
 
 package de.yamass.redg.generator.extractor;
 
+import de.yamass.redg.models.DataTypeModel;
 import de.yamass.redg.models.ForeignKeyModel;
 import de.yamass.redg.models.JoinTableSimplifierModel;
 import de.yamass.redg.models.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schemacrawler.schema.Catalog;
-import schemacrawler.schema.Table;
-import schemacrawler.schema.View;
+import schemacrawler.schema.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -41,16 +40,29 @@ public class MetadataExtractor {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetadataExtractor.class);
 
+    private final DataTypeExtractor dataTypeExtractor;
+    private final TableExtractor tableExtractor;
+
+    public MetadataExtractor() {
+        this(new DataTypeExtractor(), new TableExtractor());
+    }
+
+    public MetadataExtractor(DataTypeExtractor dataTypeExtractor, TableExtractor tableExtractor) {
+        this.dataTypeExtractor = dataTypeExtractor;
+        this.tableExtractor = tableExtractor;
+    }
+
     /**
      * Extracts a list of {@link TableModel}s from a {@link Catalog} using the specified {@link TableExtractor}.
      * In a post-processing step data for helper methods for dealing with m:n relations/join tables will be added to the models.
      *
      * @param catalog        The catalog containing all the tables that should be processed
-     * @param tableExtractor The extractor to use
      * @return A list of table models with exactly one model per table
      */
-    public static List<TableModel> extract(final Catalog catalog, final TableExtractor tableExtractor) {
+    public List<TableModel> extract(final Catalog catalog) {
         LOG.info("Extracting model data from {}", catalog.getFullName());
+
+        DataTypeLookup dataTypeLookup = new AllDataTypesExtractor(dataTypeExtractor).extractIntoDataTypeLookup(catalog);
 
         List<Table> tables = catalog.getTables().stream()
                 .filter(table -> !(table instanceof View))
@@ -65,13 +77,37 @@ public class MetadataExtractor {
                 joinTableMetadata = MetadataExtractor.mergeJoinTableMetadata(joinTableMetadata, TableExtractor.analyzeJoinTable(table));
             }
             LOG.debug("Extracting model for table {}", table.getFullName());
-            result.add(tableExtractor.extractTableModel(table));
+            result.add(tableExtractor.extractTableModel(dataTypeLookup, table));
         }
         LOG.debug("Post-processing the join tables...");
         processJoinTables(result, joinTableMetadata);
         LOG.debug("Post-processing done.");
         LOG.info("Done extracting the model");
         return result;
+    }
+
+    public Map<String, DataTypeModel> extractAllDataTypes(Catalog catalog) {
+        List<Column> columns = catalog.getTables().stream()
+                .flatMap(t -> t.getColumns().stream())
+                .collect(Collectors.toList());
+        Map<String, DataTypeModel> dataTypeModelsByFullSqlName = new HashMap<>();
+        for (Column column : columns) {
+            extractDataType(dataTypeModelsByFullSqlName, column.getColumnDataType());
+        }
+        return dataTypeModelsByFullSqlName;
+    }
+
+    private DataTypeModel extractDataType(Map<String, DataTypeModel> cache, ColumnDataType columnDataType) {
+        DataTypeModel dataType = dataTypeExtractor.extractDataType(cdt -> {
+            DataTypeModel cachedDataType = cache.get(cdt.getFullName());
+            if (cachedDataType != null) {
+                return cachedDataType;
+            } else {
+                return extractDataType(cache, cdt);
+            }
+        }, columnDataType);
+        cache.put(columnDataType.getFullName(), dataType);
+        return dataType;
     }
 
     /**
@@ -101,8 +137,8 @@ public class MetadataExtractor {
                     if (fKModel.getJavaTypeName().equals(model.getClassName())) {
                         jtsModel.getConstructorParams().add("this");
                     } else {
-                        jtsModel.getConstructorParams().add(fKModel.getName());
-                        jtsModel.getMethodParams().put(fKModel.getJavaTypeName(), fKModel.getName());
+                        jtsModel.getConstructorParams().add(fKModel.getJavaPropertyName());
+                        jtsModel.getMethodParams().put(fKModel.getJavaTypeName(), fKModel.getJavaPropertyName());
                     }
                 }
 
@@ -116,18 +152,6 @@ public class MetadataExtractor {
                 .filter(tm -> tm.getSqlFullName().equals(name))
                 .findFirst()
                 .orElse(null);
-    }
-
-    /**
-     * Just like {@link #extract(Catalog, TableExtractor)}, just using a default {@link TableExtractor}. Use the other method if you want to specify
-     * target Package and  class prefix.
-     *
-     * @param catalog The catalog containing all the tables that should be processed
-     * @return A list of table models with exactly one model per table
-     */
-    public static List<TableModel> extract(final Catalog catalog) {
-        final TableExtractor tableExtractor = new TableExtractor();
-        return extract(catalog, tableExtractor);
     }
 
     /**

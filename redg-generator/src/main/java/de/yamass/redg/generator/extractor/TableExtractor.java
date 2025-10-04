@@ -122,7 +122,7 @@ public class TableExtractor {
 	 * @param table The table to extract the model from
 	 * @return The extracted model with all information needed for code generation
 	 */
-	public TableModel extractTableModel(final Table table) {
+	public TableModel extractTableModel(DataTypeLookup dataTypeLookup, final Table table) {
 		Objects.requireNonNull(table);
 		final TableModel model = new TableModel();
 		model.setClassName(this.classPrefix + this.nameProvider.getClassNameForTable(table));
@@ -134,7 +134,7 @@ public class TableExtractor {
 
 		model.setColumns(table.getColumns().stream()
 				//.filter(c -> !c.isPartOfForeignKey()) // no longer filter due to #12
-				.map(this.columnExtractor::extractColumnModel)
+				.map((Column column) -> this.columnExtractor.extractColumnModel(dataTypeLookup, column))
 				.collect(Collectors.toList()));
 
 		Set<Set<String>> seenForeignKeyColumnNameTuples = new HashSet<>(); // TODO unit test removing duplicates

@@ -17,6 +17,7 @@
 package de.yamass.redg.generator;
 
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
+import de.yamass.redg.generator.extractor.DataTypeExtractor;
 import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.generator.extractor.MetadataExtractor;
 import de.yamass.redg.generator.extractor.TableExtractor;
@@ -87,6 +88,7 @@ public class RedGGenerator {
         Objects.requireNonNull(dataSource, "RedG requires a JDBC connection to a database to perform an analysis");
         targetPackage = targetPackage != null ? targetPackage : TableExtractor.DEFAULT_TARGET_PACKAGE;
         classPrefix = classPrefix != null ? classPrefix : TableExtractor.DEFAULT_CLASS_PREFIX;
+        DataTypeExtractor dataTypeExtractor = new DataTypeExtractor();
         final TableExtractor tableExtractor = new TableExtractor(classPrefix, targetPackage, dataTypeProvider, nameProvider, explicitAttributeDecider,
                 convenienceSetterProvider);
         Objects.requireNonNull(targetDirectory, "RedG needs a target directory for the generated source code");
@@ -94,7 +96,7 @@ public class RedGGenerator {
         LOG.info("Starting the RedG all-in-one code generation.");
 
         Catalog databaseCatalog = crawlDatabase(dataSource, schemaRule, tableRule);
-        final List<TableModel> tables = extractTableModel(tableExtractor, databaseCatalog);
+        final List<TableModel> tables = extractTableModel(dataTypeExtractor, tableExtractor, databaseCatalog);
         Path targetWithPkgFolders = createPackageFolderStructure(targetDirectory, targetPackage);
         new CodeGenerator().generate(tables, targetWithPkgFolders, enableVisualizationSupport);
     }
@@ -112,9 +114,10 @@ public class RedGGenerator {
         return database;
     }
 
-    public static List<TableModel> extractTableModel(TableExtractor tableExtractor, Catalog database) {
+    public static List<TableModel> extractTableModel(DataTypeExtractor dataTypeExtractor, TableExtractor tableExtractor, Catalog database) {
         LOG.info("Extracting the required information from the metadata...");
-        final List<TableModel> tables = MetadataExtractor.extract(database, tableExtractor);
+        MetadataExtractor metadataExtractor = new MetadataExtractor(dataTypeExtractor, tableExtractor);
+        final List<TableModel> tables = metadataExtractor.extract(database);
         LOG.info("Extraction done.");
 
         if (tables.size() == 0) {
