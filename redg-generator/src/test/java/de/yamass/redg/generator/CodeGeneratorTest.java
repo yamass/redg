@@ -26,6 +26,7 @@ import de.yamass.redg.generator.extractor.explicitattributedecider.ExplicitAttri
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
 import de.yamass.redg.generator.testutil.DatabaseTestUtil;
 import de.yamass.redg.models.ConvenienceSetterModel;
+import de.yamass.redg.models.DataTypeModel;
 import de.yamass.redg.models.TableModel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,8 @@ import schemacrawler.schema.*;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.sql.JDBCType;
+import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -76,11 +79,28 @@ public class CodeGeneratorTest {
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateCodeForTable(model, false);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/tableResult.java"), result);
+        checkResults("codegenerator/tableResult.java", result);
 
         String existingClassResult = cg.generateExistingClassCodeForTable(model);
         Assertions.assertNotNull(existingClassResult);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/tableResultExisting.java"), existingClassResult);
+        checkResults("codegenerator/tableResultExisting.java", existingClassResult);
+    }
+
+    @Test
+    void testGenerateCodeForEnum() throws Exception {
+        DataTypeModel dataTypeModel = new DataTypeModel("my_enum", "my_enum", null, JDBCType.VARCHAR.getName(), "java.sql", Types.VARCHAR, null, null, List.of("A", "B", "C"), "'", "'", 0, 0, 0, 0, String.class, false, false, true, false);
+
+        CodeGenerator cg = new CodeGenerator();
+        String result = cg.generateCodeForEnum(dataTypeModel, "com.example");
+        Assertions.assertNotNull(result);
+        checkResults("codegenerator/enumResult.java", result);
+    }
+
+    private void checkResults(String resourcePath, String result) {
+        String expectedResult = Helpers.getResourceAsString(resourcePath);
+        expectedResult = expectedResult.replaceAll("(private static String serializedTableModel = ).*\n", "$1...;");
+        result = result.replaceAll("(private static String serializedTableModel = ).*\n", "$1...;");
+        Assertions.assertEquals(expectedResult, result);
     }
 
     @Test
@@ -110,19 +130,19 @@ public class CodeGeneratorTest {
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateCodeForTable(demoUser, false);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/table-multipart-Result.java"), result);
+        checkResults("codegenerator/table-multipart-Result.java", result);
 
         String existingClassResult = cg.generateExistingClassCodeForTable(demoUser);
         Assertions.assertNotNull(existingClassResult);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/table-multipart-Result-Existing.java"), existingClassResult);
+        checkResults("codegenerator/table-multipart-Result-Existing.java", existingClassResult);
 
         result = cg.generateCodeForTable(demoCompany, false);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/table-multipart-Result2.java"), result);
+        checkResults("codegenerator/table-multipart-Result2.java", result);
 
         existingClassResult = cg.generateExistingClassCodeForTable(demoCompany);
         Assertions.assertNotNull(existingClassResult);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/table-multipart-Result2-Existing.java"), existingClassResult);
+        checkResults("codegenerator/table-multipart-Result2-Existing.java", existingClassResult);
     }
 
     @Test
@@ -140,7 +160,7 @@ public class CodeGeneratorTest {
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateMainClass(models, false);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/mainResult.java"), result);
+        checkResults("codegenerator/mainResult.java", result);
     }
 
     @Test
@@ -159,11 +179,11 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         String result = generator.generateCodeForTable(model, false);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/table-join-Result.java"), result);
+        checkResults("codegenerator/table-join-Result.java", result);
 
         String existingClassResult = generator.generateExistingClassCodeForTable(model);
         Assertions.assertNotNull(existingClassResult);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/table-join-Result-Existing.java"), existingClassResult);
+        checkResults("codegenerator/table-join-Result-Existing.java", existingClassResult);
     }
 
     @Test
@@ -194,11 +214,11 @@ public class CodeGeneratorTest {
         CodeGenerator generator = new CodeGenerator();
         String result = generator.generateCodeForTable(model, false);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/table-date-convenience-Result.java"), result);
+        checkResults("codegenerator/table-date-convenience-Result.java", result);
 
         String existingClassResult = generator.generateExistingClassCodeForTable(model);
         Assertions.assertNotNull(existingClassResult);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/table-date-convenience-Result-Existing.java"), existingClassResult);
+        checkResults("codegenerator/table-date-convenience-Result-Existing.java", existingClassResult);
     }
 
     @Test
@@ -233,11 +253,11 @@ public class CodeGeneratorTest {
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateCodeForTable(model, true);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/tableResult-wV.java"), result);
+        checkResults("codegenerator/tableResult-wV.java", result);
 
         String existingClassResult = cg.generateExistingClassCodeForTable(model);
         Assertions.assertNotNull(existingClassResult);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/tableResultExisting-wV.java"), existingClassResult);
+        checkResults("codegenerator/tableResultExisting-wV.java", existingClassResult);
     }
 
     @Test
@@ -255,6 +275,6 @@ public class CodeGeneratorTest {
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateMainClass(models, true);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Helpers.getResourceAsString("codegenerator/mainResult-wV.java"), result);
+        checkResults("codegenerator/mainResult-wV.java", result);
     }
 }

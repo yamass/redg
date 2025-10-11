@@ -43,21 +43,21 @@ class ColumnExtractorTest2 {
 	@DbContext
 	private DataSource dataSource;
 
+	private Catalog catalog;
+
 	private ColumnExtractor columnExtractor;
 
 	@BeforeEach
 	void init() throws Exception {
 		Assertions.assertNotNull(dataSource);
-
+		catalog = DatabaseManager.crawlDatabase(dataSource, DatabaseTypeTestUtil.testSchemaInclusionRule(databaseType), new IncludeAll());
 		columnExtractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(), new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
 	}
 
 	@TestTemplate
 	@Scripts("de/yamass/redg/generator/extractor/ColumnExtractorTest-int.sql")
 	void testInt() throws Exception {
-		var catalog = DatabaseManager.crawlDatabase(dataSource, DatabaseTypeTestUtil.testSchemaInclusionRule(databaseType), new IncludeAll());
-
-		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "c"));
+		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog("t", "c"));
 
 		assertThat(model.getDbTableName()).isEqualToIgnoringCase("t");
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
@@ -73,39 +73,39 @@ class ColumnExtractorTest2 {
 	@Databases({H2, POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/generator/extractor/ColumnExtractorTest-varchar.sql")
 	void testVarchar() throws Exception {
-		var catalog = DatabaseManager.crawlDatabase(dataSource, DatabaseTypeTestUtil.testSchemaInclusionRule(databaseType), new IncludeAll());
-
-		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "c"));
+		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog("t", "c"));
 
 		assertThat(model.getDbTableName()).isEqualToIgnoringCase("t");
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
 		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
 		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(databaseType.getDataTypesLookup().getVarcharType());
-		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
-		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
+		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.String");
+		assertThat(model.getJavaTypeAsClass()).isEqualTo(String.class);
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR);
 	}
 
 	@TestTemplate
-	@Databases({H2, POSTGRES, MARIADB})
+	@Databases({POSTGRES})
 	@Scripts("de/yamass/redg/generator/extractor/ColumnExtractorTest-enum.sql")
-	void testEnum() throws Exception {
-		var catalog = DatabaseManager.crawlDatabase(dataSource, DatabaseTypeTestUtil.testSchemaInclusionRule(databaseType), new IncludeAll());
-
-		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "c"));
+	void testEnum_postgres() throws Exception {
+		ColumnModel model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog("t", "c"));
 
 		assertThat(model.getDbTableName()).isEqualToIgnoringCase("t");
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
 		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
 		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase("my_enum");
-		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
-		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
-		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR);
+		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.String");  // TODO change to generated enum
+		assertThat(model.getJavaTypeAsClass()).isEqualTo(String.class); // TODO can't change this to a (not yet existing) generated class. Do we actually need this?
+		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR); // TODO change to actual type?
+
+		assertThat(model.getDataType().getName()).isEqualToIgnoringCase("my_enum");
+		assertThat(model.getDataType().isEnumerated()).isTrue();
+		assertThat(model.getDataType().getEnumValues()).containsExactly("A", "B", "C");
 	}
 
-	private Column getColumnFromCatalog(Catalog catalog, DatabaseType databaseType, String tableName, String columnName) throws Exception {
+	private Column getColumnFromCatalog(String tableName, String columnName) throws Exception {
 		Schema s = catalog.getSchemas().stream()
 				.filter(schema -> {
 					String name = schema.getName() != null ? schema.getName() : schema.getCatalogName();

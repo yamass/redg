@@ -16,13 +16,14 @@
 
 package de.yamass.redg.generator.extractor;
 
-import de.yamass.redg.models.DataTypeModel;
 import de.yamass.redg.models.ForeignKeyModel;
 import de.yamass.redg.models.JoinTableSimplifierModel;
 import de.yamass.redg.models.TableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schemacrawler.schema.*;
+import schemacrawler.schema.Catalog;
+import schemacrawler.schema.Table;
+import schemacrawler.schema.View;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -84,30 +85,6 @@ public class MetadataExtractor {
         LOG.debug("Post-processing done.");
         LOG.info("Done extracting the model");
         return result;
-    }
-
-    public Map<String, DataTypeModel> extractAllDataTypes(Catalog catalog) {
-        List<Column> columns = catalog.getTables().stream()
-                .flatMap(t -> t.getColumns().stream())
-                .collect(Collectors.toList());
-        Map<String, DataTypeModel> dataTypeModelsByFullSqlName = new HashMap<>();
-        for (Column column : columns) {
-            extractDataType(dataTypeModelsByFullSqlName, column.getColumnDataType());
-        }
-        return dataTypeModelsByFullSqlName;
-    }
-
-    private DataTypeModel extractDataType(Map<String, DataTypeModel> cache, ColumnDataType columnDataType) {
-        DataTypeModel dataType = dataTypeExtractor.extractDataType(cdt -> {
-            DataTypeModel cachedDataType = cache.get(cdt.getFullName());
-            if (cachedDataType != null) {
-                return cachedDataType;
-            } else {
-                return extractDataType(cache, cdt);
-            }
-        }, columnDataType);
-        cache.put(columnDataType.getFullName(), dataType);
-        return dataType;
     }
 
     /**

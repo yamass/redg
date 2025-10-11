@@ -17,12 +17,14 @@
 package de.yamass.redg.generator;
 
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
+import de.yamass.redg.generator.extractor.MetadataExtractor;
+import de.yamass.redg.generator.extractor.TableExtractor;
 import de.yamass.redg.generator.utils.FileUtils;
 import de.yamass.redg.generator.utils.JavaSqlStringEscapeMap;
 import de.yamass.redg.generator.utils.JavaStringEscapeMap;
+import de.yamass.redg.models.ColumnModel;
+import de.yamass.redg.models.DataTypeModel;
 import de.yamass.redg.models.TableModel;
-import de.yamass.redg.generator.extractor.MetadataExtractor;
-import de.yamass.redg.generator.extractor.TableExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stringtemplate.v4.ST;
@@ -43,200 +45,230 @@ import java.util.stream.Collectors;
  */
 public class CodeGenerator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CodeGenerator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CodeGenerator.class);
 
-    private STGroup stGroup;
+	private STGroup stGroup;
 
-    /**
-     * Creates a new code generator using the default 'templates.stg' template file and escaping of identifiers
-     * conforming to the SQL standard.
-     */
-    public CodeGenerator() {
-        this("templates.stg", null);
-    }
+	/**
+	 * Creates a new code generator using the default 'templates.stg' template file and escaping of identifiers
+	 * conforming to the SQL standard.
+	 */
+	public CodeGenerator() {
+		this("templates.stg", null);
+	}
 
-    /**
-     * Creates a new code generator using the passed template resource.
-     * The template group file <b>must</b> include templates
-     * <ul>
-     * <li>mainClass(package, prefix, tables)</li>
-     * <li>tableClass(package, className, columns, foreignKeys)</li>
-     * </ul>
-     * There is no check build in, code generation will fail if these templates do not exist.
-     *
-     * @param templateResource the resource to use. Has to be a .stg template group file
-     * @param sqlEscapeString  the string to escape SQL identifiers. Has to be Java-Escaped. Defaults to "\\\""
-     */
-    public CodeGenerator(final String templateResource, final String sqlEscapeString) {
-        try {
-            LOG.info("Loading code templates...");
-            final InputStream is = getClass().getClassLoader().getResourceAsStream(templateResource);
-            this.stGroup = new STGroupString(this.getStreamAsString(is));
-            this.stGroup.registerRenderer(String.class, new StringRenderer());
-            this.stGroup.defineDictionary("escape", new JavaStringEscapeMap());
-            if (sqlEscapeString != null) {
-                this.stGroup.defineDictionary("escapeSql", new JavaSqlStringEscapeMap(sqlEscapeString));
-            } else {
-                this.stGroup.defineDictionary("escapeSql", new JavaSqlStringEscapeMap());
-            }
-            LOG.info("Loading successful.");
-        } catch (IOException e) {
-            LOG.error("Loading failed.", e);
-            throw new RedGGenerationException("Loading of template file failed", e);
-        }
-    }
+	/**
+	 * Creates a new code generator using the passed template resource.
+	 * The template group file <b>must</b> include templates
+	 * <ul>
+	 * <li>mainClass(package, prefix, tables)</li>
+	 * <li>tableClass(package, className, columns, foreignKeys)</li>
+	 * </ul>
+	 * There is no check build in, code generation will fail if these templates do not exist.
+	 *
+	 * @param templateResource the resource to use. Has to be a .stg template group file
+	 * @param sqlEscapeString  the string to escape SQL identifiers. Has to be Java-Escaped. Defaults to "\\\""
+	 */
+	public CodeGenerator(final String templateResource, final String sqlEscapeString) {
+		try {
+			LOG.info("Loading code templates...");
+			final InputStream is = getClass().getClassLoader().getResourceAsStream(templateResource);
+			this.stGroup = new STGroupString(this.getStreamAsString(is));
+			this.stGroup.registerRenderer(String.class, new StringRenderer());
+			this.stGroup.defineDictionary("escape", new JavaStringEscapeMap());
+			if (sqlEscapeString != null) {
+				this.stGroup.defineDictionary("escapeSql", new JavaSqlStringEscapeMap(sqlEscapeString));
+			} else {
+				this.stGroup.defineDictionary("escapeSql", new JavaSqlStringEscapeMap());
+			}
+			LOG.info("Loading successful.");
+		} catch (IOException e) {
+			LOG.error("Loading failed.", e);
+			throw new RedGGenerationException("Loading of template file failed", e);
+		}
+	}
 
-    /**
-     * Creates a new code generator using the passed template resource.
-     * The template group file <b>must</b> include templates
-     * <ul>
-     * <li>mainClass(package, prefix, tables)</li>
-     * <li>tableClass(package, className, columns, foreignKeys)</li>
-     * </ul>
-     * There is no check build in, code generation will fail if these templates do not exist.
-     *
-     * @param templateResource the resource to use. Has to be a .stg template group file
-     */
-    public CodeGenerator(final String templateResource) {
-        this(templateResource, null);
-    }
+	/**
+	 * Creates a new code generator using the passed template resource.
+	 * The template group file <b>must</b> include templates
+	 * <ul>
+	 * <li>mainClass(package, prefix, tables)</li>
+	 * <li>tableClass(package, className, columns, foreignKeys)</li>
+	 * </ul>
+	 * There is no check build in, code generation will fail if these templates do not exist.
+	 *
+	 * @param templateResource the resource to use. Has to be a .stg template group file
+	 */
+	public CodeGenerator(final String templateResource) {
+		this(templateResource, null);
+	}
 
-    /**
-     * Generates the code for the passed {@link TableModel}s and writes the output into the passed folder. Each {@link TableModel} results
-     * in two files (one for the main entity, one for the existing entity reference) and a "main" manager class is generated as well,
-     * which contains all the instantiation and management methods.
-     *
-     * @param tables                     The {@link TableModel}s that code should be generated for.
-     * @param targetWithPkgFolders       The path pointing to the location the .java files should be places at.
-     * @param enableVisualizationSupport If {@code true}, the RedG visualization features will be enabled for the generated code. This will result in a small
-     *                                   performance hit and slightly more memory usage if activated.
-     */
-    public void generate(List<TableModel> tables, Path targetWithPkgFolders, final boolean enableVisualizationSupport) {
-        LOG.info("Starting code generation...");
-        LOG.info("Generation code for tables...");
-        for (TableModel table : tables) {
-            LOG.debug("Generating code for table {} ({})", table.getSqlFullName(), table.getName());
-            try {
-                final String result = generateCodeForTable(table, enableVisualizationSupport);
-                FileUtils.writeCodeFile(targetWithPkgFolders, table.getClassName(), result);
+	/**
+	 * Generates the code for the passed {@link TableModel}s and writes the output into the passed folder. Each {@link TableModel} results
+	 * in two files (one for the main entity, one for the existing entity reference) and a "main" manager class is generated as well,
+	 * which contains all the instantiation and management methods.
+	 *
+	 * @param tables                     The {@link TableModel}s that code should be generated for.
+	 * @param targetWithPkgFolders       The path pointing to the location the .java files should be places at.
+	 * @param enableVisualizationSupport If {@code true}, the RedG visualization features will be enabled for the generated code. This will result in a small
+	 *                                   performance hit and slightly more memory usage if activated.
+	 */
+	public void generate(List<TableModel> tables, Path targetWithPkgFolders, final boolean enableVisualizationSupport) {
+		LOG.info("Starting code generation...");
+		LOG.info("Generation code for tables...");
+		for (TableModel table : tables) {
+			generateTable(targetWithPkgFolders, enableVisualizationSupport, table);
+		}
+		tables.stream().flatMap(t -> t.getColumns().stream()).map(ColumnModel::getDataType).filter(DataTypeModel::isEnumerated).forEach(dt -> generateEnum(targetWithPkgFolders, dt));
 
-                if (!table.getPrimaryKeyColumns().isEmpty()) {
-                    final String existingResult = generateExistingClassCodeForTable(table);
-                    FileUtils.writeCodeFile(targetWithPkgFolders, "Existing" + table.getClassName(), existingResult);
-                }
+		generateRedGClass(tables, targetWithPkgFolders, enableVisualizationSupport);
+		LOG.info("Code generation finished successfully.");
+	}
 
-            } catch (IOException e) {
-                LOG.error("Failed writing code to file", e);
-                throw new RedGGenerationException("Failed writing code to file", e);
-            }
-        }
-        LOG.info("Generating code for main builder class...");
-        final String mainCode = generateMainClass(tables, enableVisualizationSupport);
-        try {
-            FileUtils.writeCodeFile(targetWithPkgFolders, "RedG", mainCode);
-        } catch (IOException e) {
-            LOG.error("Failed writing code to file", e);
-            throw new RedGGenerationException("Failed writing code to file", e);
-        }
-        LOG.info("Code generation finished successfully.");
-    }
+	private void generateRedGClass(List<TableModel> tables, Path targetWithPkgFolders, boolean enableVisualizationSupport) {
+		LOG.info("Generating code for main builder class...");
+		final String mainCode = generateMainClass(tables, enableVisualizationSupport);
+		try {
+			FileUtils.writeCodeFile(targetWithPkgFolders, "RedG", mainCode);
+		} catch (IOException e) {
+			LOG.error("Failed writing code to file", e);
+			throw new RedGGenerationException("Failed writing code to file", e);
+		}
+	}
 
-    private String getStreamAsString(final InputStream inputStream) throws IOException {
-        try (final BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
-            return buffer.lines().collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            LOG.error("Got IO exception while reading resource", e);
-            throw new RedGGenerationException(e);
-        }
-    }
+	private void generateTable(Path targetWithPkgFolders, boolean enableVisualizationSupport, TableModel table) {
+		LOG.debug("Generating code for table {} ({})", table.getSqlFullName(), table.getName());
+		try {
+			final String result = generateCodeForTable(table, enableVisualizationSupport);
+			FileUtils.writeCodeFile(targetWithPkgFolders, table.getClassName(), result);
 
-    /**
-     * Generates a java code file that can later be used to generate SQL insert strings for the given extractor table.
-     * All the data are taken from the {@link TableModel}, which was filled by a {@link TableExtractor} (normally used by the
-     * {@link MetadataExtractor})
-     * <p>
-     * For each column in this table the generated class will contain a private variable holding the value and a builder method to set the value. Foreign key
-     * columns will be a reference to the generated class/object for that table and need to be passed via the constructor to ensure that foreign key constraints
-     * are met and inserts will be in the right order. Proper {@code null}-checks will be generated.
-     *
-     * @param table                      The extracted table model to generate code for
-     * @param enableVisualizationSupport If {@code true}, the RedG visualization features will be enabled for the generated code. This will result in a small
-     *                                   performance hit and slightly more memory usage if activated.
-     * @return The generated source code
-     */
-    public String generateCodeForTable(final TableModel table, final boolean enableVisualizationSupport) {
-        final ST template = this.stGroup.getInstanceOf("tableClass");
-        LOG.debug("Filling template...");
-        template.add("table", table);
-        LOG.debug("Package is {} | Class name is {}", table.getPackageName(), table.getClassName());
+			if (!table.getPrimaryKeyColumns().isEmpty()) {
+				final String existingResult = generateExistingClassCodeForTable(table);
+				FileUtils.writeCodeFile(targetWithPkgFolders, "Existing" + table.getClassName(), existingResult);
+			}
 
-        template.add("colAndForeignKeys", table.hasColumnsAndForeignKeys());
-        template.add("firstRowComma", (!table.getNullableForeignKeys().isEmpty() || table.hasColumnsAndForeignKeys()) && !table.getNotNullForeignKeys().isEmpty());
-        template.add("secondRowComma", table.hasColumnsAndForeignKeys() && !table.getNullableForeignKeys().isEmpty());
+		} catch (IOException e) {
+			LOG.error("Failed writing code to file", e);
+			throw new RedGGenerationException("Failed writing code to file", e);
+		}
+	}
 
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(table);
-            oos.close();
-            String serializedData = Base64.getEncoder().encodeToString(baos.toByteArray());
-            template.add("serializedTableModelString", serializedData);
-        } catch (IOException e) {
-            LOG.error("Could not serialize table model. Model will not be included in the file", e);
-        }
-        template.add("enableVisualizationSupport", enableVisualizationSupport);
+	private void generateEnum(Path targetWithPkgFolders, DataTypeModel dataTypeModel) {
+		LOG.debug("Generating code for enum {}", dataTypeModel.getName());
+		try {
+			final String result = generateCodeForEnum(dataTypeModel, "com.todo");
+			FileUtils.writeCodeFile(targetWithPkgFolders, dataTypeModel.getName(), result);
+		} catch (IOException e) {
+			LOG.error("Failed writing code to file", e);
+			throw new RedGGenerationException("Failed writing code to file", e);
+		}
+	}
 
-        LOG.debug("Rendering template...");
-        return template.render();
-    }
+	private String getStreamAsString(final InputStream inputStream) throws IOException {
+		try (final BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
+			return buffer.lines().collect(Collectors.joining("\n"));
+		} catch (IOException e) {
+			LOG.error("Got IO exception while reading resource", e);
+			throw new RedGGenerationException(e);
+		}
+	}
 
-    /**
-     * Generates the java code for the class representing a entity that is already in the database but needs to be referenced from entities that
-     * should be created by RedG.
-     * <p>
-     * All the data are taken from the {@link TableModel}, which was filled by a {@link TableExtractor} (normally used by the
-     * {@link MetadataExtractor})
-     * <p>
-     * The generated class extends the class generated by {@link #generateCodeForTable(TableModel, boolean)} and overwrites its methods, throwing
-     * {@link UnsupportedOperationException} for each field access except getting the value of the primary keys.
-     *
-     * @param table The extracted table model to generate code for
-     * @return The generated source code
-     */
-    public String generateExistingClassCodeForTable(final TableModel table) {
-        final ST template = this.stGroup.getInstanceOf("existingTableClass");
-        LOG.debug("Filling template...");
-        template.add("table", table);
+	/**
+	 * Generates a java code file that can later be used to generate SQL insert strings for the given extractor table.
+	 * All the data are taken from the {@link TableModel}, which was filled by a {@link TableExtractor} (normally used by the
+	 * {@link MetadataExtractor})
+	 * <p>
+	 * For each column in this table the generated class will contain a private variable holding the value and a builder method to set the value. Foreign key
+	 * columns will be a reference to the generated class/object for that table and need to be passed via the constructor to ensure that foreign key constraints
+	 * are met and inserts will be in the right order. Proper {@code null}-checks will be generated.
+	 *
+	 * @param table                      The extracted table model to generate code for
+	 * @param enableVisualizationSupport If {@code true}, the RedG visualization features will be enabled for the generated code. This will result in a small
+	 *                                   performance hit and slightly more memory usage if activated.
+	 * @return The generated source code
+	 */
+	public String generateCodeForTable(final TableModel table, final boolean enableVisualizationSupport) {
+		final ST template = this.stGroup.getInstanceOf("tableClass");
+		LOG.debug("Filling template...");
+		template.add("table", table);
+		LOG.debug("Package is {} | Class name is {}", table.getPackageName(), table.getClassName());
 
-        LOG.debug("Rendering template...");
-        return template.render();
-    }
+		template.add("colAndForeignKeys", table.hasColumnsAndForeignKeys());
+		template.add("firstRowComma", (!table.getNullableForeignKeys().isEmpty() || table.hasColumnsAndForeignKeys()) && !table.getNotNullForeignKeys().isEmpty());
+		template.add("secondRowComma", table.hasColumnsAndForeignKeys() && !table.getNullableForeignKeys().isEmpty());
 
-    /**
-     * Generates the main class used for creating the extractor objects and later generating the insert statements.
-     * For each passed table a appropriate creation method will be generated that will return the new object and internally add it to the list of objects that
-     * will be used to generate the insert strings
-     *
-     * @param tables                     All tables that should get a creation method in the main class
-     * @param enableVisualizationSupport If {@code true}, the RedG visualization features will be enabled for the generated code. This will result in a small
-     *                                   performance hit and slightly more memory usage if activated.
-     * @return The generated source code
-     */
-    public String generateMainClass(final Collection<TableModel> tables, final boolean enableVisualizationSupport) {
-        Objects.requireNonNull(tables);
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(table);
+			oos.close();
+			String serializedData = Base64.getEncoder().encodeToString(baos.toByteArray());
+			template.add("serializedTableModelString", serializedData);
+		} catch (IOException e) {
+			LOG.error("Could not serialize table model. Model will not be included in the file", e);
+		}
+		template.add("enableVisualizationSupport", enableVisualizationSupport);
 
-        //get package from the table models
-        final String targetPackage = ((TableModel) tables.toArray()[0]).getPackageName();
-        final ST template = this.stGroup.getInstanceOf("mainClass");
-        LOG.debug("Filling main class template containing helpers for {} classes...", tables.size());
-        template.add("package", targetPackage);
-        // TODO: make prefix usable
-        template.add("prefix", "");
-        template.add("enableVisualizationSupport", enableVisualizationSupport);
-        LOG.debug("Package is {} | Prefix is {}", targetPackage, "");
+		LOG.debug("Rendering template...");
+		return template.render();
+	}
 
-        template.add("tables", tables);
+	public String generateCodeForEnum(DataTypeModel dataTypeModel, String packageName) {
+		final ST template = this.stGroup.getInstanceOf("enum");
+		template.add("dataType", dataTypeModel);
+		template.add("packageName", packageName);
+//        LOG.debug("Package is {} | Class name is {}", table.getPackageName(), table.getClassName());
+		LOG.debug("Rendering template...");
+		return template.render();
+	}
 
-        return template.render();
-    }
+	/**
+	 * Generates the java code for the class representing a entity that is already in the database but needs to be referenced from entities that
+	 * should be created by RedG.
+	 * <p>
+	 * All the data are taken from the {@link TableModel}, which was filled by a {@link TableExtractor} (normally used by the
+	 * {@link MetadataExtractor})
+	 * <p>
+	 * The generated class extends the class generated by {@link #generateCodeForTable(TableModel, boolean)} and overwrites its methods, throwing
+	 * {@link UnsupportedOperationException} for each field access except getting the value of the primary keys.
+	 *
+	 * @param table The extracted table model to generate code for
+	 * @return The generated source code
+	 */
+	public String generateExistingClassCodeForTable(final TableModel table) {
+		final ST template = this.stGroup.getInstanceOf("existingTableClass");
+		LOG.debug("Filling template...");
+		template.add("table", table);
+
+		LOG.debug("Rendering template...");
+		return template.render();
+	}
+
+	/**
+	 * Generates the main class used for creating the extractor objects and later generating the insert statements.
+	 * For each passed table a appropriate creation method will be generated that will return the new object and internally add it to the list of objects that
+	 * will be used to generate the insert strings
+	 *
+	 * @param tables                     All tables that should get a creation method in the main class
+	 * @param enableVisualizationSupport If {@code true}, the RedG visualization features will be enabled for the generated code. This will result in a small
+	 *                                   performance hit and slightly more memory usage if activated.
+	 * @return The generated source code
+	 */
+	public String generateMainClass(final Collection<TableModel> tables, final boolean enableVisualizationSupport) {
+		Objects.requireNonNull(tables);
+
+		//get package from the table models
+		final String targetPackage = ((TableModel) tables.toArray()[0]).getPackageName();
+		final ST template = this.stGroup.getInstanceOf("mainClass");
+		LOG.debug("Filling main class template containing helpers for {} classes...", tables.size());
+		template.add("package", targetPackage);
+		// TODO: make prefix usable
+		template.add("prefix", "");
+		template.add("enableVisualizationSupport", enableVisualizationSupport);
+		LOG.debug("Package is {} | Prefix is {}", targetPackage, "");
+
+		template.add("tables", tables);
+
+		return template.render();
+	}
 }
