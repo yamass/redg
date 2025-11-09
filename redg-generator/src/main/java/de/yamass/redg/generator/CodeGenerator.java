@@ -125,6 +125,10 @@ public class CodeGenerator {
                     FileUtils.writeCodeFile(targetWithPkgFolders, "Existing" + table.getClassName(), existingResult);
                 }
 
+                final String dummyResult = generateDummyClassCodeForTable(table);
+                FileUtils.writeCodeFile(targetWithPkgFolders, "Dummy" + table.getClassName(), dummyResult);
+
+                LOG.debug("Code for table {} ({}) generated successfully.", table.getSqlFullName(), table.getName());
             } catch (IOException e) {
                 LOG.error("Failed writing code to file", e);
                 throw new RedGGenerationException("Failed writing code to file", e);
@@ -205,6 +209,15 @@ public class CodeGenerator {
      */
     public String generateExistingClassCodeForTable(final TableModel table) {
         final ST template = this.stGroup.getInstanceOf("existingTableClass");
+        LOG.debug("Filling template...");
+        template.add("table", table);
+
+        LOG.debug("Rendering template...");
+        return template.render();
+    }
+
+    public String generateDummyClassCodeForTable(TableModel table) {
+        final ST template = this.stGroup.getInstanceOf("dummyTableClass");
         LOG.debug("Filling template...");
         template.add("table", table);
 

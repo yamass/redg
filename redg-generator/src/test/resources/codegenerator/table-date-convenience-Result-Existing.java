@@ -175,7 +175,7 @@ public class ExistingGDatesTable extends GDatesTable {
 
     @Override
     public String getSQLString() {
-        return "Your table has no primary key(s), referincing existing entities is not possible!";
+        return "Your table has no primary key(s), referencing existing entities is not possible!";
     }
 
     @Override

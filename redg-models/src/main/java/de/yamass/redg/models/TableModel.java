@@ -176,6 +176,13 @@ public class TableModel implements Serializable {
                 .collect(Collectors.toList());
     }
 
+    public List<ColumnModel> getNonForeignPrimaryKeys() {
+        return columns.stream()
+                .filter(ColumnModel::isPartOfPrimaryKey)
+                .filter(c -> !c.isPartOfForeignKey())
+                .collect(Collectors.toList());
+    }
+
     public List<ColumnModel> getNonForeignKeyColumns() {
         return columns.stream()
                 .filter(c -> !c.isPartOfForeignKey())

@@ -60,8 +60,8 @@ public class GDemoUser implements RedGEntity {
         }
     }
 
+    // dummy constructor (without explicit attributes)
     GDemoUser(AbstractRedG redG, GDemoCompany worksAtDemoCompany) {
-        // dummy constructor (without explicit attributes)
         this(
                 redG,
                 redG.getDefaultValueStrategy().getDefaultValue(getTableModel().getColumnBySQLName("DTYPE"), java.lang.String.class),
