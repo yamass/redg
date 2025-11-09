@@ -20,7 +20,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import de.yamass.redg.generator.RedGGenerator;
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
-import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.generator.extractor.TableExtractor;
 import de.yamass.redg.generator.extractor.conveniencesetterprovider.ConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
@@ -36,6 +35,7 @@ import de.yamass.redg.generator.extractor.explicitattributedecider.JsonFileExpli
 import de.yamass.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
 import de.yamass.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
 import de.yamass.redg.jpa.JpaMetamodelRedGProvider;
+import de.yamass.redg.util.ScriptRunner;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -123,7 +123,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
         HikariDataSource dataSource = new HikariDataSource(config);
 
 		try {
-            DatabaseManager.executeScripts(dataSource, sqlScripts);
+            ScriptRunner.executeScripts(dataSource, sqlScripts);
         } catch (IOException | SQLException e) {
             throw new MojoFailureException("Could not execute SQL scripts: " + e, e);
         }

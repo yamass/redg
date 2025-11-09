@@ -71,6 +71,7 @@ public class ColumnExtractor {
 		model.setPartOfPrimaryKey(column.isPartOfPrimaryKey());
 		model.setPartOfForeignKey(column.isPartOfForeignKey());
 		model.setExplicitAttribute(explicitAttributeDecider.isExplicitAttribute(column));
+		
 		model.setUnique(column.isPartOfUniqueIndex() || column.isPartOfPrimaryKey());
 		model.setConvenienceSetters(convenienceSetterProvider.getConvenienceSetters(column, javaTypeName));
 		return model;

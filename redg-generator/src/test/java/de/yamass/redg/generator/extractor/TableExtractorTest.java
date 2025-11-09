@@ -18,10 +18,11 @@ package de.yamass.redg.generator.extractor;
 
 import de.yamass.redg.generator.Helpers;
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
-import de.yamass.redg.generator.testutil.DatabaseTestUtil;
 import de.yamass.redg.models.ForeignKeyModel;
 import de.yamass.redg.models.TableModel;
+import de.yamass.redg.util.ScriptRunner;
 import org.assertj.core.api.Assertions;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Test;
 import schemacrawler.inclusionrule.IncludeAll;
 import schemacrawler.inclusionrule.RegularExpressionInclusionRule;
@@ -39,11 +40,11 @@ class TableExtractorTest {
 
     @Test
     void testExtractTable() throws Exception {
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-te", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:rt-te", "", "");
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
@@ -71,11 +72,11 @@ class TableExtractorTest {
 
     @Test
     void testExtractTableCompositeForeignKey() throws Exception {
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-te", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:rt-te", "", "");
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-exchange-rate.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         assertNotNull(db);
 
@@ -150,11 +151,11 @@ class TableExtractorTest {
 
     @Test
     void testExtractWithExcludedReferencedTable() throws Exception {
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-te-f", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:rt-te-f", "", "");
         assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         assertNotNull(tempFile);
-        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new RegularExpressionInclusionRule(".*USER.*"));
         assertNotNull(db);
         Schema s = db.lookupSchema("\"RT-TE-F\".PUBLIC").orElse(null);

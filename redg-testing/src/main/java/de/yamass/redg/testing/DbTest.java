@@ -1,4 +1,4 @@
-package de.yamass.redg.generator.testutil;
+package de.yamass.redg.testing;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 

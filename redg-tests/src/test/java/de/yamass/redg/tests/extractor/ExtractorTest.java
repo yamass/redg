@@ -5,9 +5,9 @@ import de.yamass.redg.extractor.DataExtractor;
 import de.yamass.redg.extractor.model.EntityModel;
 import de.yamass.redg.generated.extractor.GConfiguration;
 import de.yamass.redg.generated.extractor.GUser;
-import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.runtime.AbstractRedG;
 import de.yamass.redg.tests.Helpers;
+import de.yamass.redg.util.ScriptRunner;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,9 +37,9 @@ class ExtractorTest {
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-source", "", "");
         assertThat(dataSource).isNotNull();
         final File sqlSchemaFile = Helpers.getResourceAsFile("extractor-schema.sql");
-        DatabaseManager.executeScripts(dataSource, new File[]{sqlSchemaFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{sqlSchemaFile});
         final File sqlDataFile = Helpers.getResourceAsFile("extractor-data.sql");
-        DatabaseManager.executeScripts(dataSource, new File[]{sqlDataFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{sqlDataFile});
     }
 
     @Test
@@ -75,7 +75,7 @@ class ExtractorTest {
 
         final DataSource targetDataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-extractor-target", "", "");
         final File sqlSchemaFile = Helpers.getResourceAsFile("extractor-schema.sql");
-        DatabaseManager.executeScripts(targetDataSource, new File[]{sqlSchemaFile});
+        ScriptRunner.executeScripts(targetDataSource, new File[]{sqlSchemaFile});
 
         final Connection targetConnection = targetDataSource.getConnection();
         redG.insertDataIntoDatabase(targetConnection);

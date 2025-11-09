@@ -1,4 +1,4 @@
-package de.yamass.redg.generator.testutil;
+package de.yamass.redg.testing;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

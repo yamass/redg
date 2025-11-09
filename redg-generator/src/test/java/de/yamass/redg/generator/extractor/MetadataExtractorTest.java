@@ -17,8 +17,9 @@
 package de.yamass.redg.generator.extractor;
 
 import de.yamass.redg.generator.Helpers;
-import de.yamass.redg.generator.testutil.DatabaseTestUtil;
 import de.yamass.redg.models.TableModel;
+import de.yamass.redg.util.ScriptRunner;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import schemacrawler.inclusionrule.IncludeAll;
@@ -35,11 +36,11 @@ class MetadataExtractorTest {
 
     @Test
     void testJoinTableProcessing() throws Exception {
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-me", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:rt-me", "", "");
         Assertions.assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-join-table.sql");
         Assertions.assertNotNull(tempFile);
-        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
         Assertions.assertNotNull(db);
 

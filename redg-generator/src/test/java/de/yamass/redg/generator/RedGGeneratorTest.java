@@ -17,9 +17,9 @@
 package de.yamass.redg.generator;
 
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
-import de.yamass.redg.generator.extractor.DatabaseManager;
-import de.yamass.redg.generator.testutil.DatabaseTestUtil;
+import de.yamass.redg.util.ScriptRunner;
 import org.assertj.core.api.Assertions;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Test;
 import schemacrawler.inclusionrule.ExcludeAll;
 import schemacrawler.inclusionrule.IncludeAll;
@@ -35,10 +35,10 @@ class RedGGeneratorTest {
 
     @Test
     void testGenerateCode_Working() throws Exception {
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-test-all", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
-        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
 
         Path p = Files.createTempDirectory("redg-test");
         RedGGenerator.generateCode(dataSource,
@@ -68,10 +68,10 @@ class RedGGeneratorTest {
     @Test
     void testGenerateCode_NoTables() throws Exception {
 
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all2", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-test-all2", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
-        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
 
         Path p = Files.createTempDirectory("redg-test");
 
@@ -95,10 +95,10 @@ class RedGGeneratorTest {
     @Test
     void testGenerateCode_CannotWriteFolder() throws Exception {
 
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:redg-test-all3", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-test-all3", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         org.junit.jupiter.api.Assertions.assertNotNull(tempFile);
-        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
 
         Path p;
         if (System.getProperty("os.name").toLowerCase().contains("win")) {

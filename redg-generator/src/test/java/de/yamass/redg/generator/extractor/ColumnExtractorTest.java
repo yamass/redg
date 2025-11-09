@@ -22,8 +22,9 @@ import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvid
 import de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.ExplicitAttributeDecider;
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
-import de.yamass.redg.generator.testutil.DatabaseTestUtil;
 import de.yamass.redg.models.ColumnModel;
+import de.yamass.redg.util.ScriptRunner;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -42,11 +43,11 @@ class ColumnExtractorTest {
 
 	@BeforeAll
 	public static void setUp() throws Exception {
-		DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-cet", "", "");
+		DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:rt-cet", "", "");
 		Assertions.assertNotNull(dataSource);
 		File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
 		Assertions.assertNotNull(tempFile);
-		DatabaseManager.executeScripts(dataSource, tempFile);
+		ScriptRunner.executeScripts(dataSource, tempFile);
 		catalog = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
 		Assertions.assertNotNull(catalog);
 	}

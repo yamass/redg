@@ -1,4 +1,4 @@
-package de.yamass.redg.generator.testutil;
+package de.yamass.redg.testing;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

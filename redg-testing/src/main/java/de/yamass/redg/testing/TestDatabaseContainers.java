@@ -1,5 +1,6 @@
-package de.yamass.redg.generator.testutil;
+package de.yamass.redg.testing;
 
+import de.yamass.redg.DatabaseType;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -28,5 +29,14 @@ public class TestDatabaseContainers {
         }
         return mariadb;
     }
+
+	public static String testSchemaName(DatabaseType databaseType) {
+		return switch (databaseType) {
+			case POSTGRES -> postgres.getDatabaseName();
+			case MARIADB -> mariadb.getDatabaseName();
+			case H2 -> "PUBLIC";
+			default -> throw new IllegalArgumentException(databaseType + " database type is not supported yet!");
+		};
+	}
 
 }

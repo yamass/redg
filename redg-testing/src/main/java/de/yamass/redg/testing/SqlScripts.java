@@ -1,7 +1,7 @@
-package de.yamass.redg.generator.testutil;
+package de.yamass.redg.testing;
 
-import de.yamass.redg.generator.Helpers;
-import de.yamass.redg.generator.extractor.DatabaseManager;
+import de.yamass.redg.DatabaseType;
+import de.yamass.redg.util.ScriptRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +24,10 @@ public class SqlScripts {
 
 		if (Helpers.resourceExists(databaseSpecificResourcePath)) {
 			LOGGER.info("Executing database specific script: {}", databaseSpecificResourcePath);
-			DatabaseManager.executeScript(dataSource, () -> Helpers.getResourceAsReader(databaseSpecificResourcePath));
+			ScriptRunner.executeScript(dataSource, () -> Helpers.getResourceAsReader(databaseSpecificResourcePath));
 		} else {
 			LOGGER.info("Executing generic script: {}", databaseSpecificResourcePath);
-			DatabaseManager.executeScript(dataSource, () -> Helpers.getResourceAsReader(resourcePath));
+			ScriptRunner.executeScript(dataSource, () -> Helpers.getResourceAsReader(resourcePath));
 		}
 	}
 

@@ -20,9 +20,10 @@ import de.yamass.redg.generator.Helpers;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
-import de.yamass.redg.generator.testutil.DatabaseTestUtil;
 import de.yamass.redg.models.ForeignKeyColumnModel;
 import de.yamass.redg.models.ForeignKeyModel;
+import de.yamass.redg.util.ScriptRunner;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import schemacrawler.inclusionrule.IncludeAll;
@@ -39,11 +40,11 @@ class ForeignKeyExtractorTest {
 
     @Test
     void testForeignKeyExtraction() throws Exception {
-        DataSource dataSource = DatabaseTestUtil.createH2DataSource("jdbc:h2:mem:rt-fe", "", "");
+        DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:rt-fe", "", "");
         Assertions.assertNotNull(dataSource);
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         Assertions.assertNotNull(tempFile);
-        DatabaseManager.executeScripts(dataSource, new File[]{tempFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
         Catalog db = DatabaseManager.crawlDatabase(dataSource, new IncludeAll(), new IncludeAll());
         Assertions.assertNotNull(db);
 

@@ -16,23 +16,28 @@
 
 package de.yamass.redg.generator.extractor;
 
-import de.yamass.redg.generator.testutil.DatabaseType;
 import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
-import de.yamass.redg.generator.testutil.*;
+import de.yamass.redg.generator.testutil.DatabaseTypeTestUtil;
 import de.yamass.redg.models.ColumnModel;
+import de.yamass.redg.testing.*;
+import de.yamass.redg.DatabaseType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import schemacrawler.inclusionrule.IncludeAll;
-import schemacrawler.schema.*;
+import schemacrawler.schema.Catalog;
+import schemacrawler.schema.Column;
+import schemacrawler.schema.Schema;
+import schemacrawler.schema.Table;
 
 import javax.sql.DataSource;
 import java.sql.Types;
 
-import static de.yamass.redg.generator.testutil.DatabaseType.*;
+import static de.yamass.redg.DatabaseType.*;
+import static de.yamass.redg.testing.TestDatabaseContainers.testSchemaName;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DbTest()
@@ -63,7 +68,7 @@ class ColumnExtractorTest2 {
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
 		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
-		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(databaseType.getDataTypesLookup().getIntegerType());
+		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(DatabaseTypeTestUtil.getIntegerType(databaseType));
 		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
 		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.INTEGER);
@@ -81,7 +86,7 @@ class ColumnExtractorTest2 {
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
 		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
-		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(databaseType.getDataTypesLookup().getVarcharType());
+		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(DatabaseTypeTestUtil.getVarcharType(databaseType));
 		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
 		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR);
@@ -105,11 +110,30 @@ class ColumnExtractorTest2 {
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR);
 	}
 
+	@TestTemplate
+	@Databases({H2, POSTGRES, MARIADB})
+	@Scripts("de/yamass/redg/generator/extractor/ColumnExtractorTest-unique-column.sql")
+	void testUniqueColumn() throws Exception {
+		var catalog = DatabaseManager.crawlDatabase(dataSource, DatabaseTypeTestUtil.testSchemaInclusionRule(databaseType), new IncludeAll());
+
+		ColumnModel model;
+		model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "e"));
+		assertThat(model.isUnique()).isTrue();
+		model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "i"));
+		assertThat(model.isUnique()).isTrue();
+		model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "t"));
+		assertThat(model.isUnique()).isTrue();
+		model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "b"));
+		assertThat(model.isUnique()).isTrue();
+		model = columnExtractor.extractColumnModel(ExtractorTestUtil.createDataTypeLookup(catalog), getColumnFromCatalog(catalog, databaseType, "t", "partial_b"));
+		assertThat(model.isUnique()).isTrue();
+	}
+
 	private Column getColumnFromCatalog(Catalog catalog, DatabaseType databaseType, String tableName, String columnName) throws Exception {
 		Schema s = catalog.getSchemas().stream()
 				.filter(schema -> {
 					String name = schema.getName() != null ? schema.getName() : schema.getCatalogName();
-					return name.equalsIgnoreCase(DatabaseTypeTestUtil.testSchemaName(databaseType));
+					return name.equalsIgnoreCase(testSchemaName(databaseType));
 				})
 				.findFirst()
 				.orElseThrow();

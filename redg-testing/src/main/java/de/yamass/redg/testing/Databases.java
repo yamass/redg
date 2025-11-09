@@ -1,5 +1,6 @@
-package de.yamass.redg.generator.testutil;
+package de.yamass.redg.testing;
 
+import de.yamass.redg.DatabaseType;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.Retention;

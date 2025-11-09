@@ -32,12 +32,10 @@
         <dependency>
             <groupId>de.yamass</groupId>
             <artifactId>redg-models</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>de.yamass</groupId>
             <artifactId>redg-runtime</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>

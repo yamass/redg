@@ -32,8 +32,11 @@
     <dependencies>
         <dependency>
             <groupId>de.yamass</groupId>
+            <artifactId>redg-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.yamass</groupId>
             <artifactId>redg-models</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>us.fatehi</groupId>
@@ -87,6 +90,11 @@
         <!-- TEST DEPENDENCIES -->
 
         <dependency>
+            <groupId>de.yamass</groupId>
+            <artifactId>redg-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
@@ -109,7 +117,6 @@
             <version>3.5.6</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

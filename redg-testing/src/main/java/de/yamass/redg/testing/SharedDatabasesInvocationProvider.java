@@ -1,5 +1,6 @@
-package de.yamass.redg.generator.testutil;
+package de.yamass.redg.testing;
 
+import de.yamass.redg.DatabaseType;
 import org.assertj.core.util.Files;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.extension.*;
@@ -78,7 +79,7 @@ public class SharedDatabasesInvocationProvider implements TestTemplateInvocation
 							public void beforeEach(ExtensionContext context) throws Exception {
 								ArrayList<String> allScripts = new ArrayList<>();
 
-								allScripts.add("de/yamass/redg/generator/sql/drop-db.sql");
+								allScripts.add("de/yamass/redg/testing/sql/drop-db.sql");
 
 								context.getTestClass()
 										.flatMap(c -> Optional.ofNullable(c.getAnnotation(Scripts.class)))

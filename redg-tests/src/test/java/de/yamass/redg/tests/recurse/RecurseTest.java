@@ -2,8 +2,8 @@ package de.yamass.redg.tests.recurse;
 
 import de.yamass.redg.generated.recurse.GTreeElement;
 import de.yamass.redg.generated.recurse.RedG;
-import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.tests.Helpers;
+import de.yamass.redg.util.ScriptRunner;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ class RecurseTest {
         final DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:redg-recurse", "", "");
         Assertions.assertNotNull(dataSource);
         final File sqlFile = Helpers.getResourceAsFile("recurse-schema.sql");
-        DatabaseManager.executeScripts(dataSource, new File[]{sqlFile});
+        ScriptRunner.executeScripts(dataSource, new File[]{sqlFile});
     }
 
     @Test

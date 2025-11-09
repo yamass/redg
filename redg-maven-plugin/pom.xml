@@ -39,12 +39,10 @@
         <dependency>
             <groupId>de.yamass</groupId>
             <artifactId>redg-generator</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>de.yamass</groupId>
             <artifactId>redg-jpa-providers</artifactId>
-            <version>${project.parent.version}</version>
             <optional>true</optional>
         </dependency>
 

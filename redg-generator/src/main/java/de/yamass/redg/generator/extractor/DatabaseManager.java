@@ -16,7 +16,6 @@
 
 package de.yamass.redg.generator.extractor;
 
-import de.yamass.redg.generator.extractor.utils.ScriptRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schemacrawler.inclusionrule.IncludeAll;
@@ -28,10 +27,6 @@ import schemacrawler.tools.utility.SchemaCrawlerUtility;
 import us.fatehi.utility.datasource.DatabaseConnectionSources;
 
 import javax.sql.DataSource;
-import java.io.*;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.function.Supplier;
 
 /**
  * <p>
@@ -48,54 +43,6 @@ import java.util.function.Supplier;
 public class DatabaseManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatabaseManager.class);
-
-	/**
-	 * Executes the SQL scripts specified in the {@code sqlScripts} parameter.
-	 * The SQL gets split into statements and gets executed via the {@code connection} by a {@link ScriptRunner}. The output from the script runner simply gets
-	 * discarded.
-	 *
-	 * @param dataSource The data source providing a JDBC connection to use for script execution
-	 * @param sqlScripts The array containing all sql files that should be executed
-	 * @throws IOException  Gets thrown when a file IO fails
-	 * @throws SQLException Gets thrown when the a part of the SQL could not be executed
-	 */
-	public static void executeScripts(final DataSource dataSource, final File... sqlScripts) throws IOException, SQLException {
-		LOG.info("Executing provided SQL scripts...");
-		if (sqlScripts == null || sqlScripts.length == 0) {
-			LOG.info("No SQL script was provided.");
-			return;
-		}
-		for (final File sqlScript : sqlScripts) {
-			LOG.info("Processing script " + sqlScript.getAbsolutePath());
-			executeScript(dataSource, () -> {
-				try {
-					return new BufferedReader(new FileReader(sqlScript));
-				} catch (FileNotFoundException e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-	}
-
-	public static void executeScript(DataSource dataSource, Supplier<Reader> sqlScript) throws SQLException, IOException {
-		try (Connection connection = dataSource.getConnection()) {
-			final ScriptRunner scriptRunner = new ScriptRunner(connection, true, true);
-			try {
-				scriptRunner.runScript(sqlScript.get());
-				LOG.info("Script finished successfully.");
-			} catch (IOException e) {
-				if (e.getCause() instanceof SQLException) {
-					LOG.error("SQL execution failed", e);
-					throw (SQLException) e.getCause();
-				}
-				LOG.error("Some IO failed while trying to run the script", e);
-				throw e;
-			} catch (SQLException e) {
-				LOG.error("SQL execution failed", e);
-				throw e;
-			}
-		}
-	}
 
 	/**
 	 * Starts the schema crawler and lets it crawl the given JDBC connection.
