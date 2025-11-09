@@ -30,7 +30,7 @@ import de.yamass.redg.models.*;
  *     </tr>
  *     <tr>
  *         <td>Full table name</td>
- *         <td>"RT-CG-MPFK".PUBLIC.DEMO_COMPANY</td>
+ *         <td>PUBLIC.DEMO_COMPANY</td>
  *     </tr>
  * </table>
  */
@@ -79,7 +79,7 @@ public class GDemoCompany implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_COMPANY</td>
+     *         <td>PUBLIC.DEMO_COMPANY</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -123,7 +123,7 @@ public class GDemoCompany implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_COMPANY</td>
+     *         <td>PUBLIC.DEMO_COMPANY</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -165,7 +165,7 @@ public class GDemoCompany implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_COMPANY</td>
+     *         <td>PUBLIC.DEMO_COMPANY</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -209,7 +209,7 @@ public class GDemoCompany implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_COMPANY</td>
+     *         <td>PUBLIC.DEMO_COMPANY</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -243,13 +243,13 @@ public class GDemoCompany implements RedGEntity {
         return dependencies;
     }
 
-    public List<GDemoUser> demoUsersForCompany() {
-        return this.redG.findEntities(GDemoUser.class, gEntity -> ((GDemoUser) gEntity).company() == this);
+    public List<GDemoUser> demoUsersForDemoUserCompany() {
+        return this.redG.findEntities(GDemoUser.class, gEntity -> ((GDemoUser) gEntity).demoUserCompany() == this);
     }
 
-    public GDemoCompany addDemoUsersForCompany(GDemoUser... objects) {
+    public GDemoCompany addDemoUsersForDemoUserCompany(GDemoUser... objects) {
         for (GDemoUser obj : objects) {
-            obj.company(this);
+            obj.demoUserCompany(this);
         }
         return this;
     }
@@ -265,10 +265,10 @@ public class GDemoCompany implements RedGEntity {
                         "" +
                         "%s, %s)",
                 this.redG.getSqlValuesFormatter().formatValue(this.countryCode(),
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY",
+                        "CHARACTER VARYING", "PUBLIC.DEMO_COMPANY",
                         "DEMO_COMPANY", "COUNTRY_CODE"),
                 this.redG.getSqlValuesFormatter().formatValue(this.name(),
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY",
+                        "CHARACTER VARYING", "PUBLIC.DEMO_COMPANY",
                         "DEMO_COMPANY", "NAME")
         );
     }
@@ -293,12 +293,12 @@ public class GDemoCompany implements RedGEntity {
 
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[]{
-                new AttributeMetaInfo("COUNTRY_CODE", "DEMO_COMPANY", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true),
-                new AttributeMetaInfo("NAME", "DEMO_COMPANY", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true)
+                new AttributeMetaInfo("COUNTRY_CODE", "DEMO_COMPANY", "PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true),
+                new AttributeMetaInfo("NAME", "DEMO_COMPANY", "PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true)
         };
     }
 
-    private static String serializedTableModel = "rO0ABXNyACBkZS55YW1hc3MucmVkZy5tb2RlbHMuVGFibGVNb2RlbL+0Cs2MvQwOAgAKWgAYaGFzQ29sdW1uc0FuZEZvcmVpZ25LZXlzTAAJY2xhc3NOYW1ldAASTGphdmEvbGFuZy9TdHJpbmc7TAAHY29sdW1uc3QAEExqYXZhL3V0aWwvTGlzdDtMAAtmb3JlaWduS2V5c3EAfgACTAATaW5jb21pbmdGb3JlaWduS2V5c3EAfgACTAAXam9pblRhYmxlU2ltcGxpZmllckRhdGF0AA9MamF2YS91dGlsL01hcDtMAARuYW1lcQB+AAFMAAtwYWNrYWdlTmFtZXEAfgABTAALc3FsRnVsbE5hbWVxAH4AAUwAB3NxbE5hbWVxAH4AAXhwAHQADEdEZW1vQ29tcGFueXNyABNqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHAAAAACdwQAAAACc3IAIWRlLnlhbWFzcy5yZWRnLm1vZGVscy5Db2x1bW5Nb2RlbNxb0tCXjsJzAgAMWgARZXhwbGljaXRBdHRyaWJ1dGVaAAdub3ROdWxsWgAQcGFydE9mRm9yZWlnbktleVoAEHBhcnRPZlByaW1hcnlLZXlaAAZ1bmlxdWVMABJjb252ZW5pZW5jZVNldHRlcnNxAH4AAkwACGRhdGFUeXBldAAlTGRlL3lhbWFzcy9yZWRnL21vZGVscy9EYXRhVHlwZU1vZGVsO0wAD2RiRnVsbFRhYmxlTmFtZXEAfgABTAAGZGJOYW1lcQB+AAFMAAtkYlRhYmxlTmFtZXEAfgABTAAQamF2YVByb3BlcnR5TmFtZXEAfgABTAAMamF2YVR5cGVOYW1lcQB+AAF4cAABAAEBc3IAH2phdmEudXRpbC5Db2xsZWN0aW9ucyRFbXB0eUxpc3R6uBe0PKee3gIAAHhwc3IAI2RlLnlhbWFzcy5yZWRnLm1vZGVscy5EYXRhVHlwZU1vZGVswgiOwMeuoVoCABVaABFhdXRvSW5jcmVtZW50YWJsZVoACmVudW1lcmF0ZWRaABNmaXhlZFByZWNpc2lvblNjYWxlSQAMbWF4aW11bVNjYWxlSQAMbWluaW11bVNjYWxlWgAIbnVsbGFibGVJABFudW1QcmVjaXNpb25SYWRpeEoACXByZWNpc2lvbloACHVuc2lnbmVkTAAIYmFzZVR5cGVxAH4ACUwAEGNyZWF0ZVBhcmFtZXRlcnNxAH4AAUwAGGRhdGFiYXNlU3BlY2lmaWNUeXBlTmFtZXEAfgABTAAQZGVmYXVsdEphdmFDbGFzc3QAEUxqYXZhL2xhbmcvQ2xhc3M7TAAKZW51bVZhbHVlc3EAfgACTAAPamF2YVNxbFR5cGVOYW1lcQB+AAFMAA1saXRlcmFsUHJlZml4cQB+AAFMAA1saXRlcmFsU3VmZml4cQB+AAFMAA1sb2NhbFR5cGVOYW1lcQB+AAFMAARuYW1lcQB+AAFMAAZ2ZW5kb3JxAH4AAUwAEHZlbmRvclR5cGVOdW1iZXJ0ABNMamF2YS9sYW5nL0ludGVnZXI7eHAAAAAAAAAAAAAAAAEAAAAAAAAAADuaygAAcHQABkxFTkdUSHQAEUNIQVJBQ1RFUiBWQVJZSU5HdnIAEGphdmEubGFuZy5TdHJpbmeg8KQ4ejuzQgIAAHhwc3EAfgAGAAAAAHcEAAAAAHh0AAdWQVJDSEFSdAABJ3EAfgAXcQB+ABJxAH4AEnQACGphdmEuc3Fsc3IAEWphdmEubGFuZy5JbnRlZ2VyEuKgpPeBhzgCAAFJAAV2YWx1ZXhyABBqYXZhLmxhbmcuTnVtYmVyhqyVHQuU4IsCAAB4cAAAAAx0ACAiUlQtQ0ctTVBGSyIuUFVCTElDLkRFTU9fQ09NUEFOWXQADENPVU5UUllfQ09ERXQADERFTU9fQ09NUEFOWXQAC2NvdW50cnlDb2RldAAQamF2YS5sYW5nLlN0cmluZ3NxAH4ACAABAAEBcQB+AAxxAH4AEHEAfgAcdAAETkFNRXEAfgAedAAEbmFtZXEAfgAgeHNxAH4ABgAAAAB3BAAAAAB4c3EAfgAGAAAAAXcEAAAAAXNyAC1kZS55YW1hc3MucmVkZy5tb2RlbHMuSW5jb21pbmdGb3JlaWduS2V5TW9kZWzw0SQJLk0H/QIABVoAB25vdE51bGxMAA1hdHRyaWJ1dGVOYW1lcQB+AAFMABhyZWZlcmVuY2luZ0F0dHJpYnV0ZU5hbWVxAH4AAUwAFXJlZmVyZW5jaW5nRW50aXR5TmFtZXEAfgABTAAXcmVmZXJlbmNpbmdKYXZhVHlwZU5hbWVxAH4AAXhwAHQAE2RlbW9Vc2Vyc0ZvckNvbXBhbnl0AAdjb21wYW55dAAIRGVtb1VzZXJ0AAlHRGVtb1VzZXJ4c3IAEWphdmEudXRpbC5IYXNoTWFwBQfawcMWYNEDAAJGAApsb2FkRmFjdG9ySQAJdGhyZXNob2xkeHA/QAAAAAAAAHcIAAAAEAAAAAB4dAALRGVtb0NvbXBhbnl0ABhkZS55YW1hc3MucmVkZy5nZW5lcmF0ZWRxAH4AHHEAfgAe";
+    private static String serializedTableModel = "rO0ABXNyACBkZS55YW1hc3MucmVkZy5tb2RlbHMuVGFibGVNb2RlbDbHSQJAzJJ4AgAKWgAYaGFzQ29sdW1uc0FuZEZvcmVpZ25LZXlzTAAJY2xhc3NOYW1ldAASTGphdmEvbGFuZy9TdHJpbmc7TAAHY29sdW1uc3QAEExqYXZhL3V0aWwvTGlzdDtMAAtmb3JlaWduS2V5c3EAfgACTAATaW5jb21pbmdGb3JlaWduS2V5c3EAfgACTAAXam9pblRhYmxlU2ltcGxpZmllckRhdGF0AA9MamF2YS91dGlsL01hcDtMAARuYW1lcQB+AAFMAAtwYWNrYWdlTmFtZXEAfgABTAALc3FsRnVsbE5hbWVxAH4AAUwAB3NxbE5hbWVxAH4AAXhwAHQADEdEZW1vQ29tcGFueXNyABNqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHAAAAACdwQAAAACc3IAIWRlLnlhbWFzcy5yZWRnLm1vZGVscy5Db2x1bW5Nb2RlbPh9//pKB8pQAgAMWgARZXhwbGljaXRBdHRyaWJ1dGVaAAdub3ROdWxsWgAQcGFydE9mRm9yZWlnbktleVoAEHBhcnRPZlByaW1hcnlLZXlaAAZ1bmlxdWVMABJjb252ZW5pZW5jZVNldHRlcnNxAH4AAkwACGRhdGFUeXBldAAlTGRlL3lhbWFzcy9yZWRnL21vZGVscy9EYXRhVHlwZU1vZGVsO0wAD2RiRnVsbFRhYmxlTmFtZXEAfgABTAAGZGJOYW1lcQB+AAFMAAtkYlRhYmxlTmFtZXEAfgABTAAQamF2YVByb3BlcnR5TmFtZXEAfgABTAAMamF2YVR5cGVOYW1lcQB+AAF4cAABAAEBc3IAEWphdmEudXRpbC5Db2xsU2VyV46rtjobqBEDAAFJAAN0YWd4cAAAAAF3BAAAAAB4c3IAI2RlLnlhbWFzcy5yZWRnLm1vZGVscy5EYXRhVHlwZU1vZGVs+a0mnLWxazkCAANaAAhudWxsYWJsZUwABG5hbWVxAH4AAUwAEHZlbmRvclR5cGVOdW1iZXJ0ABNMamF2YS9sYW5nL0ludGVnZXI7eHABdAARQ0hBUkFDVEVSIFZBUllJTkdzcgARamF2YS5sYW5nLkludGVnZXIS4qCk94GHOAIAAUkABXZhbHVleHIAEGphdmEubGFuZy5OdW1iZXKGrJUdC5TgiwIAAHhwAAAADHQAE1BVQkxJQy5ERU1PX0NPTVBBTll0AAxDT1VOVFJZX0NPREV0AAxERU1PX0NPTVBBTll0AAtjb3VudHJ5Q29kZXQAEGphdmEubGFuZy5TdHJpbmdzcQB+AAgAAQABAXEAfgAMcQB+AA90ABNQVUJMSUMuREVNT19DT01QQU5ZdAAETkFNRXEAfgAWdAAEbmFtZXEAfgAYeHNxAH4ABgAAAAB3BAAAAAB4c3EAfgAGAAAAAXcEAAAAAXNyAC1kZS55YW1hc3MucmVkZy5tb2RlbHMuSW5jb21pbmdGb3JlaWduS2V5TW9kZWzshuDJA0NEvQIABFoAB25vdE51bGxMAA1hdHRyaWJ1dGVOYW1lcQB+AAFMABhyZWZlcmVuY2luZ0F0dHJpYnV0ZU5hbWVxAH4AAUwAF3JlZmVyZW5jaW5nSmF2YVR5cGVOYW1lcQB+AAF4cAB0ABtkZW1vVXNlcnNGb3JEZW1vVXNlckNvbXBhbnl0AA9kZW1vVXNlckNvbXBhbnl0AAlHRGVtb1VzZXJ4c3IAEWphdmEudXRpbC5IYXNoTWFwBQfawcMWYNEDAAJGAApsb2FkRmFjdG9ySQAJdGhyZXNob2xkeHA/QAAAAAAAAHcIAAAAEAAAAAB4dAALRGVtb0NvbXBhbnl0ABhkZS55YW1hc3MucmVkZy5nZW5lcmF0ZWR0ABNQVUJMSUMuREVNT19DT01QQU5ZcQB+ABY=";
     private static TableModel tableModel;
 
     public static String getSerializedTableModel() {

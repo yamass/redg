@@ -18,10 +18,11 @@ package de.yamass.redg.generator.nameprovider;
 
 import de.yamass.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
 import de.yamass.redg.generator.extractor.nameprovider.NameProvider;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.ForeignKeyColumn;
+import de.yamass.redg.schema.model.Table;
 import org.junit.jupiter.api.Test;
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.Table;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,12 +84,12 @@ class MultiProviderNameProviderTest {
 
         NameProvider extraProvider = mock(NameProvider.class);
 
-        when(extraProvider.getMethodNameForColumn(same(idColumn))).thenReturn("Identification");
-        when(extraProvider.getMethodNameForColumn(same(nameColumn))).thenReturn(null);
+        when(extraProvider.getMethodNameForColumn(same(idColumn), same(webUser))).thenReturn("Identification");
+        when(extraProvider.getMethodNameForColumn(same(nameColumn), same(webUser))).thenReturn(null);
         provider.appendProvider(extraProvider);
 
-        assertEquals("Identification", provider.getMethodNameForColumn(idColumn));
-        assertEquals("firstName", provider.getMethodNameForColumn(nameColumn));
+        assertEquals("Identification", provider.getMethodNameForColumn(idColumn, webUser));
+        assertEquals("firstName", provider.getMethodNameForColumn(nameColumn, webUser));
 
     }
 
@@ -103,7 +104,7 @@ class MultiProviderNameProviderTest {
         provider.appendProvider(extraProvider);
 
         assertEquals("creator", provider.getMethodNameForReference(userFk));
-        assertEquals("blogPostCreator", provider.getMethodNameForReference(blogFk));
+        assertEquals("blogPostCreatorUser", provider.getMethodNameForReference(blogFk));
 
     }
 }

@@ -16,9 +16,10 @@
 
 package de.yamass.redg.generator.extractor.nameprovider;
 
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.Table;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.ForeignKeyColumn;
+import de.yamass.redg.schema.model.Table;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -55,27 +56,27 @@ public class MultiProviderNameProvider implements NameProvider {
      * {@inheritDoc}
      */
     @Override
-    public String getMethodNameForColumn(final Column column) {
+    public String getMethodNameForColumn(final Column column, final Table table) {
         this.wasUsedBefore = true;
         for (final NameProvider provider : providers) {
-            final String name = provider.getMethodNameForColumn(column);
+            final String name = provider.getMethodNameForColumn(column, table);
             if (Objects.nonNull(name)) {
                 return name;
             }
         }
-        return this.fallbackProvider.getMethodNameForColumn(column);
+        return this.fallbackProvider.getMethodNameForColumn(column, table);
     }
 
     @Override
-    public String getMethodNameForForeignKeyColumn(ForeignKey foreignKey, Column primaryKeyColumn, Column foreignKeyColumn) {
+    public String getMethodNameForForeignKeyColumn(ForeignKeyColumn foreignKeyColumn, Table sourceTable) {
         this.wasUsedBefore = true;
         for (final NameProvider provider : providers) {
-            final String name = provider.getMethodNameForForeignKeyColumn(foreignKey, primaryKeyColumn, foreignKeyColumn);
+            final String name = provider.getMethodNameForForeignKeyColumn(foreignKeyColumn, sourceTable);
             if (Objects.nonNull(name)) {
                 return name;
             }
         }
-        return this.fallbackProvider.getMethodNameForForeignKeyColumn(foreignKey, primaryKeyColumn, foreignKeyColumn);
+        return this.fallbackProvider.getMethodNameForForeignKeyColumn(foreignKeyColumn, sourceTable);
     }
 
     /**

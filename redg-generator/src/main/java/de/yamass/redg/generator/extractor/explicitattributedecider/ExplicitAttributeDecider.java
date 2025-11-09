@@ -16,12 +16,13 @@
 
 package de.yamass.redg.generator.extractor.explicitattributedecider;
 
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.Table;
 
 public interface ExplicitAttributeDecider {
 
-    boolean isExplicitAttribute(Column column);
+    boolean isExplicitAttribute(Column column, Table table);
 
     boolean isExplicitForeignKey(ForeignKey foreignKey);
 

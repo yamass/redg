@@ -16,15 +16,16 @@
 
 package de.yamass.redg.jpa;
 
-import de.yamass.redg.generator.extractor.DatabaseManager;
+import de.yamass.redg.generator.RedGGenerator;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.ForeignKeyColumn;
+import de.yamass.redg.schema.model.SchemaInspectionResult;
+import de.yamass.redg.schema.model.Table;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import schemacrawler.schema.Catalog;
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.Table;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -37,7 +38,7 @@ import java.util.Optional;
 class JpaMetamodelRedGProviderTest {
 
 	private static JpaMetamodelRedGProvider provider;
-	private static Catalog catalog;
+	private static SchemaInspectionResult schemaResult;
 
 	@BeforeAll
 	public static void setUp() throws Exception {
@@ -49,7 +50,7 @@ class JpaMetamodelRedGProviderTest {
 					+ "  NORMAL_COLUMN NUMBER(19),"
 					+ "  FK NUMBER(19) references MANAGEDSUPERCLASSJOINED(ID)"
 					+ ")");
-			catalog = DatabaseManager.crawlDatabase(dataSource, null, null);
+			schemaResult = RedGGenerator.inspectSchemas(dataSource, null);
 		}
 	}
 
@@ -71,99 +72,112 @@ class JpaMetamodelRedGProviderTest {
 
 	@Test
 	void testGetMethodNameForColumnJoined() throws Exception {
-		Assertions.assertEquals("superJoinedImpliciteNameColumn", provider.getMethodNameForColumn(getColumn("MANAGEDSUPERCLASSJOINED", "SUPERJOINEDIMPLICITENAMECOLUMN")));
-		Assertions.assertEquals("superJoinedExpliciteNameColumn", provider.getMethodNameForColumn(getColumn("MANAGEDSUPERCLASSJOINED", "SUPER_JOINED_EXPLICIT_NAME_COLUMN")));
+		Table table1 = getTable("MANAGEDSUPERCLASSJOINED");
+		Assertions.assertEquals("superJoinedImpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table1, "SUPERJOINEDIMPLICITENAMECOLUMN"), table1));
+		Assertions.assertEquals("superJoinedExpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table1, "SUPER_JOINED_EXPLICIT_NAME_COLUMN"), table1));
 
-		Assertions.assertEquals("subJoinedImpliciteNameColumn", provider.getMethodNameForColumn(getColumn("SUB_ENTITY_JOINED_1", "SUBJOINEDIMPLICITENAMECOLUMN")));
-		Assertions.assertEquals("subJoinedExpliciteNameColumn", provider.getMethodNameForColumn(getColumn("SUB_ENTITY_JOINED_1", "SUB_JOINED_EXPLICITE_NAME_COLUMN")));
+		Table table2 = getTable("SUB_ENTITY_JOINED_1");
+		Assertions.assertEquals("subJoinedImpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table2, "SUBJOINEDIMPLICITENAMECOLUMN"), table2));
+		Assertions.assertEquals("subJoinedExpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table2, "SUB_JOINED_EXPLICITE_NAME_COLUMN"), table2));
 
-		Assertions.assertEquals("subEntityJoined2Attribute", provider.getMethodNameForColumn(getColumn("SUBENTITY_JOINED_2", "SUBENTITYJOINED2ATTRIBUTE")));
+		Table table3 = getTable("SUBENTITY_JOINED_2");
+		Assertions.assertEquals("subEntityJoined2Attribute", provider.getMethodNameForColumn(getColumn(table3, "SUBENTITYJOINED2ATTRIBUTE"), table3));
 	}
 
 	@Test
 	void testGetMethodNameForColumnSingleTable() throws Exception {
-		Assertions.assertEquals("superSingleTableImpliciteNameColumn", provider.getMethodNameForColumn(getColumn("MANAGED_SUPERCLASS_SINGLE_TABLE", "SUPERSINGLETABLEIMPLICITENAMECOLUMN")));
-		Assertions.assertEquals("superSingleTableExpliciteNameColumn", provider.getMethodNameForColumn(getColumn("MANAGED_SUPERCLASS_SINGLE_TABLE", "SUPER_SINGLE_TABLE_EXPLICIT_NAME_COLUMN")));
+		Table table = getTable("MANAGED_SUPERCLASS_SINGLE_TABLE");
+		Assertions.assertEquals("superSingleTableImpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table, "SUPERSINGLETABLEIMPLICITENAMECOLUMN"), table));
+		Assertions.assertEquals("superSingleTableExpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table, "SUPER_SINGLE_TABLE_EXPLICIT_NAME_COLUMN"), table));
 
-		Assertions.assertEquals("subSingleTableImpliciteNameColumn", provider.getMethodNameForColumn(getColumn("MANAGED_SUPERCLASS_SINGLE_TABLE", "SUBSINGLETABLEIMPLICITENAMECOLUMN")));
-		Assertions.assertEquals("subSingleTableExpliciteNameColumn", provider.getMethodNameForColumn(getColumn("MANAGED_SUPERCLASS_SINGLE_TABLE", "SUB_SINGLE_TABLE_EXPLICITE_NAME_COLUMN")));
+		Assertions.assertEquals("subSingleTableImpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table, "SUBSINGLETABLEIMPLICITENAMECOLUMN"), table));
+		Assertions.assertEquals("subSingleTableExpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table, "SUB_SINGLE_TABLE_EXPLICITE_NAME_COLUMN"), table));
 
-		Assertions.assertEquals("subEntitySingleTable2Attribute", provider.getMethodNameForColumn(getColumn("MANAGED_SUPERCLASS_SINGLE_TABLE", "SUBENTITYSINGLETABLE2ATTRIBUTE")));
+		Assertions.assertEquals("subEntitySingleTable2Attribute", provider.getMethodNameForColumn(getColumn(table, "SUBENTITYSINGLETABLE2ATTRIBUTE"), table));
 	}
 
 	@Test
 	void testGetMethodNameForColumnTablePerClass() throws Exception {
-		Assertions.assertEquals("superTablePerClassImpliciteNameColumn", provider.getMethodNameForColumn(getColumn("SUBENTITYTABLEPERCLASS1", "SUPERTABLEPERCLASSIMPLICITENAMECOLUMN")));
-		Assertions.assertEquals("superTablePerClassExpliciteNameColumn", provider.getMethodNameForColumn(getColumn("SUBENTITYTABLEPERCLASS1", "SUPER_TABLE_PER_CLASS_EXPLICIT_NAME_COLUMN")));
+		Table table1 = getTable("SUBENTITYTABLEPERCLASS1");
+		Assertions.assertEquals("superTablePerClassImpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table1, "SUPERTABLEPERCLASSIMPLICITENAMECOLUMN"), table1));
+		Assertions.assertEquals("superTablePerClassExpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table1, "SUPER_TABLE_PER_CLASS_EXPLICIT_NAME_COLUMN"), table1));
 
-		Assertions.assertEquals("subTablePerClassImpliciteNameColumn", provider.getMethodNameForColumn(getColumn("SUBENTITYTABLEPERCLASS1", "SUBTABLEPERCLASSIMPLICITENAMECOLUMN")));
-		Assertions.assertEquals("subTablePerClassExpliciteNameColumn", provider.getMethodNameForColumn(getColumn("SUBENTITYTABLEPERCLASS1", "SUB_TABLE_PER_CLASS_EXPLICITE_NAME_COLUMN")));
+		Assertions.assertEquals("subTablePerClassImpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table1, "SUBTABLEPERCLASSIMPLICITENAMECOLUMN"), table1));
+		Assertions.assertEquals("subTablePerClassExpliciteNameColumn", provider.getMethodNameForColumn(getColumn(table1, "SUB_TABLE_PER_CLASS_EXPLICITE_NAME_COLUMN"), table1));
 
-		Assertions.assertEquals("subEntityTablePerClass2Attribute", provider.getMethodNameForColumn(getColumn("SUBENTITY_TABLE_PER_CLASS_2", "SUBENTITYTABLEPERCLASS2ATTRIBUTE")));
+		Table table2 = getTable("SUBENTITY_TABLE_PER_CLASS_2");
+		Assertions.assertEquals("subEntityTablePerClass2Attribute", provider.getMethodNameForColumn(getColumn(table2, "SUBENTITYTABLEPERCLASS2ATTRIBUTE"), table2));
 	}
 
 	@Test
 	void testGetMethodNameForForeignKey() throws Exception {
-		Assertions.assertEquals("subJoinedManyToOne", provider.getMethodNameForReference(getForeignKey("SUB_ENTITY_JOINED_1", "SUBJOINEDMANYTOONE_ID")));
-		Assertions.assertEquals("refEntity2", provider.getMethodNameForReference(getForeignKey("REFERENCEDENTITY1", "REFENTITY2_ID1")));
+		Table table1 = getTable("SUB_ENTITY_JOINED_1");
+		Assertions.assertEquals("subJoinedManyToOne", provider.getMethodNameForReference(getForeignKey(table1, "SUBJOINEDMANYTOONE_ID")));
+		
+		Table table2 = getTable("REFERENCEDENTITY1");
+		Assertions.assertEquals("refEntity2", provider.getMethodNameForReference(getForeignKey(table2, "REFENTITY2_ID1")));
 	}
 
 	@Test
 	void testGetDataType() throws Exception {
-			Assertions.assertEquals("java.lang.Long", provider.getCanonicalDataTypeName(getColumn("REF_ENTITY_3", "ID")));
-			Assertions.assertEquals("long", provider.getCanonicalDataTypeName(getColumn("REFERENCEDENTITY1", "ID")));
-
-			Assertions.assertEquals("java.lang.Integer", provider.getCanonicalDataTypeName(getColumn("REFERENCEDENTITY1", "SUBENTITY_ID")));
+		Table table1 = getTable("REF_ENTITY_3");
+		Assertions.assertEquals("java.lang.Long", provider.getCanonicalDataTypeName(getColumn(table1, "ID"), table1));
+		
+		Table table2 = getTable("REFERENCEDENTITY1");
+		Assertions.assertEquals("long", provider.getCanonicalDataTypeName(getColumn(table2, "ID"), table2));
+		Assertions.assertEquals("java.lang.Integer", provider.getCanonicalDataTypeName(getColumn(table2, "SUBENTITY_ID"), table2));
 	}
 
 	@Test
 	void testGetDataTypeForEmbedded() throws Exception {
-			Assertions.assertEquals("long", provider.getCanonicalDataTypeName(getColumn("REFERENCEDENTITY1", "EMBEDDEDLONGATTRIBUTE")));
+		Table table = getTable("REFERENCEDENTITY1");
+		Assertions.assertEquals("long", provider.getCanonicalDataTypeName(getColumn(table, "EMBEDDEDLONGATTRIBUTE"), table));
 	}
 
 	@Test
 	void testGetMethodNameForForeignKeyColumn() throws Exception {
-		Assertions.assertEquals("refEntity2Id2", provider.getMethodNameForForeignKeyColumn(
-				getForeignKey("REFERENCEDENTITY1", "REFENTITY2_ID_2"),
-				getColumn("REF_ENTITY_2", "ID_2"),
-				getColumn("REFERENCEDENTITY1", "REFENTITY2_ID_2")));
-		Assertions.assertEquals("referencedEntity2WithExpliciteJoinColumnsId2", provider.getMethodNameForForeignKeyColumn(
-				getForeignKey("REFERENCEDENTITY1", "REF_2_ID2"),
-				getColumn("REF_ENTITY_2", "ID_2"),
-				getColumn("REFERENCEDENTITY1", "REF_2_ID2")));
+		Table sourceTable = getTable("REFERENCEDENTITY1");
+		ForeignKey fk1 = getForeignKey(sourceTable, "REFENTITY2_ID_2");
+		ForeignKeyColumn fkCol1 = fk1.columns().stream()
+				.filter(fkCol -> fkCol.sourceColumn().name().equals("REFENTITY2_ID_2"))
+				.findFirst().orElseThrow();
+		Assertions.assertEquals("refEntity2Id2", provider.getMethodNameForForeignKeyColumn(fkCol1, sourceTable));
+		
+		ForeignKey fk2 = getForeignKey(sourceTable, "REF_2_ID2");
+		ForeignKeyColumn fkCol2 = fk2.columns().stream()
+				.filter(fkCol -> fkCol.sourceColumn().name().equals("REF_2_ID2"))
+				.findFirst().orElseThrow();
+		Assertions.assertEquals("referencedEntity2WithExpliciteJoinColumnsId2", provider.getMethodNameForForeignKeyColumn(fkCol2, sourceTable));
 	}
 
 	@Test
 	void testFallBackToDefaultImplementation() throws Exception {
-		Assertions.assertEquals("NonMappedTable", provider.getClassNameForTable(getTable("NON_MAPPED_TABLE")));
-		Assertions.assertEquals("normalColumn", provider.getMethodNameForColumn(getColumn("NON_MAPPED_TABLE", "NORMAL_COLUMN")));
-		Assertions.assertEquals("fkManagedsuperclassjoined", provider.getMethodNameForReference(getForeignKey("NON_MAPPED_TABLE", "FK")));
-		Assertions.assertEquals("fkManagedsuperclassjoinedId", provider.getMethodNameForForeignKeyColumn(getForeignKey("NON_MAPPED_TABLE", "FK"), getColumn("MANAGEDSUPERCLASSJOINED", "ID"), getColumn("NON_MAPPED_TABLE", "FK")));
+		Table table = getTable("NON_MAPPED_TABLE");
+		Assertions.assertEquals("NonMappedTable", provider.getClassNameForTable(table));
+		Assertions.assertEquals("normalColumn", provider.getMethodNameForColumn(getColumn(table, "NORMAL_COLUMN"), table));
+		Assertions.assertEquals("fkManagedsuperclassjoined", provider.getMethodNameForReference(getForeignKey(table, "FK")));
+		
+		ForeignKey fk = getForeignKey(table, "FK");
+		ForeignKeyColumn fkCol = fk.columns().stream()
+				.filter(fkColumn -> fkColumn.sourceColumn().name().equals("FK"))
+				.findFirst().orElseThrow();
+		Assertions.assertEquals("fkManagedsuperclassjoinedId", provider.getMethodNameForForeignKeyColumn(fkCol, table));
 	}
 
-	private Column getColumn(String tableName, String columnName) {
-		Table table = getTable(tableName);
-		if (table != null) {
-			Optional<Column> column = table.getColumns().stream()
-					.filter(c -> c.getName().equals(columnName))
-					.findAny();
-			if (column.isPresent()) {
-				return column.get();
-			}
-		}
-		return null;
+	private Column getColumn(Table table, String columnName) {
+		return table.findColumn(columnName).orElse(null);
 	}
 
 	private Table getTable(String tableName) {
-		return catalog.getTables().stream()
-                    .filter(t -> t.getName().equals(tableName))
-                    .findFirst().orElse(null);
+		return schemaResult.tables().stream()
+				.filter(t -> t.name().equalsIgnoreCase(tableName))
+				.findFirst().orElse(null);
 	}
 
-	private ForeignKey getForeignKey(String referencingTableName, String fkColumnName) {
-		return getTable(referencingTableName).getImportedForeignKeys().stream()
-				.filter(foreignKeyColumnReferences ->  foreignKeyColumnReferences.getColumnReferences().stream()
-						.anyMatch(foreignKeyColumnReference -> foreignKeyColumnReference.getForeignKeyColumn().getName().equals(fkColumnName)))
-				.findAny().orElse(null);
+	private ForeignKey getForeignKey(Table referencingTable, String fkColumnName) {
+		return referencingTable.outgoingForeignKeys().stream()
+				.filter(foreignKey -> foreignKey.columns().stream()
+						.anyMatch(fkCol -> fkCol.sourceColumn().name().equalsIgnoreCase(fkColumnName)))
+				.findFirst().orElse(null);
 	}
 }

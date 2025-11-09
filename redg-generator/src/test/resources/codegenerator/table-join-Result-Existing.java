@@ -117,7 +117,7 @@ public class ExistingGDemoUser extends GDemoUser {
     @Override
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[] {
-                new AttributeMetaInfo("ID", "DEMO_USER", "\"RT-CG-JT\".PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true)
+                new AttributeMetaInfo("ID", "DEMO_USER", "PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true)
         };
     }
 }

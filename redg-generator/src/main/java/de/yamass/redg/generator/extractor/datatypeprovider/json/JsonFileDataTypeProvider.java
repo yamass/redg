@@ -17,9 +17,9 @@
 package de.yamass.redg.generator.extractor.datatypeprovider.json;
 
 import de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider;
-import de.yamass.redg.generator.extractor.datatypeprovider.helpers.DataTypePrecisionHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import schemacrawler.schema.Column;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.Table;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,11 +72,14 @@ public class JsonFileDataTypeProvider implements DataTypeProvider {
     }
 
     @Override
-    public String getCanonicalDataTypeName(final Column column) {
+    public String getCanonicalDataTypeName(final Column column, final Table table) {
         if (typeMappings.getTableMappings() != null) {
-            final HashMap<String, String> tableMap = typeMappings.getTableMappings().get(column.getParent().getFullName());
+            String tableFullName = table.schemaName() != null && !table.schemaName().isEmpty() 
+                    ? table.schemaName() + "." + table.name() 
+                    : table.name();
+            final HashMap<String, String> tableMap = typeMappings.getTableMappings().get(tableFullName);
             if (tableMap != null) {
-                final String className = tableMap.get(column.getName());
+                final String className = tableMap.get(column.name());
                 if (className != null) {
                     return className;
                 }
@@ -84,7 +87,9 @@ public class JsonFileDataTypeProvider implements DataTypeProvider {
         }
         final HashMap<String, String> defaultMappings = typeMappings.getDefaultTypeMappings();
         if (defaultMappings != null) {
-            List<String> variants = DataTypePrecisionHelper.getDataTypeWithAllPrecisionVariants(column);
+            // Build type name variants with precision/scale
+            String typeName = column.type().getName();
+            List<String> variants = buildDataTypeVariants(typeName, column);
             for (final String variant : variants) {
                 final String defaultType = defaultMappings.get(variant);
                 if (defaultType != null) {
@@ -92,6 +97,22 @@ public class JsonFileDataTypeProvider implements DataTypeProvider {
                 }
             }
         }
-        return fallbackProvider.getCanonicalDataTypeName(column);
+        return fallbackProvider.getCanonicalDataTypeName(column, table);
+    }
+    
+    private List<String> buildDataTypeVariants(String typeName, Column column) {
+        List<String> variants = new java.util.ArrayList<>();
+        variants.add(typeName);
+        
+        // Add variants with precision/scale if applicable
+        if (column.type().getPrecision() > 0) {
+            if (column.type().isFixedPrecisionScale() && column.type().getMaximumScale() > 0) {
+                variants.add(typeName + "(" + column.type().getPrecision() + "," + column.type().getMaximumScale() + ")");
+            } else {
+                variants.add(typeName + "(" + column.type().getPrecision() + ")");
+            }
+        }
+        
+        return variants;
     }
 }

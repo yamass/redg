@@ -21,8 +21,6 @@ import de.yamass.redg.util.ScriptRunner;
 import org.assertj.core.api.Assertions;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Test;
-import schemacrawler.inclusionrule.ExcludeAll;
-import schemacrawler.inclusionrule.IncludeAll;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -42,8 +40,7 @@ class RedGGeneratorTest {
 
         Path p = Files.createTempDirectory("redg-test");
         RedGGenerator.generateCode(dataSource,
-                new IncludeAll(),
-                new IncludeAll(),
+                null, // schemas - null means all schemas
                 null,
                 "",
                 p,
@@ -77,8 +74,7 @@ class RedGGeneratorTest {
 
         Assertions.assertThatThrownBy(() -> {
                     RedGGenerator.generateCode(dataSource,
-                            new ExcludeAll(),
-                            new ExcludeAll(),
+                            java.util.Collections.emptyList(), // empty schemas list
                             null,
                             "",
                             p,
@@ -88,7 +84,7 @@ class RedGGeneratorTest {
                             null,
                             false);
                 }).isInstanceOf(RedGGenerationException.class)
-                .hasMessage("Crawling failed");
+                .hasMessage("No tables to process!");
 
     }
 
@@ -114,8 +110,7 @@ class RedGGeneratorTest {
 
         Assertions.assertThatThrownBy(() -> {
             RedGGenerator.generateCode(dataSource,
-                    new IncludeAll(),
-                    new IncludeAll(),
+                    null, // schemas - null means all schemas
                     null,
                     "",
                     p,

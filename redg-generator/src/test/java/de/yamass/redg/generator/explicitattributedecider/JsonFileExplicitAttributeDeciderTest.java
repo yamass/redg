@@ -17,16 +17,16 @@
 package de.yamass.redg.generator.explicitattributedecider;
 
 import de.yamass.redg.generator.extractor.explicitattributedecider.JsonFileExplicitAttributeDecider;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.DefaultDataType;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.ForeignKeyColumn;
+import de.yamass.redg.schema.model.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ColumnReference;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.Table;
 
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.sql.JDBCType;
 import java.util.Collections;
 
 class JsonFileExplicitAttributeDeciderTest {
@@ -35,74 +35,52 @@ class JsonFileExplicitAttributeDeciderTest {
         JsonFileExplicitAttributeDecider decider =
                 new JsonFileExplicitAttributeDecider(new InputStreamReader(getClass().getResourceAsStream("JsonFileExplicitAttributeDeciderTest.json")));
 
-        Table tableMock = Mockito.mock(Table.class);
-        Mockito.when(tableMock.getName()).thenReturn("TABLENAME");
-        Column columnMock = Mockito.mock(Column.class);
-        Mockito.when(columnMock.getName()).thenReturn("EXPLICIT");
-        Mockito.when(columnMock.getParent()).thenReturn(tableMock);
-        Assertions.assertTrue(decider.isExplicitAttribute(columnMock));
-
-        Mockito.when(columnMock.getName()).thenReturn("NONEXPLICIT");
-        Assertions.assertFalse(decider.isExplicitAttribute(columnMock));
+        Table table = new de.yamass.redg.schema.model.MutableTable(null, "TABLENAME");
+        DefaultDataType dataType = new DefaultDataType("VARCHAR", JDBCType.VARCHAR, JDBCType.VARCHAR.getVendorTypeNumber(), null, false, 0);
+        Column explicitColumn = new Column("EXPLICIT", dataType, true, false, table);
+        Column nonExplicitColumn = new Column("NONEXPLICIT", dataType, true, false, table);
+        
+        Assertions.assertTrue(decider.isExplicitAttribute(explicitColumn, table));
+        Assertions.assertFalse(decider.isExplicitAttribute(nonExplicitColumn, table));
     }
 
     @Test
     void isExplicitAttributeDefinitionMissing() throws Exception {
         JsonFileExplicitAttributeDecider decider =
                 new JsonFileExplicitAttributeDecider(new InputStreamReader(getClass().getResourceAsStream("JsonFileExplicitAttributeDeciderTest2.json")));
-        Table tableMock = Mockito.mock(Table.class);
-        Mockito.when(tableMock.getName()).thenReturn("TABLENAME");
-        Column columnMock = Mockito.mock(Column.class);
-        Mockito.when(columnMock.getName()).thenReturn("EXPLICIT");
-        Mockito.when(columnMock.getParent()).thenReturn(tableMock);
-        Assertions.assertFalse(decider.isExplicitAttribute(columnMock));
-
-        Mockito.when(columnMock.getName()).thenReturn("NONEXPLICIT");
-        Assertions.assertFalse(decider.isExplicitAttribute(columnMock));
+        Table table = new de.yamass.redg.schema.model.MutableTable(null, "TABLENAME");
+        DefaultDataType dataType = new DefaultDataType("VARCHAR", JDBCType.VARCHAR, JDBCType.VARCHAR.getVendorTypeNumber(), null, false, 0);
+        Column explicitColumn = new Column("EXPLICIT", dataType, true, false, table);
+        Column nonExplicitColumn = new Column("NONEXPLICIT", dataType, true, false, table);
+        
+        Assertions.assertFalse(decider.isExplicitAttribute(explicitColumn, table));
+        Assertions.assertFalse(decider.isExplicitAttribute(nonExplicitColumn, table));
     }
 
     @Test
     void isExplicitForeignKey() throws Exception {
         JsonFileExplicitAttributeDecider decider =
                 new JsonFileExplicitAttributeDecider(new InputStreamReader(getClass().getResourceAsStream("JsonFileExplicitAttributeDeciderTest.json")));
-        Table tableMock = Mockito.mock(Table.class);
-        Mockito.when(tableMock.getName()).thenReturn("TABLENAME");
+        Table sourceTable = new de.yamass.redg.schema.model.MutableTable(null, "TABLENAME");
+        Table targetTable = new de.yamass.redg.schema.model.MutableTable(null, "TARGET");
 
-        ForeignKey fk1Mock = Mockito.mock(ForeignKey.class);
+        DefaultDataType dataType = new DefaultDataType("VARCHAR", JDBCType.VARCHAR, JDBCType.VARCHAR.getVendorTypeNumber(), null, false, 0);
+        Column c1 = new Column("NOPE", dataType, true, false, sourceTable);
+        Column target1 = new Column("ID", dataType, true, false, targetTable);
+        ForeignKeyColumn fkCol1 = new ForeignKeyColumn(c1, target1);
+        ForeignKey fk1 = new ForeignKey("FK1", sourceTable, targetTable, Collections.singletonList(fkCol1));
 
-        ColumnReference fkcr1Mock = Mockito.mock(ColumnReference.class);
+        Assertions.assertFalse(decider.isExplicitForeignKey(fk1));
 
-        Column c1Mock = Mockito.mock(Column.class);
-        Mockito.when(c1Mock.getName()).thenReturn("NOPE");
-        Mockito.when(c1Mock.getParent()).thenReturn(tableMock);
+        Column c2 = new Column("FOREIGNKEY1", dataType, true, false, sourceTable);
+        Column c3 = new Column("PART2", dataType, true, false, sourceTable);
+        Column target2 = new Column("ID1", dataType, true, false, targetTable);
+        Column target3 = new Column("ID2", dataType, true, false, targetTable);
+        ForeignKeyColumn fkCol2 = new ForeignKeyColumn(c2, target2);
+        ForeignKeyColumn fkCol3 = new ForeignKeyColumn(c3, target3);
+        ForeignKey fk2 = new ForeignKey("FK2", sourceTable, targetTable, java.util.Arrays.asList(fkCol2, fkCol3));
 
-        Mockito.when(fkcr1Mock.getForeignKeyColumn()).thenReturn(c1Mock);
-
-        Mockito.when(fk1Mock.getColumnReferences()).thenReturn(Collections.singletonList(fkcr1Mock));
-
-        Assertions.assertFalse(decider.isExplicitForeignKey(fk1Mock));
-
-        ForeignKey fk2Mock = Mockito.mock(ForeignKey.class);
-
-        ColumnReference fkcr2Mock = Mockito.mock(ColumnReference.class);
-
-        Column c2Mock = Mockito.mock(Column.class);
-        Mockito.when(c2Mock.getName()).thenReturn("FOREIGNKEY1");
-        Mockito.when(c2Mock.getParent()).thenReturn(tableMock);
-
-        Mockito.when(fkcr2Mock.getForeignKeyColumn()).thenReturn(c2Mock);
-
-        ColumnReference fkcr3Mock = Mockito.mock(ColumnReference.class);
-
-        Column c3Mock = Mockito.mock(Column.class);
-        Mockito.when(c3Mock.getName()).thenReturn("PART2");
-        Mockito.when(c3Mock.getParent()).thenReturn(tableMock);
-
-        Mockito.when(fkcr3Mock.getForeignKeyColumn()).thenReturn(c3Mock);
-
-        Mockito.when(fk2Mock.getColumnReferences()).thenReturn(Arrays.asList(fkcr2Mock, fkcr3Mock));
-
-        Assertions.assertTrue(decider.isExplicitForeignKey(fk2Mock));
+        Assertions.assertTrue(decider.isExplicitForeignKey(fk2));
     }
 
 }

@@ -85,7 +85,7 @@ public class DataExtractor {
     }
 
     private String getFullTableName(final TableModel tm) {
-        if (this.sqlSchemaName != null) {
+        if (this.sqlSchemaName != null && !this.sqlSchemaName.isEmpty()) {
             // goal: keep escaping of table name if it is escaped in #getSqlFullName()
             // thus we split it with a regex at the last point
             final Matcher tableNameMatcher = TABLE_NAME_EXTRACTOR_PATTERN.matcher(tm.getSqlFullName());
@@ -97,10 +97,32 @@ public class DataExtractor {
                 // thus, use whole value
                 escapedTableName = tm.getSqlFullName();
             }
-            if (this.sqlSchemaName.isEmpty()) {
-                return escapedTableName;
+            
+            // H2 has issues with mixed-quoted identifiers like "CATALOG".SCHEMA."table"
+            // When the catalog is quoted but schema is not, and table is quoted, H2 fails to parse.
+            // Solution: If sqlSchemaName contains a quoted catalog (starts with quote and contains a dot),
+            // we need to ensure all parts are consistently quoted.
+            // Example: "REDG-EXTRACTOR-SOURCE".PUBLIC."user" should become "REDG-EXTRACTOR-SOURCE"."PUBLIC"."user"
+            if (this.sqlSchemaName.startsWith("\"") && this.sqlSchemaName.contains(".")) {
+                // Extract catalog and schema from sqlSchemaName (format: "CATALOG".SCHEMA)
+                int lastDotIndex = this.sqlSchemaName.lastIndexOf('.');
+                if (lastDotIndex > 0) {
+                    String catalogPart = this.sqlSchemaName.substring(0, lastDotIndex); // "CATALOG"
+                    String schemaPart = this.sqlSchemaName.substring(lastDotIndex + 1); // SCHEMA
+                    // Ensure table name is quoted if it's a reserved word (like "user")
+                    // Quote the schema part for consistency: "CATALOG"."SCHEMA"."table"
+                    String quotedTableName = escapedTableName.startsWith("\"") ? escapedTableName : "\"" + escapedTableName + "\"";
+                    return catalogPart + ".\"" + schemaPart + "\"." + quotedTableName;
+                }
             }
-            return this.sqlSchemaName + (this.sqlSchemaName.endsWith(".") ? "" : ".") + escapedTableName;
+            
+            // If sqlSchemaName already contains a dot (like "CATALOG.SCHEMA"), use it as-is
+            // Otherwise, add a dot between schema and table name
+            if (this.sqlSchemaName.endsWith(".")) {
+                return this.sqlSchemaName + escapedTableName;
+            } else {
+                return this.sqlSchemaName + "." + escapedTableName;
+            }
         }
         return tm.getSqlFullName();
     }
@@ -116,8 +138,10 @@ public class DataExtractor {
             st.setFetchSize(50);
 
             for (final TableModel tableModel : tableModels) {
-                LOG.debug("Fetching data from table {}...", getFullTableName(tableModel));
-                final ResultSet rs = st.executeQuery(String.format(SELECT_FORMAT_STRING, getFullTableName(tableModel)));
+                String fullTableName = getFullTableName(tableModel);
+                LOG.debug("Fetching data from table {}...", fullTableName);
+                // Don't use String.format as it might cause issues with quoted identifiers in some cases
+                final ResultSet rs = st.executeQuery("SELECT * FROM " + fullTableName);
                 long counter = 0;
                 while (rs.next()) {
                     ++counter;
@@ -158,7 +182,7 @@ public class DataExtractor {
                         }
                         if (value != null) {
                             entityModel.addValues(cm.getJavaPropertyName(), new EntityModel.ValueModel(
-                                    jcrProvider.getCodeForColumnValue(value, cm.getSqlTypeName(), cm.getSqlTypeInt(), cm.getJavaTypeName()),
+                                    jcrProvider.getCodeForColumnValue(value, cm.getDbTypeName(), cm.getSqlTypeInt(), cm.getJavaTypeName()),
                                     cm.isPartOfForeignKey() ? EntityModel.ValueModel.ForeignKeyState.FK : EntityModel.ValueModel.ForeignKeyState.NON_FK));
                         }
                     }

@@ -17,6 +17,7 @@
 package de.yamass.redg.generator.nameprovider;
 
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
+import de.yamass.redg.schema.model.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -42,16 +43,17 @@ class DefaultNameProviderTest {
     @Test
     void testMethodNameGeneration() {
         DefaultNameProvider provider = new DefaultNameProvider();
-        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_NAME", null)));
-        Assertions.assertEquals("lastname", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LASTNAME", null)));
-        Assertions.assertEquals("last123Name", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_123_NAME", null)));
-        Assertions.assertEquals("last123name", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_123NAME", null)));
-        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("123_LAST_NAME", null)));
-        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("123LAST_NAME", null)));
-        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_ÜÄÖ_NAME", null)));
-        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_ÜÄÖNAME", null)));
-        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("ÜÄÖ_LAST_NAME", null)));
-        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("ÜÄÖLAST_NAME", null)));
+        Table dummyTable = DummyDatabaseStructureProvider.getDummyTable("DUMMY_TABLE");
+        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_NAME", null), dummyTable));
+        Assertions.assertEquals("lastname", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LASTNAME", null), dummyTable));
+        Assertions.assertEquals("last123Name", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_123_NAME", null), dummyTable));
+        Assertions.assertEquals("last123name", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_123NAME", null), dummyTable));
+        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("123_LAST_NAME", null), dummyTable));
+        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("123LAST_NAME", null), dummyTable));
+        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_ÜÄÖ_NAME", null), dummyTable));
+        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("LAST_ÜÄÖNAME", null), dummyTable));
+        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("ÜÄÖ_LAST_NAME", null), dummyTable));
+        Assertions.assertEquals("lastName", provider.getMethodNameForColumn(DummyDatabaseStructureProvider.getDummyColumn("ÜÄÖLAST_NAME", null), dummyTable));
     }
 
     @Test
@@ -60,7 +62,7 @@ class DefaultNameProviderTest {
         Assertions.assertEquals("creatorUser", provider.getMethodNameForReference(DummyDatabaseStructureProvider.getSimpleForeignKey("creator", "X", "User")));
 
         Assertions.assertEquals("blogPostCreator", provider.getMethodNameForReference(
-                DummyDatabaseStructureProvider.getMultiPartForeignKey("FK_BLOG_POST_CREATOR_USER", "User")));
+                DummyDatabaseStructureProvider.getMultiPartForeignKey("FK_BLOG_POST_CREATOR", "User")));
     }
 
     @Test
@@ -69,8 +71,8 @@ class DefaultNameProviderTest {
         Assertions.assertEquals("referencingsForCreatorUser", provider.getMethodNameForIncomingForeignKey(
                 DummyDatabaseStructureProvider.getSimpleForeignKey("creator", "Referencing", "User")));
 
-        Assertions.assertEquals("usersForBlogPostCreator", provider.getMethodNameForIncomingForeignKey(
-                DummyDatabaseStructureProvider.getMultiPartForeignKey("FK_BLOG_POST_CREATOR_USER", "User")));
+        Assertions.assertEquals("sourceTablesForBlogPostCreator", provider.getMethodNameForIncomingForeignKey(
+                DummyDatabaseStructureProvider.getMultiPartForeignKey("FK_BLOG_POST_CREATOR", "User")));
     }
 
 

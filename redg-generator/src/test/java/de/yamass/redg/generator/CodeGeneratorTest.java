@@ -16,11 +16,7 @@
 
 package de.yamass.redg.generator;
 
-import de.yamass.redg.generator.extractor.DataTypeExtractor;
-import de.yamass.redg.generator.extractor.DatabaseManager;
-import de.yamass.redg.generator.extractor.MetadataExtractor;
-import de.yamass.redg.generator.extractor.TableExtractor;
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
+import de.yamass.redg.generator.extractor.conveniencesetterprovider.ConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.ExplicitAttributeDecider;
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
@@ -30,9 +26,6 @@ import de.yamass.redg.util.ScriptRunner;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import schemacrawler.inclusionrule.IncludeAll;
-import schemacrawler.inclusionrule.InclusionRule;
-import schemacrawler.schema.*;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -43,34 +36,31 @@ import java.util.Objects;
 
 public class CodeGeneratorTest {
 
-    public static final InclusionRule NO_INFORMATION_SCHEMA_INCLUSION_RULE = s -> !s.toLowerCase().replace("\"", "").contains(".information_schema");
-
     @Test
     void testGenerateCodeForTable() throws Exception {
         DataSource dataSource = JdbcConnectionPool.create("jdbc:h2:mem:rt-cg-tt", "", "");
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         Assertions.assertNotNull(tempFile);
         ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
-        Assertions.assertNotNull(db);
-        Schema s = db.getSchemas().stream().filter(schema -> schema.getName().equals("PUBLIC")).findFirst().orElse(null);
-        Assertions.assertNotNull(s);
-        Table t = db.getTables(s).stream().filter(table -> table.getName().equals("DEMO_USER")).findFirst().orElse(null);
-        Assertions.assertNotNull(t);
 
-        MetadataExtractor metadataExtractor = new MetadataExtractor(new DataTypeExtractor(), new TableExtractor("G", "de.yamass.redg.generated",
-                new DefaultDataTypeProvider(), new DefaultNameProvider(), new ExplicitAttributeDecider() {
-            @Override
-            public boolean isExplicitAttribute(final Column column) {
-                return column.getName().equals("DTYPE");
-            }
+        List<TableModel> models = RedGGenerator.transformSchemaModel(
+                RedGGenerator.inspectSchemas(dataSource, null),
+                "G",
+                "de.yamass.redg.generated",
+                new DefaultDataTypeProvider(),
+                new DefaultNameProvider(),
+                new ExplicitAttributeDecider() {
+                    @Override
+                    public boolean isExplicitAttribute(final de.yamass.redg.schema.model.Column column, final de.yamass.redg.schema.model.Table table) {
+                        return column.name().equals("DTYPE");
+                    }
 
-            @Override
-            public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
-                return false;
-            }
-        }, new DefaultConvenienceSetterProvider()));
-        List<TableModel> models = metadataExtractor.extract(db);
+                    @Override
+                    public boolean isExplicitForeignKey(final de.yamass.redg.schema.model.ForeignKey foreignKey) {
+                        return false;
+                    }
+                },
+                ConvenienceSetterProvider.NONE);
         TableModel model = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 
@@ -91,18 +81,15 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-multipart-fk.sql");
         Assertions.assertNotNull(tempFile);
         ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
-        Assertions.assertNotNull(db);
-        Schema s = db.getSchemas().stream()
-                .filter(schema -> schema.getName().equals("PUBLIC"))
-                .findFirst().orElse(null);
-        Assertions.assertNotNull(s);
-        Table t = db.getTables(s).stream()
-                .filter(table -> table.getName().equals("DEMO_USER"))
-                .findFirst().orElse(null);
-        Assertions.assertNotNull(t);
 
-        List<TableModel> models = new MetadataExtractor().extract(db);
+        List<TableModel> models = RedGGenerator.transformSchemaModel(
+                RedGGenerator.inspectSchemas(dataSource, null),
+                Constants.DEFAULT_CLASS_PREFIX,
+                Constants.DEFAULT_TARGET_PACKAGE,
+                new DefaultDataTypeProvider(),
+                new DefaultNameProvider(),
+                new de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider(),
+                ConvenienceSetterProvider.NONE);
         TableModel demoUser = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         TableModel demoCompany = models.stream().filter(m -> Objects.equals("DemoCompany", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(demoUser);
@@ -133,10 +120,15 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         Assertions.assertNotNull(tempFile);
         ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
-        Assertions.assertNotNull(db);
 
-        List<TableModel> models = new MetadataExtractor().extract(db);
+        List<TableModel> models = RedGGenerator.transformSchemaModel(
+                RedGGenerator.inspectSchemas(dataSource, List.of("PUBLIC")),
+                Constants.DEFAULT_CLASS_PREFIX,
+                Constants.DEFAULT_TARGET_PACKAGE,
+                new DefaultDataTypeProvider(),
+                new DefaultNameProvider(),
+                new de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider(),
+                ConvenienceSetterProvider.NONE);
 
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateMainClass(models, false);
@@ -150,10 +142,15 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-join-table.sql");
         Assertions.assertNotNull(tempFile);
         ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
-        Assertions.assertNotNull(db);
 
-        List<TableModel> models = new MetadataExtractor().extract(db);
+        List<TableModel> models = RedGGenerator.transformSchemaModel(
+                RedGGenerator.inspectSchemas(dataSource, null),
+                Constants.DEFAULT_CLASS_PREFIX,
+                Constants.DEFAULT_TARGET_PACKAGE,
+                new DefaultDataTypeProvider(),
+                new DefaultNameProvider(),
+                new de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider(),
+                ConvenienceSetterProvider.NONE);
         TableModel model = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 
@@ -174,21 +171,21 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test-date-convenience.sql");
         Assertions.assertNotNull(tempFile);
         ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
-        Assertions.assertNotNull(db);
 
-        TableExtractor tableExtractor = new TableExtractor(
-                TableExtractor.DEFAULT_CLASS_PREFIX,
-                TableExtractor.DEFAULT_TARGET_PACKAGE,
-                null, null, null, (column, javaDataTypeName) -> {
+        List<TableModel> models = RedGGenerator.transformSchemaModel(
+                RedGGenerator.inspectSchemas(dataSource, null),
+                Constants.DEFAULT_CLASS_PREFIX,
+                Constants.DEFAULT_TARGET_PACKAGE,
+                new DefaultDataTypeProvider(),
+                new DefaultNameProvider(),
+                new de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider(),
+                (column, table, javaDataTypeName) -> {
                     if (javaDataTypeName.equals("java.sql.Timestamp")) {
                         return Collections.singletonList(new ConvenienceSetterModel("java.util.String", "de.yamass.redg.runtime.util.DateConverter.convertDate"));
                     } else {
                         return Collections.emptyList();
                     }
-                }
-        );
-        List<TableModel> models = new MetadataExtractor(new DataTypeExtractor(), tableExtractor).extract(db);
+                });
         TableModel model = models.stream().filter(m -> Objects.equals("DatesTable", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 
@@ -208,26 +205,25 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         Assertions.assertNotNull(tempFile);
         ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
-        Assertions.assertNotNull(db);
-        Schema s = db.getSchemas().stream().filter(schema -> schema.getName().equals("PUBLIC")).findFirst().orElse(null);
-        Assertions.assertNotNull(s);
-        Table t = db.getTables(s).stream().filter(table -> table.getName().equals("DEMO_USER")).findFirst().orElse(null);
-        Assertions.assertNotNull(t);
 
-        List<TableModel> models = new MetadataExtractor(new DataTypeExtractor(), new TableExtractor("G", "de.yamass.redg.generated",
-		        new DefaultDataTypeProvider(), new DefaultNameProvider(), new ExplicitAttributeDecider() {
-	        @Override
-	        public boolean isExplicitAttribute(final Column column) {
-		        return column.getName().equals("DTYPE");
-	        }
+        List<TableModel> models = RedGGenerator.transformSchemaModel(
+                RedGGenerator.inspectSchemas(dataSource, null),
+                "G",
+                "de.yamass.redg.generated",
+                new DefaultDataTypeProvider(),
+                new DefaultNameProvider(),
+                new ExplicitAttributeDecider() {
+                    @Override
+                    public boolean isExplicitAttribute(final de.yamass.redg.schema.model.Column column, final de.yamass.redg.schema.model.Table table) {
+                        return column.name().equals("DTYPE");
+                    }
 
-	        @Override
-	        public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
-		        return false;
-	        }
-        },
-		        new DefaultConvenienceSetterProvider())).extract(db);
+                    @Override
+                    public boolean isExplicitForeignKey(final de.yamass.redg.schema.model.ForeignKey foreignKey) {
+                        return false;
+                    }
+                },
+                ConvenienceSetterProvider.NONE);
         TableModel model = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 
@@ -248,10 +244,15 @@ public class CodeGeneratorTest {
         File tempFile = Helpers.getResourceAsFile("codegenerator/test.sql");
         Assertions.assertNotNull(tempFile);
         ScriptRunner.executeScripts(dataSource, new File[]{tempFile});
-        Catalog db = DatabaseManager.crawlDatabase(dataSource, NO_INFORMATION_SCHEMA_INCLUSION_RULE, new IncludeAll());
-        Assertions.assertNotNull(db);
 
-        List<TableModel> models = new MetadataExtractor().extract(db);
+        List<TableModel> models = RedGGenerator.transformSchemaModel(
+                RedGGenerator.inspectSchemas(dataSource, List.of("PUBLIC")),
+                Constants.DEFAULT_CLASS_PREFIX,
+                Constants.DEFAULT_TARGET_PACKAGE,
+                new DefaultDataTypeProvider(),
+                new DefaultNameProvider(),
+                new de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider(),
+                ConvenienceSetterProvider.NONE);
 
         CodeGenerator cg = new CodeGenerator();
         String result = cg.generateMainClass(models, true);
@@ -260,6 +261,13 @@ public class CodeGeneratorTest {
     }
 
     private void compareResultWithExpected(String resourcePath, String actual) {
+//	    try {
+//		    Path path = Path.of("./src/test/resources").resolve(resourcePath);
+//		    System.out.println(path.toAbsolutePath().toString());
+//		    Files.writeString(path, actual);
+//	    } catch (IOException e) {
+//		    e.printStackTrace();
+//	    }
         String expected = Helpers.getResourceAsString(resourcePath);
         expected = expected.replaceAll("private static String serializedTableModel = .*", "");
         actual = actual.replaceAll("private static String serializedTableModel = .*", "");

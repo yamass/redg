@@ -16,21 +16,23 @@
 
 package de.yamass.redg.generator.extractor.datatypeprovider;
 
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.Table;
 import org.jspecify.annotations.NonNull;
-import schemacrawler.schema.Column;
 
 /**
  * Common interface for all data type providers, that are able to decide the java data type for a database column
  */
 public interface DataTypeProvider {
     /**
-     * Called by during the model data extraction process for each column that is being processed with the current column as the parameter.
+     * Called during the model data extraction process for each column that is being processed with the current column as the parameter.
      * This method has to decide on the data type that will later represent this column in the generated java code.
      * <p>
-     * Information about the {@link schemacrawler.schema.Table} can be obtained by calling {@link Column#getParent()}.<p>
-     * Information about the SQL Data type and what schemacrawler recommends can be obtained by calling {@link Column#getColumnDataType()}.
+     * Information about the table can be obtained from the column's context.<p>
+     * Information about the SQL Data type can be obtained from the column's type.
      * @param column The current column
+     * @param table The table that contains the column
      * @return The canonical name of the data type to use for the given column
      */
-    @NonNull String getCanonicalDataTypeName(Column column);
+    @NonNull String getCanonicalDataTypeName(Column column, Table table);
 }

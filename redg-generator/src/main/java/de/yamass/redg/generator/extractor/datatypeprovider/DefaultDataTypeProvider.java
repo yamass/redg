@@ -16,24 +16,34 @@
 
 package de.yamass.redg.generator.extractor.datatypeprovider;
 
+import de.yamass.redg.generator.utils.TypeMap;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.Table;
 import org.jspecify.annotations.NonNull;
-import schemacrawler.schema.Column;
 
 /**
- * The default data type provider, used if nothing else is specified
+ * The default data type provider, used if nothing else is specified.
  */
 public class DefaultDataTypeProvider implements DataTypeProvider {
 
     /**
-     * Simply returns the data type advised by SchemaCrawler.
+     * Returns the Java class name based on the JDBC type mapping.
+     * For arrays, this returns the base type's mapped class (not the array class).
      *
      * This needs to be based on columns because the column definition adds parameters to the type! E.g. VARCHAR(10), NUMBER(22, 2).
      *
      * @param column The current column
-     * @return The data type advised by SchemaCrawler
+     * @param table The table containing the column
+     * @return The canonical name of the Java class that corresponds to the column's JDBC type
      */
     @Override
-    public @NonNull String getCanonicalDataTypeName(Column column) {
-        return column.getColumnDataType().getTypeMappedClass().getCanonicalName();
+    public @NonNull String getCanonicalDataTypeName(Column column, Table table) {
+        de.yamass.redg.schema.model.DataType dataType = column.type();
+        
+        if (dataType.isArray() && dataType.getBaseType() != null) {
+            return TypeMap.getCanonicalName(dataType.getBaseType().getJdbcType());
+        }
+        
+        return TypeMap.getCanonicalName(dataType.getJdbcType());
     }
 }

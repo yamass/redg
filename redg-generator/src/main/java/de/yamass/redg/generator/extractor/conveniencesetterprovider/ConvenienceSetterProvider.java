@@ -16,14 +16,16 @@
 
 package de.yamass.redg.generator.extractor.conveniencesetterprovider;
 
-import java.util.List;
-
-
 import de.yamass.redg.models.ConvenienceSetterModel;
-import schemacrawler.schema.Column;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.Table;
+
+import java.util.List;
 
 public interface ConvenienceSetterProvider {
 
-    List<ConvenienceSetterModel> getConvenienceSetters(Column column, String javaDataTypeName);
+	ConvenienceSetterProvider NONE = (c, t, type) -> List.of();
+
+    List<ConvenienceSetterModel> getConvenienceSetters(Column column, Table table, String javaDataTypeName);
 
 }

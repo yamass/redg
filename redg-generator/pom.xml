@@ -39,16 +39,8 @@
             <artifactId>redg-models</artifactId>
         </dependency>
         <dependency>
-            <groupId>us.fatehi</groupId>
-            <artifactId>schemacrawler</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>us.fatehi</groupId>
-            <artifactId>schemacrawler-postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>us.fatehi</groupId>
-            <artifactId>schemacrawler-mysql</artifactId>
+            <groupId>de.yamass</groupId>
+            <artifactId>redg-schema-inspection</artifactId>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>

@@ -81,12 +81,6 @@ public class TableModel implements Serializable {
         return columns;
     }
 
-    public ColumnModel getColumnByName(final String name) {
-        return columns.stream()
-                .filter(c -> c.getJavaPropertyName().equals(name))
-                .findFirst().orElse(null);
-    }
-
     public ColumnModel getColumnBySQLName(final String name) {
         return columns.stream()
                 .filter(c -> c.getDbName().equals(name))
@@ -163,12 +157,6 @@ public class TableModel implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    public List<ColumnModel> getNonPrimaryKeyColumns() {
-        return columns.stream()
-                .filter(c -> !c.isPartOfPrimaryKey())
-                .collect(Collectors.toList());
-    }
-
     public List<ColumnModel> getNonPrimaryKeyNonFKColumns() {
         return columns.stream()
                 .filter(c -> !c.isPartOfPrimaryKey())
@@ -195,11 +183,6 @@ public class TableModel implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    public List<ColumnModel> getNonExplicitAttributes() {
-        return columns.stream()
-                .filter((columnModel) -> !columnModel.isExplicitAttribute())
-                .collect(Collectors.toList());
-    }
     public List<ColumnModel> getNonExplicitNonFKAttributes() {
         return columns.stream()
                 .filter((columnModel) -> !columnModel.isExplicitAttribute())

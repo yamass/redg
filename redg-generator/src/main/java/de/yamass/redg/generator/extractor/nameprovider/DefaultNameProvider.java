@@ -17,10 +17,9 @@
 package de.yamass.redg.generator.extractor.nameprovider;
 
 import de.yamass.redg.generator.utils.NameUtils;
-
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.Table;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.Table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +40,7 @@ public class DefaultNameProvider implements NameProvider {
     @Override
     public String getClassNameForTable(final Table table) {
         final StringBuilder classNameBuilder = new StringBuilder();
-        final List<String> words = new ArrayList<>(Arrays.asList(table.getName()
+        final List<String> words = new ArrayList<>(Arrays.asList(table.name()
                 .toUpperCase()
                 .replaceAll("(^[0-9]+|[^A-Z0-9_-])", "") // Delete every not-alphanumeric or _/- character and numbers at beginning
                 .split("_")));
@@ -60,11 +59,12 @@ public class DefaultNameProvider implements NameProvider {
      * Example: FIRST_NAME -&gt; firstName
      *
      * @param column The database column
+     * @param table The table containing the column
      * @return The method name
      */
     @Override
-    public String getMethodNameForColumn(final Column column) {
-        return convertToJavaName(column.getName());
+    public String getMethodNameForColumn(final Column column, final Table table) {
+        return convertToJavaName(column.name());
     }
 
     public static String convertToJavaName(String columnName) {
@@ -85,8 +85,8 @@ public class DefaultNameProvider implements NameProvider {
     }
 
     @Override
-    public String getMethodNameForForeignKeyColumn(ForeignKey foreignKey, Column primaryKeyColumn, Column foreignKeyColumn) {
-        return getMethodNameForColumn(foreignKeyColumn);
+    public String getMethodNameForForeignKeyColumn(de.yamass.redg.schema.model.ForeignKeyColumn foreignKeyColumn, Table sourceTable) {
+        return getMethodNameForColumn(foreignKeyColumn.sourceColumn(), sourceTable);
     }
 
     /**
@@ -96,36 +96,39 @@ public class DefaultNameProvider implements NameProvider {
      */
     @Override
     public String getMethodNameForReference(final ForeignKey foreignKey) {
-        final Column c = foreignKey.getColumnReferences().get(0).getForeignKeyColumn();
-        // check if only one-column fk
-        if (foreignKey.getColumnReferences().size() == 1) {
-            return getMethodNameForColumn(c) + getClassNameForTable(c.getReferencedColumn().getParent());
+        // For our schema model, foreign keys have columns() which is a list of ForeignKeyColumn
+        if (foreignKey.columns().size() == 1) {
+            Column foreignKeyColumn = foreignKey.columns().get(0).sourceColumn();
+            Column primaryKeyColumn = foreignKey.columns().get(0).targetColumn();
+            return getMethodNameForColumn(foreignKeyColumn, foreignKey.sourceTable()) + getClassNameForTable(foreignKey.targetTable());
         }
 
+        // Multi-column foreign key - generate name from foreign key name if available, otherwise use source table name
+        String nameSource = foreignKey.name() != null && !foreignKey.name().isBlank() 
+                ? foreignKey.name() 
+                : foreignKey.sourceTable().name();
+        // Remove common prefixes like "FK_", "FK", "fk_", etc.
+        nameSource = nameSource.replaceFirst("^(?i)(FK_?|fk_?)", "");
+        final List<String> words = new ArrayList<>(Arrays.asList(nameSource
+                .toLowerCase()
+                .replaceAll("(^[0-9]+|[^a-z0-9_-])", "") // Delete every not-alphanumeric or _/- character and numbers at beginning
+                .split("_")));
+        words.removeAll(Arrays.asList("", null));
         final StringBuilder nameBuilder = new StringBuilder();
-        final List<String> words = new ArrayList<>(Arrays.asList(foreignKey.getName()
-                .toLowerCase()
-                .replaceAll("(^[0-9]+|[^a-z0-9_-])", "") // Delete every not-alphanumeric or _/- character and numbers at beginning
-                .split("_")));
-        words.removeAll(Arrays.asList("fk", "", null)); // removes FK_ prefix and empty entries
-        final List<String> tableWords = new ArrayList<>(Arrays.asList(c.getParent().getName()
-                .toLowerCase()
-                .replaceAll("(^[0-9]+|[^a-z0-9_-])", "") // Delete every not-alphanumeric or _/- character and numbers at beginning
-                .split("_")));
-        words.removeAll(tableWords);
-        nameBuilder.append(words.get(0));
-        for (int i = 1; i < words.size(); i++) {
-            String word = words.get(i);
-
-            nameBuilder.append(word.substring(0, 1).toUpperCase());
-            nameBuilder.append(word.substring(1));
+        if (!words.isEmpty()) {
+            nameBuilder.append(words.get(0));
+            for (int i = 1; i < words.size(); i++) {
+                String word = words.get(i);
+                nameBuilder.append(word.substring(0, 1).toUpperCase());
+                nameBuilder.append(word.substring(1));
+            }
         }
         return nameBuilder.toString();
     }
 
     @Override
     public String getMethodNameForIncomingForeignKey(ForeignKey foreignKey) {
-        Table referencingTable = foreignKey.getColumnReferences().get(0).getForeignKeyColumn().getParent();
+        Table referencingTable = foreignKey.sourceTable();
         return NameUtils.firstCharacterToLowerCase(getClassNameForTable(referencingTable))
                 + "sFor" + NameUtils.firstCharacterToUpperCase(getMethodNameForReference(foreignKey));
     }

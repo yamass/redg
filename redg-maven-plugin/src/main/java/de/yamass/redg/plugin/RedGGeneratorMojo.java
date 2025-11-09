@@ -18,12 +18,10 @@ package de.yamass.redg.plugin;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import de.yamass.redg.generator.Constants;
 import de.yamass.redg.generator.RedGGenerator;
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
-import de.yamass.redg.generator.extractor.TableExtractor;
 import de.yamass.redg.generator.extractor.conveniencesetterprovider.ConvenienceSetterProvider;
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.xml.XmlFileConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.NoPrimitiveTypesDataTypeProviderWrapper;
@@ -35,6 +33,8 @@ import de.yamass.redg.generator.extractor.explicitattributedecider.JsonFileExpli
 import de.yamass.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
 import de.yamass.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
 import de.yamass.redg.jpa.JpaMetamodelRedGProvider;
+import de.yamass.redg.plugin.config.ConvenienceSetterConfig;
+import de.yamass.redg.plugin.config.MojoConvenienceSetterProvider;
 import de.yamass.redg.util.ScriptRunner;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -43,7 +43,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import schemacrawler.inclusionrule.RegularExpressionInclusionRule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,6 +52,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The MOJO class for the RedG maven plugin
@@ -60,7 +62,7 @@ import java.sql.SQLException;
 @Mojo(name = "redg", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES)
 public class RedGGeneratorMojo extends AbstractMojo {
 
-    @Parameter(property = "redg.connectionString", defaultValue = "jdbc:h2:mem:redg;DB_CLOSE_DELAY=-1")
+    @Parameter(property = "redg.connectionString", required = true)
     private String connectionString;
 
     @Parameter(property = "redg.username")
@@ -69,7 +71,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
     @Parameter(property = "redg.password")
     private String password = "";
 
-    @Parameter(property = "redg.jdbcDriver", defaultValue = "org.h2.Driver")
+    @Parameter(property = "redg.jdbcDriver", required = true)
     private String jdbcDriver;
 
     @Parameter(property = "redg.enableVisualization")
@@ -83,6 +85,9 @@ public class RedGGeneratorMojo extends AbstractMojo {
 
     @Parameter(defaultValue = ".*")
     private String schemaRegex;
+
+    @Parameter
+    private List<String> schemas;
 
     @Parameter(defaultValue = "target/generated-test-sources/redg")
     private File outputDirectory;
@@ -100,7 +105,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
     private File customNameMappings;
 
     @Parameter
-    private File convenienceSetterConfig;
+    private ConvenienceSetterConfig[] convenienceSetters;
 
     @Parameter
     private JpaProviderConfig jpaProviderConfig;
@@ -109,10 +114,10 @@ public class RedGGeneratorMojo extends AbstractMojo {
     private boolean allowPrimitiveTypes = false;
 
     @Parameter
-    private String targetPackage = TableExtractor.DEFAULT_TARGET_PACKAGE;
+    private String targetPackage = Constants.DEFAULT_TARGET_PACKAGE;
 
     @Parameter
-    private String classPrefix = TableExtractor.DEFAULT_CLASS_PREFIX;
+    private String classPrefix = Constants.DEFAULT_CLASS_PREFIX;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -185,29 +190,59 @@ public class RedGGeneratorMojo extends AbstractMojo {
 
 
         ConvenienceSetterProvider convenienceSetterProvider;
-        if (convenienceSetterConfig != null) {
-            try {
-                convenienceSetterProvider =
-                        new XmlFileConvenienceSetterProvider(new InputStreamReader(new FileInputStream(convenienceSetterConfig), "UTF-8"));
-            } catch (IOException e) {
-                throw new MojoFailureException("Could not read convenience setter config.", e);
-            }
+        if (convenienceSetters != null && convenienceSetters.length > 0) {
+            convenienceSetterProvider = new MojoConvenienceSetterProvider(List.of(convenienceSetters));
         } else {
-            convenienceSetterProvider = new DefaultConvenienceSetterProvider();
+            convenienceSetterProvider = ConvenienceSetterProvider.NONE;
         }
 
         try {
-            RedGGenerator.generateCode(dataSource,
-                    new RegularExpressionInclusionRule(this.schemaRegex),
-                    new RegularExpressionInclusionRule(this.tablesRegex),
-                    targetPackage,
+            // Inspect schemas (pass null to inspect all schemas if schemas list is null)
+            de.yamass.redg.schema.model.SchemaInspectionResult schemaResult = RedGGenerator.inspectSchemas(dataSource, schemas);
+            
+            // Filter tables by schemaRegex and tablesRegex
+            Pattern schemaPattern = Pattern.compile(schemaRegex, Pattern.CASE_INSENSITIVE);
+            Pattern tablePattern = Pattern.compile(tablesRegex, Pattern.CASE_INSENSITIVE);
+            
+            List<de.yamass.redg.schema.model.Table> filteredTables = schemaResult.tables().stream()
+                    .filter(table -> {
+                        // Filter by schemaRegex (check schema name, which may include catalog prefix like "CATALOG.SCHEMA")
+                        String schemaName = table.schemaName() != null ? table.schemaName() : "";
+                        boolean schemaMatches = schemaPattern.matcher(schemaName).matches();
+                        // Also check if the full qualified name matches (for H2 which uses "CATALOG.SCHEMA" format)
+                        if (!schemaMatches && schemaName.contains(".")) {
+                            schemaMatches = schemaPattern.matcher(schemaName.substring(schemaName.lastIndexOf('.') + 1)).matches() ||
+                                    schemaPattern.matcher(schemaName).matches();
+                        }
+                        // Filter by tablesRegex
+                        boolean tableMatches = tablePattern.matcher(table.name()).matches();
+                        return schemaMatches && tableMatches;
+                    })
+                    .collect(Collectors.toList());
+            
+            if (filteredTables.isEmpty()) {
+                getLog().warn("No tables match the schemaRegex pattern: " + schemaRegex + " and tablesRegex pattern: " + tablesRegex);
+            }
+            
+            // Create a filtered SchemaInspectionResult
+            de.yamass.redg.schema.model.SchemaInspectionResult filteredResult = new de.yamass.redg.schema.model.SchemaInspectionResult(
+                    filteredTables,
+                    schemaResult.constraints(),
+                    schemaResult.udts()
+            );
+            
+            // Transform and generate code
+            List<de.yamass.redg.models.TableModel> tables = RedGGenerator.transformSchemaModel(
+                    filteredResult,
                     classPrefix,
-                    outputDirectory.toPath(),
+                    targetPackage,
                     dataTypeProvider,
                     nameProvider,
                     explicitAttributeDecider,
-                    convenienceSetterProvider,
-                    this.enableVisualizationSupport);
+                    convenienceSetterProvider);
+            
+            Path targetWithPkgFolders = RedGGenerator.createPackageFolderStructure(outputDirectory.toPath(), targetPackage);
+            new de.yamass.redg.generator.CodeGenerator().generate(tables, targetWithPkgFolders, this.enableVisualizationSupport);
         } catch (RedGGenerationException e) {
             throw new MojoFailureException("Code generation failed", e);
         }

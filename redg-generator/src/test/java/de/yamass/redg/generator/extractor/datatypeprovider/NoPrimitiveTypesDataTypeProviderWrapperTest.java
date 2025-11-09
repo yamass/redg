@@ -16,65 +16,70 @@
 
 package de.yamass.redg.generator.extractor.datatypeprovider;
 
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.DefaultDataType;
+import de.yamass.redg.schema.model.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import schemacrawler.schema.Column;
+import java.sql.JDBCType;
 
 class NoPrimitiveTypesDataTypeProviderWrapperTest {
+    private static final Table DUMMY_TABLE = new de.yamass.redg.schema.model.MutableTable(null, "DUMMY_TABLE");
+    private static final Column DUMMY_COLUMN = new Column("DUMMY_COL", new DefaultDataType("VARCHAR", JDBCType.VARCHAR, JDBCType.VARCHAR.getVendorTypeNumber(), null, false, 0), true, false, DUMMY_TABLE);
+    
     @Test
     void getDataTypeBoolean() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "boolean");
-        Assertions.assertEquals("java.lang.Boolean", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "boolean");
+        Assertions.assertEquals("java.lang.Boolean", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
     @Test
     void getDataTypeCharacter() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "char");
-        Assertions.assertEquals("java.lang.Character", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "char");
+        Assertions.assertEquals("java.lang.Character", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
     @Test
     void getDataTypeByte() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "byte");
-        Assertions.assertEquals("java.lang.Byte", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "byte");
+        Assertions.assertEquals("java.lang.Byte", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
     @Test
     void getDataTypeShort() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "short");
-        Assertions.assertEquals("java.lang.Short", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "short");
+        Assertions.assertEquals("java.lang.Short", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
     @Test
     void getDataTypeInteger() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "int");
-        Assertions.assertEquals("java.lang.Integer", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "int");
+        Assertions.assertEquals("java.lang.Integer", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
     @Test
     void getDataTypeLong() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "long");
-        Assertions.assertEquals("java.lang.Long", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "long");
+        Assertions.assertEquals("java.lang.Long", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
     @Test
     void getDataTypeFloat() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "float");
-        Assertions.assertEquals("java.lang.Float", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "float");
+        Assertions.assertEquals("java.lang.Float", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
     @Test
     void getDataTypeDouble() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "double");
-        Assertions.assertEquals("java.lang.Double", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "double");
+        Assertions.assertEquals("java.lang.Double", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
     @Test
     void getDataTypeNonPrimitiveType() throws Exception {
-        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper(column -> "java.lang.Double");
-        Assertions.assertEquals("java.lang.Double", provider.getCanonicalDataTypeName(Mockito.mock(Column.class)));
+        NoPrimitiveTypesDataTypeProviderWrapper provider = new NoPrimitiveTypesDataTypeProviderWrapper((column, table) -> "java.lang.Double");
+        Assertions.assertEquals("java.lang.Double", provider.getCanonicalDataTypeName(DUMMY_COLUMN, DUMMY_TABLE));
     }
 
 }

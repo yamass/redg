@@ -1,0 +1,6 @@
+{
+  "defaultTypeMappings": {
+    "VARCHAR": "java.lang.String"
+  }
+}
+

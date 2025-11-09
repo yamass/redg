@@ -17,23 +17,21 @@
 package de.yamass.redg.generator.extractor.datatypeprovider.xml;
 
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.DefaultDataType;
+import de.yamass.redg.schema.model.Table;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ColumnDataType;
-import schemacrawler.schema.Table;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.mockito.Mockito.when;
 
 class XmlFileDataTypeProviderTest {
     @Test
@@ -105,30 +103,25 @@ class XmlFileDataTypeProviderTest {
                 new DefaultTypeMapping(" TIMESTAMP  WITH    TIME ZONE ( 30 , 0 ) ", "java.sql.Timestamp")
         ));
 
-        ColumnDataType cdt = Mockito.mock(ColumnDataType.class);
-        when(cdt.getName()).thenReturn("DECIMAL");
-        Column column1 = Mockito.mock(Column.class);
-        when(column1.getColumnDataType()).thenReturn(cdt);
-        when(column1.getSize()).thenReturn(1);
-        when(column1.getDecimalDigits()).thenReturn(0);
+        Table dummyTable = new de.yamass.redg.schema.model.MutableTable(null, "DUMMY_TABLE");
+        
+        // Column 1: DECIMAL(1)
+        DefaultDataType decimal1Type = new DefaultDataType("DECIMAL", JDBCType.DECIMAL, JDBCType.DECIMAL.getVendorTypeNumber(), null, false, 0, 0, 0, 1, true, false);
+        Column column1 = new Column("COL1", decimal1Type, true, false, dummyTable);
 
-        Column column2 = Mockito.mock(Column.class);
-        when(column2.getColumnDataType()).thenReturn(cdt);
-        when(column2.getSize()).thenReturn(10);
-        when(column2.getDecimalDigits()).thenReturn(0);
+        // Column 2: DECIMAL(10)
+        DefaultDataType decimal10Type = new DefaultDataType("DECIMAL", JDBCType.DECIMAL, JDBCType.DECIMAL.getVendorTypeNumber(), null, false, 0, 0, 0, 10, true, false);
+        Column column2 = new Column("COL2", decimal10Type, true, false, dummyTable);
 
-        ColumnDataType timestampWithTimeZoneDataType = Mockito.mock(ColumnDataType.class);
-        when(timestampWithTimeZoneDataType.getName()).thenReturn("TIMESTAMP WITH TIME ZONE");
-        Column column3 = Mockito.mock(Column.class);
-        when(column3.getColumnDataType()).thenReturn(timestampWithTimeZoneDataType);
-        when(column3.getSize()).thenReturn(30);
-        when(column3.getDecimalDigits()).thenReturn(0);
+        // Column 3: TIMESTAMP WITH TIME ZONE(30, 0)
+        DefaultDataType timestampType = new DefaultDataType("TIMESTAMP WITH TIME ZONE", JDBCType.TIMESTAMP_WITH_TIMEZONE, JDBCType.TIMESTAMP_WITH_TIMEZONE.getVendorTypeNumber(), null, false, 0, 0, 0, 30, true, false);
+        Column column3 = new Column("COL3", timestampType, true, false, dummyTable);
 
         XmlFileDataTypeProvider dataTypeProvider = new XmlFileDataTypeProvider(typeMappings, new DefaultDataTypeProvider());
 
-        Assertions.assertEquals("java.lang.Boolean", dataTypeProvider.getDataTypeBySqlType(column1));
-        Assertions.assertEquals("java.lang.Long", dataTypeProvider.getDataTypeBySqlType(column2));
-        Assertions.assertEquals("java.sql.Timestamp", dataTypeProvider.getDataTypeBySqlType(column3));
+        Assertions.assertEquals("java.lang.Boolean", dataTypeProvider.getCanonicalDataTypeName(column1, dummyTable));
+        Assertions.assertEquals("java.lang.Long", dataTypeProvider.getCanonicalDataTypeName(column2, dummyTable));
+        Assertions.assertEquals("java.sql.Timestamp", dataTypeProvider.getCanonicalDataTypeName(column3, dummyTable));
     }
 
     @Test
@@ -137,7 +130,7 @@ class XmlFileDataTypeProviderTest {
         typeMappings.setDefaultTypeMappings(Collections.emptyList());
         XmlFileDataTypeProvider dataTypeProvider = new XmlFileDataTypeProvider(typeMappings, new DefaultDataTypeProvider());
 
-        Assertions.assertEquals("java.lang.Integer", dataTypeProvider.getCanonicalDataTypeName(createColumnMock()));
+        Assertions.assertEquals("java.math.BigDecimal", dataTypeProvider.getCanonicalDataTypeName(createColumnMock(), createTableMock()));
     }
 
     @Test
@@ -146,23 +139,17 @@ class XmlFileDataTypeProviderTest {
         typeMappings.setTableTypeMappings(Collections.emptyList());
         XmlFileDataTypeProvider dataTypeProvider = new XmlFileDataTypeProvider(typeMappings, new DefaultDataTypeProvider());
 
-        Assertions.assertEquals("java.lang.Integer", dataTypeProvider.getCanonicalDataTypeName(createColumnMock()));
+        Assertions.assertEquals("java.math.BigDecimal", dataTypeProvider.getCanonicalDataTypeName(createColumnMock(), createTableMock()));
     }
 
     private Column createColumnMock() {
-        Column columnMock = Mockito.mock(Column.class);
-        when(columnMock.getName()).thenReturn("MY_COLUMN");
-        ColumnDataType columnDataTypeMock = Mockito.mock(ColumnDataType.class);
-        when(columnDataTypeMock.getName()).thenReturn("NUMBER");
-        when(columnMock.getColumnDataType()).thenReturn(columnDataTypeMock);
-        when(columnMock.getColumnDataType()).thenReturn(columnDataTypeMock);
-        when(columnDataTypeMock.getTypeMappedClass()).then(invocationOnMock -> Integer.class);
-        when(columnMock.getSize()).thenReturn(23);
-        when(columnMock.getDecimalDigits()).thenReturn(10);
-        Table tableMock = Mockito.mock(Table.class);
-        when(tableMock.getName()).thenReturn("MY_TABLE");
-        when(columnMock.getParent()).thenReturn(tableMock);
-        return columnMock;
+        Table table = createTableMock();
+        DefaultDataType dataType = new DefaultDataType("NUMBER", JDBCType.NUMERIC, JDBCType.NUMERIC.getVendorTypeNumber(), null, false, 0, 10, 0, 23, true, false);
+        return new Column("MY_COLUMN", dataType, true, false, table);
+    }
+    
+    private Table createTableMock() {
+        return new de.yamass.redg.schema.model.MutableTable(null, "MY_TABLE");
     }
 
     private void assertEqualsIgnoreXmlWhiteSpaces(String expected, String actual) {

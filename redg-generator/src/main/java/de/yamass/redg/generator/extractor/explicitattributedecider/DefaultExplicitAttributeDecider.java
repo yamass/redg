@@ -16,13 +16,14 @@
 
 package de.yamass.redg.generator.extractor.explicitattributedecider;
 
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.Table;
 
 public class DefaultExplicitAttributeDecider implements ExplicitAttributeDecider{
 
     @Override
-    public boolean isExplicitAttribute(Column column) {
+    public boolean isExplicitAttribute(Column column, Table table) {
         return false;
     }
 

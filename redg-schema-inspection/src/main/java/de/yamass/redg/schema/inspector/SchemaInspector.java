@@ -1,0 +1,352 @@
+package de.yamass.redg.schema.inspector;
+
+import de.yamass.redg.DatabaseType;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.DataType;
+import de.yamass.redg.schema.model.DefaultDataType;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.ForeignKeyColumn;
+import de.yamass.redg.schema.model.SchemaInspectionResult;
+import de.yamass.redg.schema.model.Table;
+import de.yamass.redg.schema.model.Constraint;
+import de.yamass.redg.schema.model.Udt;
+import de.yamass.redg.schema.vendor.SchemaInfoRetriever;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+public class SchemaInspector {
+	private final DatabaseType databaseType;
+	private final DataSource dataSource;
+
+	public SchemaInspector(DatabaseType databaseType, DataSource dataSource) {
+		this.databaseType = databaseType;
+		this.dataSource = dataSource;
+	}
+
+	public SchemaInspectionResult inspectSchema(String schema) throws SQLException {
+		try (Connection connection = dataSource.getConnection()) {
+			return inspectSchema(connection, schema, SchemaInfoRetriever.byDatabaseType(databaseType));
+		}
+	}
+
+	private SchemaInspectionResult inspectSchema(Connection connection, String schema, SchemaInfoRetriever schemaInfoRetriever) throws SQLException {
+		DatabaseMetaData metadata = connection.getMetaData();
+		Map<QualifiedTableName, TableBuilder> tableBuilders = discoverTables(metadata, schema);
+		Map<QualifiedTableName, Set<String>> uniqueColumnNames = collectUniqueColumns(metadata, tableBuilders.keySet());
+		Map<QualifiedTableName, List<String>> primaryKeyColumns = collectPrimaryKeyColumns(metadata, tableBuilders.keySet());
+		String vendor = metadata.getDatabaseProductName() != null ? metadata.getDatabaseProductName() : "";
+
+		for (TableBuilder builder : tableBuilders.values()) {
+			loadColumns(connection, metadata, builder, uniqueColumnNames.getOrDefault(builder.key(), Collections.emptySet()), schemaInfoRetriever, schema);
+			builder.setPrimaryKeyColumnNames(primaryKeyColumns.getOrDefault(builder.key(), Collections.emptyList()));
+			builder.initializeTable();
+		}
+
+		List<ForeignKeySpec> foreignKeySpecs = collectForeignKeySpecs(metadata, tableBuilders.keySet());
+		buildForeignKeys(foreignKeySpecs, tableBuilders);
+
+		List<Table> tables = new ArrayList<>();
+		for (TableBuilder builder : tableBuilders.values()) {
+			tables.add(builder.table());
+		}
+
+		List<Constraint> constraints = schemaInfoRetriever.getConstraints(connection, schema);
+		List<Udt> udts = schemaInfoRetriever.getUdts(connection, schema);
+
+		return new SchemaInspectionResult(tables, constraints, udts);
+	}
+
+	private static Map<QualifiedTableName, TableBuilder> discoverTables(DatabaseMetaData metadata, String schema) throws SQLException {
+		Map<QualifiedTableName, TableBuilder> tables = new LinkedHashMap<>();
+		try (ResultSet rs = metadata.getTables(null, schema, "%", new String[]{"TABLE"})) {
+			while (rs.next()) {
+				String tableSchema = defaultIfBlank(rs.getString("TABLE_SCHEM"), schema);
+				String tableName = rs.getString("TABLE_NAME");
+				if (tableName == null) {
+					continue;
+				}
+				QualifiedTableName key = new QualifiedTableName(tableSchema, tableName);
+				tables.put(key, new TableBuilder(key));
+			}
+		}
+		return tables;
+	}
+
+	private static Map<QualifiedTableName, List<String>> collectPrimaryKeyColumns(DatabaseMetaData metadata, Collection<QualifiedTableName> qualifiedTableNames) throws SQLException {
+		Map<QualifiedTableName, List<String>> primaryKeyColumns = new LinkedHashMap<>();
+		for (QualifiedTableName qTableName : qualifiedTableNames) {
+			List<String> pkColumns = new ArrayList<>();
+			Map<Short, String> orderedPkColumns = new LinkedHashMap<>();
+			try (ResultSet pk = metadata.getPrimaryKeys(null, qTableName.schema(), qTableName.name())) {
+				while (pk.next()) {
+					Short keySeq = pk.getShort("KEY_SEQ");
+					String columnName = pk.getString("COLUMN_NAME");
+					if (columnName != null && keySeq != null) {
+						orderedPkColumns.put(keySeq, columnName);
+					}
+				}
+			}
+			// Sort by KEY_SEQ to maintain the correct order
+			orderedPkColumns.entrySet().stream()
+					.sorted(Map.Entry.comparingByKey())
+					.forEach(entry -> pkColumns.add(entry.getValue()));
+			primaryKeyColumns.put(qTableName, pkColumns);
+		}
+		return primaryKeyColumns;
+	}
+
+	private static Map<QualifiedTableName, Set<String>> collectUniqueColumns(DatabaseMetaData metadata, Collection<QualifiedTableName> qualifiedTableNames) throws SQLException {
+		Map<QualifiedTableName, Set<String>> uniqueColumns = new LinkedHashMap<>();
+		for (QualifiedTableName qTableName : qualifiedTableNames) {
+			Set<String> columns = new LinkedHashSet<>();
+			List<String> primaryKeyColumns = new ArrayList<>();
+			try (ResultSet pk = metadata.getPrimaryKeys(null, qTableName.schema(), qTableName.name())) {
+				while (pk.next()) {
+					String columnName = pk.getString("COLUMN_NAME");
+					if (columnName != null) {
+						primaryKeyColumns.add(columnName);
+					}
+				}
+			}
+			if (primaryKeyColumns.size() == 1) {
+				columns.add(primaryKeyColumns.get(0));
+			}
+
+			Map<String, List<String>> indexColumns = new LinkedHashMap<>();
+			try (ResultSet idx = metadata.getIndexInfo(null, qTableName.schema(), qTableName.name(), true, true)) {
+				while (idx.next()) {
+					String columnName = idx.getString("COLUMN_NAME");
+					String indexName = idx.getString("INDEX_NAME");
+					if (columnName == null || indexName == null) {
+						continue;
+					}
+					indexColumns.computeIfAbsent(indexName, ignored -> new ArrayList<>()).add(columnName);
+				}
+			}
+			for (List<String> indexColumnList : indexColumns.values()) {
+				if (indexColumnList.size() == 1) {
+					columns.add(indexColumnList.get(0));
+				}
+			}
+			uniqueColumns.put(qTableName, columns);
+		}
+		return uniqueColumns;
+	}
+
+	private static void loadColumns(Connection connection, DatabaseMetaData metadata, TableBuilder builder, Set<String> uniqueColumns, SchemaInfoRetriever schemaInfoRetriever, String schema) throws SQLException {
+		try (ResultSet cols = metadata.getColumns(null, builder.key().schema(), builder.key().name(), "%")) {
+			while (cols.next()) {
+				String columnName = cols.getString("COLUMN_NAME");
+				if (columnName == null) {
+					continue;
+				}
+				boolean nullable = "YES".equalsIgnoreCase(cols.getString("IS_NULLABLE"));
+				boolean unique = uniqueColumns.contains(columnName);
+				DataType dataType = buildDataType(connection, metadata, cols, schemaInfoRetriever, schema, builder.key().name(), columnName);
+				builder.addColumnMetadata(columnName, dataType, nullable, unique);
+			}
+		}
+	}
+
+	private static DataType buildDataType(Connection connection, DatabaseMetaData metadata, ResultSet columnMetadata, SchemaInfoRetriever schemaInfoRetriever, String schema, String tableName, String columnName) throws SQLException {
+		int jdbcTypeId = columnMetadata.getInt("DATA_TYPE");
+		Optional<JDBCType> jdbcType = resolveJdbcTypeName(jdbcTypeId);
+		String typeName = columnMetadata.getString("TYPE_NAME");
+		boolean autoIncrementable = "YES".equalsIgnoreCase(columnMetadata.getString("IS_AUTOINCREMENT"));
+
+		// Detect array types using JDBC standard (JDBCType.ARRAY)
+		boolean isArrayType = jdbcType.isPresent() && jdbcType.get() == JDBCType.ARRAY;
+		int arrayDimensions = 0;
+		if (isArrayType) {
+			// Get array dimensions from vendor-specific retriever
+			arrayDimensions = schemaInfoRetriever.getArrayDimensions(connection, schema, tableName, columnName);
+		}
+		
+		DataType baseType = null;
+		if (isArrayType) {
+			// For arrays, SOURCE_DATA_TYPE contains the base type's JDBC type ID
+			// Extract base type name from type name
+			// PostgreSQL uses "_" prefix, but we should handle other formats too
+			String baseTypeName = typeName;
+			if (typeName != null && typeName.startsWith("_")) {
+				baseTypeName = typeName.substring(1); // Remove the '_' prefix for PostgreSQL
+			}
+			
+			// Query database metadata to find the JDBC type for the base type
+			Optional<JDBCType> baseJdbcType = Optional.empty();
+			Integer baseTypeNumber = columnMetadata.getInt("SOURCE_DATA_TYPE"); // Use SOURCE_DATA_TYPE as fallback
+			if (baseTypeNumber != 0) {
+				baseJdbcType = resolveJdbcTypeName(baseTypeNumber);
+			}
+			
+			// If SOURCE_DATA_TYPE doesn't give us a valid JDBC type, query type info
+			if (baseJdbcType.isEmpty() && baseTypeName != null) {
+				try (ResultSet typeInfo = metadata.getTypeInfo()) {
+					while (typeInfo.next()) {
+						String typeInfoName = typeInfo.getString("TYPE_NAME");
+						if (baseTypeName.equalsIgnoreCase(typeInfoName)) {
+							int baseJdbcTypeId = typeInfo.getInt("DATA_TYPE");
+							baseJdbcType = resolveJdbcTypeName(baseJdbcTypeId);
+							baseTypeNumber = baseJdbcTypeId;
+							break;
+						}
+					}
+				}
+			}
+			
+			if (baseTypeNumber != null && isNumericType(baseTypeNumber)) {
+				int precision = Optional.ofNullable(getInteger(columnMetadata, "COLUMN_SIZE")).orElse(0);
+				int scale = Optional.ofNullable(getInteger(columnMetadata, "DECIMAL_DIGITS")).orElse(0);
+				boolean fixed = baseTypeNumber == Types.DECIMAL || baseTypeNumber == Types.NUMERIC;
+				boolean unsigned = baseTypeName != null && baseTypeName.toLowerCase(Locale.ROOT).contains("unsigned");
+				baseType = new DefaultDataType(
+						baseTypeName,
+						baseJdbcType.orElse(null),
+						baseTypeNumber,
+						null,
+						false,
+						0,
+						scale,
+						0,
+						precision,
+						fixed,
+						unsigned
+				);
+			} else {
+				baseType = new DefaultDataType(
+						baseTypeName,
+						baseJdbcType.orElse(null),
+						baseTypeNumber != null ? baseTypeNumber : jdbcTypeId,
+						null,
+						false,
+						0
+				);
+			}
+		}
+
+		// Get enum values if this is an enum type
+		List<String> enumValues = schemaInfoRetriever.getEnumValues(connection, schema, tableName, columnName, typeName);
+
+		if (isNumericType(jdbcTypeId)) {
+			int precision = Optional.ofNullable(getInteger(columnMetadata, "COLUMN_SIZE")).orElse(0);
+			int scale = Optional.ofNullable(getInteger(columnMetadata, "DECIMAL_DIGITS")).orElse(0);
+			boolean fixed = jdbcTypeId == Types.DECIMAL || jdbcTypeId == Types.NUMERIC;
+			boolean unsigned = typeName != null && typeName.toLowerCase(Locale.ROOT).contains("unsigned");
+			return new DefaultDataType(
+					typeName,
+					jdbcType.orElse(null),
+					jdbcTypeId,
+					baseType,
+					autoIncrementable,
+					arrayDimensions,
+					scale,
+					0,
+					precision,
+					fixed,
+					unsigned,
+					enumValues
+			);
+		}
+		return new DefaultDataType(
+				typeName,
+				jdbcType.orElse(null),
+				jdbcTypeId,
+				baseType,
+				autoIncrementable,
+				arrayDimensions,
+				0,
+				0,
+				0,
+				false,
+				false,
+				enumValues
+		);
+	}
+
+	private static boolean isNumericType(int jdbcType) {
+		return switch (jdbcType) {
+			case Types.BIGINT, Types.BIT, Types.DECIMAL, Types.DOUBLE, Types.FLOAT,
+					Types.INTEGER, Types.NUMERIC, Types.REAL, Types.SMALLINT, Types.TINYINT -> true;
+			default -> false;
+		};
+	}
+
+	private static Optional<JDBCType> resolveJdbcTypeName(int jdbcTypeId) {
+		try {
+			return Optional.of(JDBCType.valueOf(jdbcTypeId));
+		} catch (IllegalArgumentException ex) {
+			return Optional.empty();
+		}
+	}
+
+	private static List<ForeignKeySpec> collectForeignKeySpecs(DatabaseMetaData metadata, Collection<QualifiedTableName> qualifiedTableNames) throws SQLException {
+		List<ForeignKeySpec> specs = new ArrayList<>();
+		for (QualifiedTableName key : qualifiedTableNames) {
+			Map<String, ForeignKeySpec> byName = new LinkedHashMap<>();
+			try (ResultSet fk = metadata.getImportedKeys(null, key.schema(), key.name())) {
+				while (fk.next()) {
+					String fkNameRaw = fk.getString("FK_NAME");
+					final String fkName = (fkNameRaw == null || fkNameRaw.isBlank()) 
+							? key.name() + "_fk_" + fk.getShort("KEY_SEQ")
+							: fkNameRaw;
+					String targetSchema = defaultIfBlank(fk.getString("PKTABLE_SCHEM"),
+							defaultIfBlank(fk.getString("PKTABLE_CAT"), key.schema()));
+					QualifiedTableName targetKey = new QualifiedTableName(targetSchema, fk.getString("PKTABLE_NAME"));
+					ForeignKeySpec spec = byName.computeIfAbsent(fkName, ignored -> new ForeignKeySpec(fkName, key, targetKey));
+					short sequence = fk.getShort("KEY_SEQ");
+					spec.addColumnPair(sequence, fk.getString("FKCOLUMN_NAME"), fk.getString("PKCOLUMN_NAME"));
+				}
+			}
+			specs.addAll(byName.values());
+		}
+		return specs;
+	}
+
+	private static void buildForeignKeys(List<ForeignKeySpec> specs, Map<QualifiedTableName, TableBuilder> tables) {
+		for (ForeignKeySpec spec : specs) {
+			TableBuilder sourceBuilder = tables.get(spec.source());
+			TableBuilder targetBuilder = tables.get(spec.target());
+			if (sourceBuilder == null || targetBuilder == null) {
+				continue;
+			}
+			List<ForeignKeyColumn> columns = new ArrayList<>();
+			for (ColumnPair pair : spec.columnPairs()) {
+				Column source = sourceBuilder.table().findColumn(pair.sourceColumn()).orElse(null);
+				Column target = targetBuilder.table().findColumn(pair.targetColumn()).orElse(null);
+				if (source != null && target != null) {
+					columns.add(new ForeignKeyColumn(source, target));
+				}
+			}
+			if (columns.isEmpty()) {
+				continue;
+			}
+			ForeignKey foreignKey = new ForeignKey(spec.name(), sourceBuilder.table(), targetBuilder.table(), List.copyOf(columns));
+			sourceBuilder.addOutgoingForeignKey(foreignKey);
+			targetBuilder.addIncomingForeignKey(foreignKey);
+		}
+	}
+
+	private static Integer getInteger(ResultSet rs, String columnLabel) throws SQLException {
+		int value = rs.getInt(columnLabel);
+		return rs.wasNull() ? null : value;
+	}
+
+	private static String defaultIfBlank(String value, String fallback) {
+		if (value == null || value.isBlank()) {
+			return fallback;
+		}
+		return value;
+	}
+
+}

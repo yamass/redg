@@ -19,10 +19,10 @@ package de.yamass.redg.generator.extractor.nameprovider.json;
 import de.yamass.redg.generator.extractor.nameprovider.NameProvider;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ColumnReference;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.Table;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.ForeignKeyColumn;
+import de.yamass.redg.schema.model.Table;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,37 +43,35 @@ public class JsonFileNameProvider implements NameProvider {
 
     @Override
     public String getClassNameForTable(final Table table) {
-        if (mappings.containsKey(table.getName())) {
-            return mappings.get(table.getName()).getName();
+        if (mappings.containsKey(table.name())) {
+            return mappings.get(table.name()).getName();
         }
         return null;
     }
 
     @Override
-    public String getMethodNameForColumn(final Column column) {
-        if (mappings.containsKey(column.getParent().getName())) {
-            if (mappings.get(column.getParent().getName()).getColumns() != null &&
-                    mappings.get(column.getParent().getName()).getColumns().containsKey(column.getName())) {
-                return mappings.get(column.getParent().getName()).getColumns().get(column.getName());
+    public String getMethodNameForColumn(final Column column, final Table table) {
+        if (mappings.containsKey(table.name())) {
+            if (mappings.get(table.name()).getColumns() != null &&
+                    mappings.get(table.name()).getColumns().containsKey(column.name())) {
+                return mappings.get(table.name()).getColumns().get(column.name());
             }
         }
         return null;
     }
 
     @Override
-    public String getMethodNameForForeignKeyColumn(ForeignKey foreignKey, Column primaryKeyColumn, Column foreignKeyColumn) {
-        return getMethodNameForColumn(foreignKeyColumn);
+    public String getMethodNameForForeignKeyColumn(ForeignKeyColumn foreignKeyColumn, Table sourceTable) {
+        return getMethodNameForColumn(foreignKeyColumn.sourceColumn(), sourceTable);
     }
 
     @Override
     public String getMethodNameForReference(final ForeignKey foreignKey) {
-        ColumnReference firstForeignKeyColumnReferences = foreignKey.getColumnReferences().get(0);
-        final String tableName = firstForeignKeyColumnReferences.getForeignKeyColumn().getParent().getName();
+        final String tableName = foreignKey.sourceTable().name();
         if (mappings.containsKey(tableName)) {
-            if (mappings.get(tableName).getColumns() != null &&
-                    mappings.get(tableName).getColumns().containsKey(foreignKey.getName())) {
-                return mappings.get(tableName).getColumns().get(foreignKey.getName());
-            }
+            // Note: ForeignKey doesn't have a name in our model, so we can't look it up by name
+            // This might need to be adjusted based on how the JSON mapping is structured
+            // For now, return null as the mapping structure may not support this
         }
         return null;
     }

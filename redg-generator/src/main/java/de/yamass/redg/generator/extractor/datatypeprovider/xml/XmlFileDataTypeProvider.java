@@ -18,8 +18,8 @@ package de.yamass.redg.generator.extractor.datatypeprovider.xml;
 
 import com.thoughtworks.xstream.XStream;
 import de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider;
-import de.yamass.redg.generator.extractor.datatypeprovider.helpers.DataTypePrecisionHelper;
-import schemacrawler.schema.Column;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.Table;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -79,11 +79,11 @@ public class XmlFileDataTypeProvider implements DataTypeProvider {
 	}
 
 	@Override
-	public String getCanonicalDataTypeName(final Column column) {
-		String dataTypeByName = getDataTypeByName(column.getParent().getName(), column.getName());
+	public String getCanonicalDataTypeName(final Column column, final Table table) {
+		String dataTypeByName = getDataTypeByName(table.name(), column.name());
 		String dataTypeByType = getDataTypeBySqlType(column);
 		return dataTypeByName != null ? dataTypeByName :
-				dataTypeByType != null ? dataTypeByType : fallbackDataTypeProvider.getCanonicalDataTypeName(column);
+				dataTypeByType != null ? dataTypeByType : fallbackDataTypeProvider.getCanonicalDataTypeName(column, table);
 	}
 
 	String getDataTypeByName(String tableName, String columnName) {
@@ -105,7 +105,7 @@ public class XmlFileDataTypeProvider implements DataTypeProvider {
 			return null;
 		}
 
-		List<String> variants = DataTypePrecisionHelper.getDataTypeWithAllPrecisionVariants(column);
+		List<String> variants = buildDataTypeVariants(column.type().getName(), column);
 		return variants.stream()
 				.map(variant ->
 						typeMappings.getDefaultTypeMappings().stream()
@@ -114,6 +114,26 @@ public class XmlFileDataTypeProvider implements DataTypeProvider {
 				.filter(Objects::nonNull)
 				.map(DefaultTypeMapping::getJavaType)
 				.findFirst().orElse(null);
+	}
+	
+	private List<String> buildDataTypeVariants(String typeName, Column column) {
+		List<String> variants = new ArrayList<>();
+		
+		// Add most specific variants first (with precision/scale), then generic ones
+		// This ensures that "DECIMAL(1)" matches before "DECIMAL"
+		// and "TIMESTAMP WITH TIME ZONE(30,0)" matches before "TIMESTAMP WITH TIME ZONE(30)"
+		if (column.type().getPrecision() > 0) {
+			// Add precision,scale variant if fixed precision/scale (even if scale is 0)
+			if (column.type().isFixedPrecisionScale()) {
+				variants.add(typeName + "(" + column.type().getPrecision() + "," + column.type().getMaximumScale() + ")");
+			}
+			// Add precision-only variant
+			variants.add(typeName + "(" + column.type().getPrecision() + ")");
+		}
+		// Add base type name as fallback
+		variants.add(typeName);
+		
+		return variants;
 	}
 
 	private String normalizeSqlType(String sqlType) {

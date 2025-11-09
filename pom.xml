@@ -26,6 +26,7 @@
     <modules>
         <module>redg-common</module>
         <module>redg-testing</module>
+        <module>redg-schema-inspection</module>
         <module>redg-generator</module>
         <module>redg-jpa-providers</module>
         <module>redg-maven-plugin</module>
@@ -59,7 +60,6 @@
 
     <properties>
         <mavenPluginAnnotationsVersion>3.15.1</mavenPluginAnnotationsVersion>
-        <schemacrawlerVersion>16.29.1</schemacrawlerVersion>
         <stringtemplateVersion>4.0.8</stringtemplateVersion>
         <mavenVersion>3.9.9</mavenVersion>
         <mavenProjectVersion>2.2.1</mavenProjectVersion>
@@ -113,6 +113,11 @@
                 <artifactId>redg-models</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>de.yamass</groupId>
+                <artifactId>redg-schema-inspection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- Dependencies for the maven plugin -->
             <dependency>
                 <!-- TODO remove -->
@@ -153,31 +158,6 @@
             </dependency>
 
             <!-- Dependencies for the core logic -->
-            <dependency>
-                <groupId>us.fatehi</groupId>
-                <artifactId>schemacrawler</artifactId>
-                <version>${schemacrawlerVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>us.fatehi</groupId>
-                <artifactId>schemacrawler-postgresql</artifactId>
-                <version>${schemacrawlerVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>us.fatehi</groupId>
-                <artifactId>schemacrawler-oracle</artifactId>
-                <version>${schemacrawlerVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>us.fatehi</groupId>
-                <artifactId>schemacrawler-db2</artifactId>
-                <version>${schemacrawlerVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>us.fatehi</groupId>
-                <artifactId>schemacrawler-mysql</artifactId>
-                <version>${schemacrawlerVersion}</version>
-            </dependency>
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>

@@ -16,20 +16,16 @@
 
 package de.yamass.redg.generator.extractor.explicitattributedecider;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.Table;
 
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.ColumnReference;
+import java.io.*;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -38,8 +34,10 @@ import schemacrawler.schema.ColumnReference;
  * The format for the file is:
  * </p><p><blockquote><pre>
  * {
- *     "TABLENAME": [EXPLICITCOLUMNNAME1, EXPLICITCOLUMNNAME2, ...],
- *     ...
+ *   "USER": {
+ *     "attributes": ["DESCRIPTION"],
+ *     "relations": [["a_id"]]
+ *   }
  * }
  * </pre></blockquote>
  */
@@ -59,12 +57,12 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
     }
 
     @Override
-    public boolean isExplicitAttribute(Column column) {
-        String tableName = column.getParent().getName();
-        String columnName = column.getName();
+    public boolean isExplicitAttribute(Column column, Table table) {
+        String tableName = table.name();
+        String columnName = column.name();
 
         return explicitDataByTableRegex.keySet().stream()
-                .filter(tableName::matches)
+                .filter(regex -> matchesRegexIgnoreCase(tableName, regex))
                 .flatMap(tableNameRegex -> {
                     if (explicitDataByTableRegex.get(tableNameRegex).attributes == null) {
                         return null;
@@ -76,10 +74,10 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
 
     @Override
     public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
-        String tableName = foreignKey.getColumnReferences().get(0).getForeignKeyColumn().getParent().getName();
+        String tableName = foreignKey.sourceTable().name();
 
         return explicitDataByTableRegex.keySet().stream()
-                .filter(tableName::matches)
+                .filter(regex -> matchesRegexIgnoreCase(tableName, regex))
                 .flatMap(tableNameRegex -> {
                     if (explicitDataByTableRegex.get(tableNameRegex).relations == null) {
                         return null;
@@ -89,14 +87,9 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
                 .anyMatch(regexes -> matchesColumns(regexes, foreignKey));
     }
 
-    private static boolean matchesColumns(final String[] regexes, final ForeignKey foreignKey) {
-        /*return foreignKey.getColumnReferences().stream()
-                .map(ForeignKeyColumnReference::getForeignKeyColumn)
-                .map(Column::getName)
-                .anyMatch(name -> name.matches(regex));*/
-        List<String> columnNames = foreignKey.getColumnReferences().stream()
-                .map(ColumnReference::getForeignKeyColumn)
-                .map(Column::getName)
+	private static boolean matchesColumns(final String[] regexes, final ForeignKey foreignKey) {
+        List<String> columnNames = foreignKey.columns().stream()
+                .map(fkCol -> fkCol.sourceColumn().name())
                 .collect(Collectors.toList());
         if (columnNames.size() != regexes.length) {
             return false;
@@ -106,7 +99,7 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
             boolean foundMatch = false;
             for (int i = 0; i < regexes.length; i++) {
                 if (!usedFields.contains(i)) {
-                    foundMatch = colName.matches(regexes[i]);
+                    foundMatch = matchesRegexIgnoreCase(colName, regexes[i]);
                     if (foundMatch) {
                         usedFields.push(i);
                         break;
@@ -120,6 +113,10 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
         return true;
 
     }
+
+	private static boolean matchesRegexIgnoreCase(String name, String regex) {
+		return Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(name).matches();
+	}
 
     private static class JsonExplicitModel {
         public String[] attributes;

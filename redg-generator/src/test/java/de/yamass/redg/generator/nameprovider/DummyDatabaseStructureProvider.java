@@ -16,59 +16,54 @@
 
 package de.yamass.redg.generator.nameprovider;
 
-import schemacrawler.schema.*;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.DataType;
+import de.yamass.redg.schema.model.DefaultDataType;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.ForeignKeyColumn;
+import de.yamass.redg.schema.model.Table;
 
-import java.util.*;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import java.sql.JDBCType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class DummyDatabaseStructureProvider {
 
     static Table getDummyTable(final String name) {
-        Table table = mock(Table.class);
-        when(table.getName()).thenReturn(name);
-        return table;
+        return new de.yamass.redg.schema.model.MutableTable(null, name);
     }
 
     static Column getDummyColumn(final String name, final String parentName) {
         Table table = getDummyTable(parentName);
-        Column column = mock(Column.class);
-        when(column.getName()).thenReturn(name);
-        when(column.getParent()).thenReturn(table);
-        return column;
+        DataType dataType = new DefaultDataType("VARCHAR", JDBCType.VARCHAR, JDBCType.VARCHAR.getVendorTypeNumber(), null, false, 0);
+        return new Column(name, dataType, true, false, table);
     }
 
     static Column getReferencingDummyColumn(final String name, final String referencingTableName,
             final String referencedParentName) {
-        Table referencingTable = getDummyTable(referencingTableName);
-        Table referencedTable = getDummyTable(referencedParentName);
-        Column refColumn = mock(Column.class);
-        when(refColumn.getParent()).thenReturn(referencedTable);
-        Column column = mock(Column.class);
-        when(column.getName()).thenReturn(name);
-        when(column.getReferencedColumn()).thenReturn(refColumn);
-        when(column.getParent()).thenReturn(referencingTable);
-        return column;
+        // For tests, we just create a simple column
+        return getDummyColumn(name, referencingTableName);
     }
 
     static ForeignKey getSimpleForeignKey(final String columnName, String sourceTableName, final String targetTableName) {
-        Column c = getReferencingDummyColumn(columnName, sourceTableName, targetTableName);
-        ForeignKey fk = mock(ForeignKey.class);
-        ColumnReference reference = mock(ColumnReference.class);
-        when(reference.getForeignKeyColumn()).thenReturn(c);
-        when(fk.getColumnReferences()).thenReturn(Collections.singletonList(reference));
-        return fk;
+        Table sourceTable = getDummyTable(sourceTableName);
+        Table targetTable = getDummyTable(targetTableName);
+        Column sourceColumn = getDummyColumn(columnName, sourceTableName);
+        Column targetColumn = getDummyColumn("ID", targetTableName);
+        ForeignKeyColumn fkColumn = new ForeignKeyColumn(sourceColumn, targetColumn);
+        return new ForeignKey("FK_" + columnName, sourceTable, targetTable, Collections.singletonList(fkColumn));
     }
 
     static ForeignKey getMultiPartForeignKey(final String fkName, final String targetTableName) {
-        Column c = getDummyColumn("", targetTableName);
-        ForeignKey fk = mock(ForeignKey.class);
-        ColumnReference reference = mock(ColumnReference.class);
-        when(reference.getForeignKeyColumn()).thenReturn(c);
-        when(fk.getColumnReferences()).thenReturn(Arrays.asList(reference, reference, reference));
-        when(fk.getName()).thenReturn(fkName);
-        return fk;
+        Table sourceTable = getDummyTable("SOURCE_TABLE");
+        Table targetTable = getDummyTable(targetTableName);
+        List<ForeignKeyColumn> fkColumns = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Column sourceCol = getDummyColumn("COL" + i, "SOURCE_TABLE");
+            Column targetCol = getDummyColumn("ID" + i, targetTableName);
+            fkColumns.add(new ForeignKeyColumn(sourceCol, targetCol));
+        }
+        return new ForeignKey(fkName, sourceTable, targetTable, fkColumns);
     }
 }

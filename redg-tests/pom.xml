@@ -78,6 +78,9 @@
                             </sqlScripts>
                             <targetPackage>de.yamass.redg.generated.standard</targetPackage>
                             <schemaRegex>.*</schemaRegex>
+                            <schemas>
+                                <param>PUBLIC</param>
+                            </schemas>
                         </configuration>
                     </execution>
                     <execution>
@@ -97,6 +100,9 @@
                             </sqlScripts>
                             <targetPackage>de.yamass.redg.generated.escape</targetPackage>
                             <schemaRegex>.*</schemaRegex>
+                            <schemas>
+                                <param>PUBLIC</param>
+                            </schemas>
                         </configuration>
                     </execution>
                     <execution>
@@ -116,6 +122,9 @@
                             </sqlScripts>
                             <targetPackage>de.yamass.redg.generated.recurse</targetPackage>
                             <schemaRegex>.*</schemaRegex>
+                            <schemas>
+                                <param>PUBLIC</param>
+                            </schemas>
                         </configuration>
                     </execution>
                     <execution>
@@ -135,6 +144,9 @@
                             </sqlScripts>
                             <targetPackage>de.yamass.redg.generated.extractor</targetPackage>
                             <schemaRegex>.*</schemaRegex>
+                            <schemas>
+                                <param>PUBLIC</param>
+                            </schemas>
                         </configuration>
                     </execution>
                 </executions>
