@@ -12,13 +12,15 @@ public class DefaultDataType implements DataType {
 	private final Integer typeNumber;
 	private final DataType baseType;
 	private final boolean autoIncrementable;
+	private final boolean isArray;
 
-	public DefaultDataType(String name, @Nullable JDBCType jdbcType, Integer typeNumber, DataType baseType, boolean autoIncrementable) {
+	public DefaultDataType(String name, @Nullable JDBCType jdbcType, Integer typeNumber, DataType baseType, boolean autoIncrementable, boolean isArray) {
 		this.name = name;
 		this.jdbcType = jdbcType;
 		this.typeNumber = typeNumber;
 		this.baseType = baseType;
 		this.autoIncrementable = autoIncrementable;
+		this.isArray = isArray;
 	}
 
 	@Override
@@ -49,6 +51,11 @@ public class DefaultDataType implements DataType {
 	@Override
 	public boolean isEnumerated() {
 		return false;
+	}
+
+	@Override
+	public boolean isArray() {
+		return isArray;
 	}
 }
 

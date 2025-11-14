@@ -14,12 +14,7 @@ import de.yamass.redg.schema.model.Udt;
 import de.yamass.redg.schema.vendor.SchemaInfoRetriever;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.JDBCType;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -159,18 +154,82 @@ public class SchemaInspector {
 				}
 				boolean nullable = "YES".equalsIgnoreCase(cols.getString("IS_NULLABLE"));
 				boolean unique = uniqueColumns.contains(columnName);
-				DataType dataType = buildDataType(cols);
+				DataType dataType = buildDataType(metadata, cols);
 				builder.addColumn(new Column(columnName, dataType, nullable, unique));
 			}
 		}
 	}
 
-	private static DataType buildDataType(ResultSet columnMetadata) throws SQLException {
+	private static DataType buildDataType(DatabaseMetaData metadata, ResultSet columnMetadata) throws SQLException {
 		int jdbcTypeId = columnMetadata.getInt("DATA_TYPE");
 		Optional<JDBCType> jdbcType = resolveJdbcTypeName(jdbcTypeId);
 		int typeId = columnMetadata.getInt("SOURCE_DATA_TYPE");
 		String typeName = columnMetadata.getString("TYPE_NAME");
 		boolean autoIncrementable = "YES".equalsIgnoreCase(columnMetadata.getString("IS_AUTOINCREMENT"));
+
+		// Detect array types using JDBC standard (JDBCType.ARRAY)
+		boolean isArray = jdbcType.isPresent() && jdbcType.get() == JDBCType.ARRAY;
+		DataType baseType = null;
+		if (isArray) {
+			// For arrays, SOURCE_DATA_TYPE contains the base type's JDBC type ID
+			// Extract base type name from type name
+			// PostgreSQL uses "_" prefix, but we should handle other formats too
+			String baseTypeName = typeName;
+			if (typeName != null && typeName.startsWith("_")) {
+				baseTypeName = typeName.substring(1); // Remove the '_' prefix for PostgreSQL
+			}
+			
+			// Query database metadata to find the JDBC type for the base type
+			Optional<JDBCType> baseJdbcType = Optional.empty();
+			Integer baseTypeNumber = typeId; // Use SOURCE_DATA_TYPE as fallback
+			if (typeId != 0) {
+				baseJdbcType = resolveJdbcTypeName(typeId);
+			}
+			
+			// If SOURCE_DATA_TYPE doesn't give us a valid JDBC type, query type info
+			if (baseJdbcType.isEmpty() && baseTypeName != null) {
+				try (ResultSet typeInfo = metadata.getTypeInfo()) {
+					while (typeInfo.next()) {
+						String typeInfoName = typeInfo.getString("TYPE_NAME");
+						if (baseTypeName.equalsIgnoreCase(typeInfoName)) {
+							int baseJdbcTypeId = typeInfo.getInt("DATA_TYPE");
+							baseJdbcType = resolveJdbcTypeName(baseJdbcTypeId);
+							baseTypeNumber = baseJdbcTypeId;
+							break;
+						}
+					}
+				}
+			}
+			
+			if (baseTypeNumber != null && isNumericType(baseTypeNumber)) {
+				int precision = Optional.ofNullable(getInteger(columnMetadata, "COLUMN_SIZE")).orElse(0);
+				int scale = Optional.ofNullable(getInteger(columnMetadata, "DECIMAL_DIGITS")).orElse(0);
+				boolean fixed = baseTypeNumber == Types.DECIMAL || baseTypeNumber == Types.NUMERIC;
+				boolean unsigned = baseTypeName != null && baseTypeName.toLowerCase(Locale.ROOT).contains("unsigned");
+				baseType = new DefaultNumberDataType(
+						baseTypeName,
+						baseJdbcType.orElse(null),
+						baseTypeNumber,
+						null,
+						false,
+						scale,
+						0,
+						precision,
+						fixed,
+						unsigned,
+						false
+				);
+			} else {
+				baseType = new DefaultDataType(
+						baseTypeName,
+						baseJdbcType.orElse(null),
+						baseTypeNumber != null ? baseTypeNumber : typeId,
+						null,
+						false,
+						false
+				);
+			}
+		}
 
 		if (isNumericType(jdbcTypeId)) {
 			int precision = Optional.ofNullable(getInteger(columnMetadata, "COLUMN_SIZE")).orElse(0);
@@ -181,21 +240,23 @@ public class SchemaInspector {
 					typeName,
 					jdbcType.orElse(null),
 					typeId,
-					null,
+					baseType,
 					autoIncrementable,
 					scale,
 					0,
 					precision,
 					fixed,
-					unsigned
+					unsigned,
+					isArray
 			);
 		}
 		return new DefaultDataType(
 				typeName,
 				jdbcType.orElse(null),
 				typeId,
-				null,
-				autoIncrementable
+				baseType,
+				autoIncrementable,
+				isArray
 		);
 	}
 

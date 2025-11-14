@@ -21,8 +21,9 @@ public class DefaultNumberDataType extends DefaultDataType implements NumberData
 	                             int minimumScale,
 	                             int precision,
 	                             boolean fixedPrecisionScale,
-	                             boolean unsigned) {
-		super(name, jdbcType, typeNumber, baseType, autoIncrementable);
+	                             boolean unsigned,
+	                             boolean isArray) {
+		super(name, jdbcType, typeNumber, baseType, autoIncrementable, isArray);
 		this.maximumScale = maximumScale;
 		this.minimumScale = minimumScale;
 		this.precision = precision;

@@ -20,4 +20,6 @@ public interface DataType {
 
 	boolean isEnumerated();
 
+	boolean isArray();
+
 }

@@ -128,6 +128,49 @@ class SchemaInspectorTest_column_datatype {
 
 	@TestTemplate
 	@Databases({POSTGRES})
+	@Scripts("de/yamass/redg/schema/sql/column-datatype-array.sql")
+	void extractsArrayDataTypes() throws SQLException {
+		SchemaInspectionResult result = inspectPublicSchema();
+		Table table = result.findTableOrThrow("public", "column_datatype_array_table");
+
+		// Test integer array
+		Column integerArrayColumn = table.findColumnOrThrow("column_integer_array");
+		DataType integerArrayType = integerArrayColumn.type();
+		assertThat(integerArrayType.getName()).isEqualTo("_int4");
+		assertThat(integerArrayType.isArray()).isTrue();
+		assertThat(integerArrayType.getBaseType()).isNotNull();
+		assertThat(integerArrayType.getBaseType().getName()).isEqualTo("int4");
+		assertThat(integerArrayType.getBaseType().isArray()).isFalse();
+		assertThat(integerArrayType.getBaseType().getJdbcType()).isPresent();
+		assertThat(integerArrayType.getBaseType().getJdbcType().get()).isEqualTo(JDBCType.INTEGER);
+
+		// Test decimal array
+		Column decimalArrayColumn = table.findColumnOrThrow("column_decimal_array");
+		DataType decimalArrayType = decimalArrayColumn.type();
+		assertThat(decimalArrayType.getName()).isEqualTo("_numeric");
+		assertThat(decimalArrayType.isArray()).isTrue();
+		NumberDataType decimalBaseType = (NumberDataType) decimalArrayType.getBaseType();
+		assertThat(decimalBaseType).isNotNull();
+		assertThat(decimalBaseType.isArray()).isFalse();
+		assertThat(decimalBaseType).isInstanceOf(NumberDataType.class);
+		assertThat(decimalBaseType.getName()).isEqualTo("numeric");
+		assertThat(decimalBaseType.getPrecision()).isEqualTo(10);
+		assertThat(decimalBaseType.getMaximumScale()).isEqualTo(2);
+		assertThat(decimalBaseType.getJdbcType()).isPresent();
+		assertThat(decimalBaseType.getJdbcType().get()).isEqualTo(JDBCType.NUMERIC);
+
+		// Test text array
+		Column textArrayColumn = table.findColumnOrThrow("column_text_array");
+		DataType textArrayType = textArrayColumn.type();
+		assertThat(textArrayType.getName()).isEqualTo("_text");
+		assertThat(textArrayType.isArray()).isTrue();
+		assertThat(textArrayType.getBaseType()).isNotNull();
+		assertThat(textArrayType.getBaseType().getName()).isEqualTo("text");
+		assertThat(textArrayType.getBaseType().isArray()).isFalse();
+	}
+
+	@TestTemplate
+	@Databases({POSTGRES})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-other.sql")
 	void extractsOtherDataTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -135,25 +178,29 @@ class SchemaInspectorTest_column_datatype {
 
 		// PostgreSQL-specific types may not map directly to standard JDBC types
 		// We verify they are extracted, but JDBCType may be null or OTHER
-		Column arrayColumn = table.findColumnOrThrow("column_array");
-		DataType arrayType = arrayColumn.type();
-		assertThat(arrayType.getName()).isEqualTo("_int4"); // PostgreSQL array type name
-
 		Column jsonColumn = table.findColumnOrThrow("column_json");
 		DataType jsonType = jsonColumn.type();
 		assertThat(jsonType.getName()).isEqualTo("json");
+		assertThat(jsonType.isArray()).isFalse();
+		assertThat(jsonType.getBaseType()).isNull();
 
 		Column jsonbColumn = table.findColumnOrThrow("column_jsonb");
 		DataType jsonbType = jsonbColumn.type();
 		assertThat(jsonbType.getName()).isEqualTo("jsonb");
+		assertThat(jsonbType.isArray()).isFalse();
+		assertThat(jsonbType.getBaseType()).isNull();
 
 		Column uuidColumn = table.findColumnOrThrow("column_uuid");
 		DataType uuidType = uuidColumn.type();
 		assertThat(uuidType.getName()).isEqualTo("uuid");
+		assertThat(uuidType.isArray()).isFalse();
+		assertThat(uuidType.getBaseType()).isNull();
 
 		Column xmlColumn = table.findColumnOrThrow("column_xml");
 		DataType xmlType = xmlColumn.type();
 		assertThat(xmlType.getName()).isEqualTo("xml");
+		assertThat(xmlType.isArray()).isFalse();
+		assertThat(xmlType.getBaseType()).isNull();
 	}
 
 	private SchemaInspectionResult inspectPublicSchema() throws SQLException {
