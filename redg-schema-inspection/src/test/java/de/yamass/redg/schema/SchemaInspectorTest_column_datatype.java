@@ -137,9 +137,11 @@ class SchemaInspectorTest_column_datatype {
 		Column integerArrayColumn = table.findColumnOrThrow("column_integer_array");
 		DataType integerArrayType = integerArrayColumn.type();
 		assertThat(integerArrayType.getName()).isEqualTo("_int4");
+		assertThat(integerArrayType.getArrayDimensions()).isEqualTo(1);
 		assertThat(integerArrayType.isArray()).isTrue();
 		assertThat(integerArrayType.getBaseType()).isNotNull();
 		assertThat(integerArrayType.getBaseType().getName()).isEqualTo("int4");
+		assertThat(integerArrayType.getBaseType().getArrayDimensions()).isEqualTo(0);
 		assertThat(integerArrayType.getBaseType().isArray()).isFalse();
 		assertThat(integerArrayType.getBaseType().getJdbcType()).isPresent();
 		assertThat(integerArrayType.getBaseType().getJdbcType().get()).isEqualTo(JDBCType.INTEGER);
@@ -148,9 +150,11 @@ class SchemaInspectorTest_column_datatype {
 		Column decimalArrayColumn = table.findColumnOrThrow("column_decimal_array");
 		DataType decimalArrayType = decimalArrayColumn.type();
 		assertThat(decimalArrayType.getName()).isEqualTo("_numeric");
+		assertThat(decimalArrayType.getArrayDimensions()).isEqualTo(1);
 		assertThat(decimalArrayType.isArray()).isTrue();
 		NumberDataType decimalBaseType = (NumberDataType) decimalArrayType.getBaseType();
 		assertThat(decimalBaseType).isNotNull();
+		assertThat(decimalBaseType.getArrayDimensions()).isEqualTo(0);
 		assertThat(decimalBaseType.isArray()).isFalse();
 		assertThat(decimalBaseType).isInstanceOf(NumberDataType.class);
 		assertThat(decimalBaseType.getName()).isEqualTo("numeric");
@@ -163,10 +167,38 @@ class SchemaInspectorTest_column_datatype {
 		Column textArrayColumn = table.findColumnOrThrow("column_text_array");
 		DataType textArrayType = textArrayColumn.type();
 		assertThat(textArrayType.getName()).isEqualTo("_text");
+		assertThat(textArrayType.getArrayDimensions()).isEqualTo(1);
 		assertThat(textArrayType.isArray()).isTrue();
 		assertThat(textArrayType.getBaseType()).isNotNull();
 		assertThat(textArrayType.getBaseType().getName()).isEqualTo("text");
+		assertThat(textArrayType.getBaseType().getArrayDimensions()).isEqualTo(0);
 		assertThat(textArrayType.getBaseType().isArray()).isFalse();
+	}
+
+	@TestTemplate
+	@Databases({POSTGRES})
+	@Scripts("de/yamass/redg/schema/sql/column-datatype-array-multidimensional.sql")
+	void extractsMultiDimensionalArrayDataTypes() throws SQLException {
+		SchemaInspectionResult result = inspectPublicSchema();
+		Table table = result.findTableOrThrow("public", "column_datatype_array_multidimensional_table");
+
+		// Test two-dimensional array
+		Column twoDimArrayColumn = table.findColumnOrThrow("column_two_dimensional_array");
+		DataType twoDimArrayType = twoDimArrayColumn.type();
+		assertThat(twoDimArrayType.getArrayDimensions()).isEqualTo(2);
+		assertThat(twoDimArrayType.isArray()).isTrue();
+		assertThat(twoDimArrayType.getBaseType()).isNotNull();
+		assertThat(twoDimArrayType.getBaseType().getArrayDimensions()).isEqualTo(0);
+		assertThat(twoDimArrayType.getBaseType().isArray()).isFalse();
+
+		// Test three-dimensional array
+		Column threeDimArrayColumn = table.findColumnOrThrow("column_three_dimensional_array");
+		DataType threeDimArrayType = threeDimArrayColumn.type();
+		assertThat(threeDimArrayType.getArrayDimensions()).isEqualTo(3);
+		assertThat(threeDimArrayType.isArray()).isTrue();
+		assertThat(threeDimArrayType.getBaseType()).isNotNull();
+		assertThat(threeDimArrayType.getBaseType().getArrayDimensions()).isEqualTo(0);
+		assertThat(threeDimArrayType.getBaseType().isArray()).isFalse();
 	}
 
 	@TestTemplate
@@ -181,24 +213,28 @@ class SchemaInspectorTest_column_datatype {
 		Column jsonColumn = table.findColumnOrThrow("column_json");
 		DataType jsonType = jsonColumn.type();
 		assertThat(jsonType.getName()).isEqualTo("json");
+		assertThat(jsonType.getArrayDimensions()).isEqualTo(0);
 		assertThat(jsonType.isArray()).isFalse();
 		assertThat(jsonType.getBaseType()).isNull();
 
 		Column jsonbColumn = table.findColumnOrThrow("column_jsonb");
 		DataType jsonbType = jsonbColumn.type();
 		assertThat(jsonbType.getName()).isEqualTo("jsonb");
+		assertThat(jsonbType.getArrayDimensions()).isEqualTo(0);
 		assertThat(jsonbType.isArray()).isFalse();
 		assertThat(jsonbType.getBaseType()).isNull();
 
 		Column uuidColumn = table.findColumnOrThrow("column_uuid");
 		DataType uuidType = uuidColumn.type();
 		assertThat(uuidType.getName()).isEqualTo("uuid");
+		assertThat(uuidType.getArrayDimensions()).isEqualTo(0);
 		assertThat(uuidType.isArray()).isFalse();
 		assertThat(uuidType.getBaseType()).isNull();
 
 		Column xmlColumn = table.findColumnOrThrow("column_xml");
 		DataType xmlType = xmlColumn.type();
 		assertThat(xmlType.getName()).isEqualTo("xml");
+		assertThat(xmlType.getArrayDimensions()).isEqualTo(0);
 		assertThat(xmlType.isArray()).isFalse();
 		assertThat(xmlType.getBaseType()).isNull();
 	}

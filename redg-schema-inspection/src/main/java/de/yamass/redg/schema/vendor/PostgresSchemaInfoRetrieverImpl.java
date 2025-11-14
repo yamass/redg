@@ -67,4 +67,29 @@ public class PostgresSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
 		}
 		return udts;
 	}
+
+	@Override
+	public int getArrayDimensions(Connection connection, String schema, String tableName, String columnName) throws SQLException {
+		// Query PostgreSQL system catalogs to get array dimensions
+		// For arrays, we count the number of '_' prefixes in the type name
+		// or query pg_attribute.attndims which gives the number of dimensions
+		String dimensionsQuery = """
+				SELECT attndims
+				FROM pg_attribute a
+				JOIN pg_class c ON c.oid = a.attrelid
+				JOIN pg_namespace n ON n.oid = c.relnamespace
+				WHERE n.nspname = ? AND c.relname = ? AND a.attname = ?
+				""";
+		try (PreparedStatement ps = connection.prepareStatement(dimensionsQuery)) {
+			ps.setString(1, schema);
+			ps.setString(2, tableName);
+			ps.setString(3, columnName);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt("attndims");
+				}
+			}
+		}
+		return 0;
+	}
 }

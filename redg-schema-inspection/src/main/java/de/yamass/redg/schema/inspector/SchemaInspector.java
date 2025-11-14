@@ -49,7 +49,7 @@ public class SchemaInspector {
 		String vendor = metadata.getDatabaseProductName() != null ? metadata.getDatabaseProductName() : "";
 
 		for (TableBuilder builder : tableBuilders.values()) {
-			loadColumns(metadata, builder, uniqueColumnNames.getOrDefault(builder.key(), Collections.emptySet()));
+			loadColumns(connection, metadata, builder, uniqueColumnNames.getOrDefault(builder.key(), Collections.emptySet()), schemaInfoRetriever, schema);
 			builder.setPrimaryKeyColumnNames(primaryKeyColumns.getOrDefault(builder.key(), Collections.emptyList()));
 			builder.initializeTable();
 		}
@@ -145,7 +145,7 @@ public class SchemaInspector {
 		return uniqueColumns;
 	}
 
-	private static void loadColumns(DatabaseMetaData metadata, TableBuilder builder, Set<String> uniqueColumns) throws SQLException {
+	private static void loadColumns(Connection connection, DatabaseMetaData metadata, TableBuilder builder, Set<String> uniqueColumns, SchemaInfoRetriever schemaInfoRetriever, String schema) throws SQLException {
 		try (ResultSet cols = metadata.getColumns(null, builder.key().schema(), builder.key().name(), "%")) {
 			while (cols.next()) {
 				String columnName = cols.getString("COLUMN_NAME");
@@ -154,13 +154,13 @@ public class SchemaInspector {
 				}
 				boolean nullable = "YES".equalsIgnoreCase(cols.getString("IS_NULLABLE"));
 				boolean unique = uniqueColumns.contains(columnName);
-				DataType dataType = buildDataType(metadata, cols);
+				DataType dataType = buildDataType(connection, metadata, cols, schemaInfoRetriever, schema, builder.key().name(), columnName);
 				builder.addColumn(new Column(columnName, dataType, nullable, unique));
 			}
 		}
 	}
 
-	private static DataType buildDataType(DatabaseMetaData metadata, ResultSet columnMetadata) throws SQLException {
+	private static DataType buildDataType(Connection connection, DatabaseMetaData metadata, ResultSet columnMetadata, SchemaInfoRetriever schemaInfoRetriever, String schema, String tableName, String columnName) throws SQLException {
 		int jdbcTypeId = columnMetadata.getInt("DATA_TYPE");
 		Optional<JDBCType> jdbcType = resolveJdbcTypeName(jdbcTypeId);
 		int typeId = columnMetadata.getInt("SOURCE_DATA_TYPE");
@@ -168,9 +168,15 @@ public class SchemaInspector {
 		boolean autoIncrementable = "YES".equalsIgnoreCase(columnMetadata.getString("IS_AUTOINCREMENT"));
 
 		// Detect array types using JDBC standard (JDBCType.ARRAY)
-		boolean isArray = jdbcType.isPresent() && jdbcType.get() == JDBCType.ARRAY;
+		boolean isArrayType = jdbcType.isPresent() && jdbcType.get() == JDBCType.ARRAY;
+		int arrayDimensions = 0;
+		if (isArrayType) {
+			// Get array dimensions from vendor-specific retriever
+			arrayDimensions = schemaInfoRetriever.getArrayDimensions(connection, schema, tableName, columnName);
+		}
+		
 		DataType baseType = null;
-		if (isArray) {
+		if (isArrayType) {
 			// For arrays, SOURCE_DATA_TYPE contains the base type's JDBC type ID
 			// Extract base type name from type name
 			// PostgreSQL uses "_" prefix, but we should handle other formats too
@@ -217,7 +223,7 @@ public class SchemaInspector {
 						precision,
 						fixed,
 						unsigned,
-						false
+						0
 				);
 			} else {
 				baseType = new DefaultDataType(
@@ -226,7 +232,7 @@ public class SchemaInspector {
 						baseTypeNumber != null ? baseTypeNumber : typeId,
 						null,
 						false,
-						false
+						0
 				);
 			}
 		}
@@ -247,7 +253,7 @@ public class SchemaInspector {
 					precision,
 					fixed,
 					unsigned,
-					isArray
+					arrayDimensions
 			);
 		}
 		return new DefaultDataType(
@@ -256,7 +262,7 @@ public class SchemaInspector {
 				typeId,
 				baseType,
 				autoIncrementable,
-				isArray
+				arrayDimensions
 		);
 	}
 

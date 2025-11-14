@@ -23,4 +23,17 @@ public interface SchemaInfoRetriever {
 
 	List<Udt> getUdts(Connection connection, String schema) throws SQLException;
 
+	/**
+	 * Gets the number of array dimensions for a column type.
+	 * @param connection the database connection
+	 * @param schema the schema name
+	 * @param tableName the table name
+	 * @param columnName the column name
+	 * @return the number of array dimensions, or 0 if not an array or cannot be determined
+	 * @throws SQLException if a database error occurs
+	 */
+	default int getArrayDimensions(Connection connection, String schema, String tableName, String columnName) throws SQLException {
+		return 0; // Default implementation returns 0 (not an array)
+	}
+
 }

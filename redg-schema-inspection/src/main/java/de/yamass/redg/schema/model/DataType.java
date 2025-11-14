@@ -20,6 +20,18 @@ public interface DataType {
 
 	boolean isEnumerated();
 
-	boolean isArray();
+	/**
+	 * Returns the number of array dimensions. Returns 0 if this is not an array type.
+	 * @return the number of array dimensions, or 0 if not an array
+	 */
+	int getArrayDimensions();
+
+	/**
+	 * Returns true if this is an array type (i.e., getArrayDimensions() > 0).
+	 * @return true if this is an array type
+	 */
+	default boolean isArray() {
+		return getArrayDimensions() > 0;
+	}
 
 }
