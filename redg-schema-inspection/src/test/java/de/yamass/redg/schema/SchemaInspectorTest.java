@@ -39,7 +39,7 @@ class SchemaInspectorTest {
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-uniqueness.sql")
 	void extractsColumnUniqueness() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -53,7 +53,7 @@ class SchemaInspectorTest {
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/foreign-key.sql")
 	void extractsForeignKeyRelationships() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -81,7 +81,7 @@ class SchemaInspectorTest {
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/foreign-key-composite.sql")
 	void extractsCompositeForeignKeyRelationships() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -116,7 +116,7 @@ class SchemaInspectorTest {
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/constraints.sql")
 	void extractsConstraints() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();

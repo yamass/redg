@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 
+import static de.yamass.redg.DatabaseType.MARIADB;
 import static de.yamass.redg.DatabaseType.POSTGRES;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +30,7 @@ class SchemaInspectorTest_column_datatype {
 	private DataSource dataSource;
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-numeric.sql")
 	void extractsNumericDataTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -38,21 +39,46 @@ class SchemaInspectorTest_column_datatype {
 		assertJdbcType(table, "column_bigint", JDBCType.BIGINT);
 		assertJdbcType(table, "column_integer", JDBCType.INTEGER);
 		assertJdbcType(table, "column_smallint", JDBCType.SMALLINT);
-		assertJdbcType(table, "column_tinyint", JDBCType.SMALLINT); // PostgreSQL maps TINYINT to SMALLINT
-		assertJdbcType(table, "column_numeric", JDBCType.NUMERIC);
-		assertJdbcType(table, "column_real", JDBCType.REAL);
+		// PostgreSQL maps TINYINT to SMALLINT, MariaDB has native TINYINT
+		if (databaseType == POSTGRES) {
+			assertJdbcType(table, "column_tinyint", JDBCType.SMALLINT);
+		} else {
+			assertJdbcType(table, "column_tinyint", JDBCType.TINYINT);
+		}
+		// PostgreSQL maps NUMERIC to NUMERIC, MariaDB maps NUMERIC to DECIMAL
+		if (databaseType == POSTGRES) {
+			assertJdbcType(table, "column_numeric", JDBCType.NUMERIC);
+		} else {
+			assertJdbcType(table, "column_numeric", JDBCType.DECIMAL);
+		}
+		// PostgreSQL maps REAL to REAL, MariaDB maps REAL to DOUBLE
+		if (databaseType == POSTGRES) {
+			assertJdbcType(table, "column_real", JDBCType.REAL);
+		} else {
+			assertJdbcType(table, "column_real", JDBCType.DOUBLE);
+		}
 		assertJdbcType(table, "column_double", JDBCType.DOUBLE);
-		assertJdbcType(table, "column_float", JDBCType.DOUBLE); // PostgreSQL maps FLOAT to DOUBLE
+		// PostgreSQL maps FLOAT to DOUBLE, MariaDB maps FLOAT to REAL
+		if (databaseType == POSTGRES) {
+			assertJdbcType(table, "column_float", JDBCType.DOUBLE);
+		} else {
+			assertJdbcType(table, "column_float", JDBCType.REAL);
+		}
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-decimal.sql")
 	void extractsDecimalDataType() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
 		Table table = result.findTableOrThrow("public", "column_datatype_decimal_table");
 
-		assertJdbcType(table, "column_decimal", JDBCType.NUMERIC); // PostgreSQL maps DECIMAL to NUMERIC
+		// PostgreSQL maps DECIMAL to NUMERIC, MariaDB maps DECIMAL to DECIMAL
+		if (databaseType == POSTGRES) {
+			assertJdbcType(table, "column_decimal", JDBCType.NUMERIC);
+		} else {
+			assertJdbcType(table, "column_decimal", JDBCType.DECIMAL);
+		}
 
 		// Verify decimal type has NumberDataType with correct precision and scale
 		Column decimalColumn = table.findColumnOrThrow("column_decimal");
@@ -63,7 +89,7 @@ class SchemaInspectorTest_column_datatype {
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-string.sql")
 	void extractsStringDataTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -71,39 +97,53 @@ class SchemaInspectorTest_column_datatype {
 
 		assertJdbcType(table, "column_varchar", JDBCType.VARCHAR);
 		assertJdbcType(table, "column_char", JDBCType.CHAR);
-		assertJdbcType(table, "column_text", JDBCType.VARCHAR); // PostgreSQL TEXT maps to VARCHAR
-		assertJdbcType(table, "column_clob", JDBCType.VARCHAR); // PostgreSQL CLOB maps to VARCHAR
+		// PostgreSQL maps TEXT to VARCHAR, MariaDB maps TEXT to LONGVARCHAR
+		if (databaseType == POSTGRES) {
+			assertJdbcType(table, "column_text", JDBCType.VARCHAR);
+			assertJdbcType(table, "column_clob", JDBCType.VARCHAR);
+		} else {
+			assertJdbcType(table, "column_text", JDBCType.LONGVARCHAR);
+			assertJdbcType(table, "column_clob", JDBCType.LONGVARCHAR);
+		}
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-binary.sql")
 	void extractsBinaryDataTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
 		Table table = result.findTableOrThrow("public", "column_datatype_binary_table");
 
-		// PostgreSQL BYTEA maps to BINARY in JDBC
-		// All BYTEA columns map to the same JDBC type regardless of the column name
 		Column binaryColumn = table.findColumnOrThrow("column_binary");
 		Column varbinaryColumn = table.findColumnOrThrow("column_varbinary");
 		Column blobColumn = table.findColumnOrThrow("column_blob");
 		Column longvarbinaryColumn = table.findColumnOrThrow("column_longvarbinary");
 
-		// Verify all BYTEA columns have a JDBC type (they all map to BINARY)
+		// Verify all binary columns have a JDBC type
 		assertThat(binaryColumn.type().getJdbcType()).isPresent();
 		assertThat(varbinaryColumn.type().getJdbcType()).isPresent();
 		assertThat(blobColumn.type().getJdbcType()).isPresent();
 		assertThat(longvarbinaryColumn.type().getJdbcType()).isPresent();
 
-		// All should map to BINARY (PostgreSQL's BYTEA maps to JDBC BINARY)
-		JDBCType expectedType = binaryColumn.type().getJdbcType().orElseThrow();
-		assertThat(varbinaryColumn.type().getJdbcType()).contains(expectedType);
-		assertThat(blobColumn.type().getJdbcType()).contains(expectedType);
-		assertThat(longvarbinaryColumn.type().getJdbcType()).contains(expectedType);
+		// PostgreSQL BYTEA maps to BINARY, MariaDB VARBINARY/BLOB map to VARBINARY/BLOB
+		if (databaseType == POSTGRES) {
+			// All BYTEA columns map to BINARY in PostgreSQL
+			JDBCType expectedType = binaryColumn.type().getJdbcType().orElseThrow();
+			assertThat(varbinaryColumn.type().getJdbcType()).contains(expectedType);
+			assertThat(blobColumn.type().getJdbcType()).contains(expectedType);
+			assertThat(longvarbinaryColumn.type().getJdbcType()).contains(expectedType);
+		} else {
+			// MariaDB has more specific mappings
+			assertJdbcType(table, "column_binary", JDBCType.VARBINARY);
+			assertJdbcType(table, "column_varbinary", JDBCType.VARBINARY);
+			// MariaDB maps BLOB to LONGVARBINARY, not BLOB
+			assertJdbcType(table, "column_blob", JDBCType.LONGVARBINARY);
+			assertJdbcType(table, "column_longvarbinary", JDBCType.LONGVARBINARY);
+		}
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-date-time.sql")
 	void extractsDateTimeDataTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -112,18 +152,25 @@ class SchemaInspectorTest_column_datatype {
 		assertJdbcType(table, "column_date", JDBCType.DATE);
 		assertJdbcType(table, "column_time", JDBCType.TIME);
 		assertJdbcType(table, "column_timestamp", JDBCType.TIMESTAMP);
-		assertJdbcType(table, "column_timestamptz", JDBCType.TIMESTAMP); // PostgreSQL maps TIMESTAMP WITH TIME ZONE to TIMESTAMP
+		// Both databases map timestamp with time zone to TIMESTAMP in JDBC
+		assertJdbcType(table, "column_timestamptz", JDBCType.TIMESTAMP);
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-boolean.sql")
 	void extractsBooleanDataTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
 		Table table = result.findTableOrThrow("public", "column_datatype_boolean_table");
 
-		assertJdbcType(table, "column_boolean", JDBCType.BIT); // PostgreSQL BOOLEAN maps to BIT
-		assertJdbcType(table, "column_bit", JDBCType.BIT);
+		// PostgreSQL maps BOOLEAN to BIT, MariaDB maps both BOOLEAN and BIT to BOOLEAN
+		if (databaseType == POSTGRES) {
+			assertJdbcType(table, "column_boolean", JDBCType.BIT);
+			assertJdbcType(table, "column_bit", JDBCType.BIT);
+		} else {
+			assertJdbcType(table, "column_boolean", JDBCType.BOOLEAN);
+			assertJdbcType(table, "column_bit", JDBCType.BIT);
+		}
 	}
 
 	@TestTemplate
