@@ -94,7 +94,7 @@ public class PostgresSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
 	}
 
 	@Override
-	public List<String> getEnumValues(Connection connection, String schema, String typeName) throws SQLException {
+	public List<String> getEnumValues(Connection connection, String schema, String tableName, String columnName, String typeName) throws SQLException {
 		// Query PostgreSQL system catalogs to get enum values
 		// pg_enum contains the enum values, ordered by oid (which reflects creation order)
 		String enumQuery = """

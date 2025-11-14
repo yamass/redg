@@ -237,7 +237,7 @@ public class SchemaInspector {
 		}
 
 		// Get enum values if this is an enum type
-		List<String> enumValues = schemaInfoRetriever.getEnumValues(connection, schema, typeName);
+		List<String> enumValues = schemaInfoRetriever.getEnumValues(connection, schema, tableName, columnName, typeName);
 
 		if (isNumericType(jdbcTypeId)) {
 			int precision = Optional.ofNullable(getInteger(columnMetadata, "COLUMN_SIZE")).orElse(0);

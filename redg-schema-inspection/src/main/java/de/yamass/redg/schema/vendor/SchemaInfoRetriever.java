@@ -38,11 +38,13 @@ public interface SchemaInfoRetriever {
 	 * Gets the enum values for an enumerated type column.
 	 * @param connection the database connection
 	 * @param schema the schema name
-	 * @param typeName the type name (e.g., enum type name)
+	 * @param tableName the table name (may be null if not available)
+	 * @param columnName the column name (may be null if not available)
+	 * @param typeName the type name (e.g., enum type name or column type definition)
 	 * @return the list of enum values, or an empty list if not an enum or cannot be determined
 	 * @throws SQLException if a database error occurs
 	 */
-	default java.util.List<String> getEnumValues(Connection connection, String schema, String typeName) throws SQLException {
+	default java.util.List<String> getEnumValues(Connection connection, String schema, String tableName, String columnName, String typeName) throws SQLException {
 		return java.util.Collections.emptyList();
 	}
 

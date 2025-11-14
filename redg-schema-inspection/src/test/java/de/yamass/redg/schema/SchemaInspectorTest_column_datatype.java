@@ -246,21 +246,35 @@ class SchemaInspectorTest_column_datatype {
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-other.sql")
 	void extractsOtherDataTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
 		Table table = result.findTableOrThrow("public", "column_datatype_other_table");
 
-		// PostgreSQL-specific types may not map directly to standard JDBC types
-		// We verify they are extracted, but JDBCType may be null or OTHER
+		// Both databases support JSON
 		Column jsonColumn = table.findColumnOrThrow("column_json");
 		DataType jsonType = jsonColumn.type();
-		assertThat(jsonType.getName()).isEqualTo("json");
+		// PostgreSQL uses "json" as type name, MariaDB maps JSON to LONGTEXT
+		if (databaseType == POSTGRES) {
+			assertThat(jsonType.getName()).isEqualTo("json");
+		} else {
+			// MariaDB maps JSON to LONGTEXT (case may vary)
+			assertThat(jsonType.getName().toLowerCase()).isEqualTo("longtext");
+		}
 		assertThat(jsonType.getArrayDimensions()).isEqualTo(0);
 		assertThat(jsonType.isArray()).isFalse();
 		assertThat(jsonType.getBaseType()).isNull();
+	}
 
+	@TestTemplate
+	@Databases({POSTGRES})
+	@Scripts("de/yamass/redg/schema/sql/column-datatype-postgres-specific.sql")
+	void extractsPostgresSpecificDataTypes() throws SQLException {
+		SchemaInspectionResult result = inspectPublicSchema();
+		Table table = result.findTableOrThrow("public", "column_datatype_other_postgres_table");
+
+		// PostgreSQL-specific types
 		Column jsonbColumn = table.findColumnOrThrow("column_jsonb");
 		DataType jsonbType = jsonbColumn.type();
 		assertThat(jsonbType.getName()).isEqualTo("jsonb");
@@ -289,7 +303,7 @@ class SchemaInspectorTest_column_datatype {
 	}
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-datatype-enum.sql")
 	void extractsEnumDataTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -297,7 +311,13 @@ class SchemaInspectorTest_column_datatype {
 
 		Column enumColumn = table.findColumnOrThrow("column_enum");
 		DataType enumType = enumColumn.type();
-		assertThat(enumType.getName()).isEqualTo("column_datatype_enum_type");
+		// PostgreSQL uses separate enum type names, MariaDB uses "enum" as the type name
+		if (databaseType == POSTGRES) {
+			assertThat(enumType.getName()).isEqualTo("custom_enum_type");
+		} else {
+			// MariaDB type name is "enum" (case may vary)
+			assertThat(enumType.getName().toLowerCase()).isEqualTo("enum");
+		}
 		assertThat(enumType.isEnumerated()).isTrue();
 		assertThat(enumType.getEnumValues()).containsExactly("VALUE_A", "VALUE_B", "VALUE_C");
 	}

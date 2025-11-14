@@ -140,6 +140,75 @@ public class MariaDbSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
 
 	@Override
 	public int getArrayDimensions(Connection connection, String schema, String tableName, String columnName) throws SQLException {
-		return 0; // TODO
+		return 0; // MariaDB doesn't support arrays
+	}
+
+	@Override
+	public List<String> getEnumValues(Connection connection, String schema, String tableName, String columnName, String typeName) throws SQLException {
+		// In MariaDB, ENUM types are defined inline in column definitions, not as separate types
+		// We can get the full column type definition from INFORMATION_SCHEMA.COLUMNS
+		if (tableName != null && columnName != null) {
+			String enumQuery = """
+					SELECT COLUMN_TYPE
+					FROM INFORMATION_SCHEMA.COLUMNS
+					WHERE TABLE_SCHEMA = ?
+					    AND TABLE_NAME = ?
+					    AND COLUMN_NAME = ?
+					    AND DATA_TYPE = 'enum'
+					""";
+			try (PreparedStatement ps = connection.prepareStatement(enumQuery)) {
+				ps.setString(1, schema);
+				ps.setString(2, tableName);
+				ps.setString(3, columnName);
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						String columnType = rs.getString("COLUMN_TYPE");
+						return parseEnumValues(columnType);
+					}
+				}
+			}
+		}
+		
+		// Fallback: If typeName looks like an enum definition (contains parentheses), parse it directly
+		if (typeName != null && typeName.contains("(") && typeName.contains(")")) {
+			return parseEnumValues(typeName);
+		}
+		
+		return new ArrayList<>();
+	}
+	
+	private List<String> parseEnumValues(String enumDefinition) {
+		// Parse enum definition like: enum('VALUE_A','VALUE_B','VALUE_C')
+		// or: ENUM('VALUE_A','VALUE_B','VALUE_C')
+		List<String> values = new ArrayList<>();
+		if (enumDefinition == null) {
+			return values;
+		}
+		
+		// Find the part between parentheses
+		int start = enumDefinition.indexOf('(');
+		int end = enumDefinition.lastIndexOf(')');
+		if (start == -1 || end == -1 || start >= end) {
+			return values;
+		}
+		
+		String valuesStr = enumDefinition.substring(start + 1, end);
+		// Split by comma, but handle quoted values that might contain commas
+		// Values are typically single-quoted: 'VALUE_A','VALUE_B'
+		String[] parts = valuesStr.split("',\\s*'");
+		for (String part : parts) {
+			// Remove leading/trailing quotes and whitespace
+			part = part.trim();
+			if (part.startsWith("'")) {
+				part = part.substring(1);
+			}
+			if (part.endsWith("'")) {
+				part = part.substring(0, part.length() - 1);
+			}
+			if (!part.isEmpty()) {
+				values.add(part);
+			}
+		}
+		return values;
 	}
 }
