@@ -187,15 +187,15 @@ public class ScriptRunner {
 					command.append(line.substring(0, line
 							.lastIndexOf(getDelimiter())));
 					command.append(" ");
-					this.execCommand(conn, command.toString(), lineReader);
+					this.execCommand(conn, command.toString(), lineReader.getLineNumber());
 					command = null;
 				} else {
 					command.append(line);
 					command.append("\n");
 				}
 			}
-			if (command != null) {
-				this.execCommand(conn, command.toString(), lineReader);
+			if (command != null && command.toString().trim().length() > 0) {
+				this.execCommand(conn, command.toString(), lineReader.getLineNumber());
 			}
 			if (!autoCommit) {
 				conn.commit();
@@ -213,8 +213,7 @@ public class ScriptRunner {
 		}
 	}
 
-	private void execCommand(Connection conn, String command,
-	                         LineNumberReader lineReader) throws SQLException {
+	private void execCommand(Connection conn, String command, int lineNumber) throws SQLException {
 
 		Statement statement = conn.createStatement();
 
@@ -224,7 +223,7 @@ public class ScriptRunner {
 		try {
 			hasResults = statement.execute(command);
 		} catch (SQLException e) {
-			final String errText = String.format("Error executing '%s' (line %d): %s", command, lineReader.getLineNumber(), e.getMessage());
+			final String errText = String.format("Error executing '%s' (line %d): %s", command, lineNumber, e.getMessage());
 			LOG.error(errText);
 			if (stopOnError) {
 				throw new SQLException(errText, e);

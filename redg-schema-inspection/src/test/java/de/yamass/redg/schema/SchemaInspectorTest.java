@@ -12,6 +12,7 @@ import org.junit.jupiter.api.TestTemplate;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
+import static de.yamass.redg.DatabaseType.MARIADB;
 import static de.yamass.redg.DatabaseType.POSTGRES;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +25,7 @@ class SchemaInspectorTest {
 	private DataSource dataSource;
 
 	@TestTemplate
-	@Databases({POSTGRES})
+	@Databases({POSTGRES, MARIADB})
 	@Scripts("de/yamass/redg/schema/sql/column-nullability.sql")
 	void extractsColumnNullability() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();

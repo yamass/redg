@@ -13,7 +13,7 @@ public interface SchemaInfoRetriever {
 	public static SchemaInfoRetriever byDatabaseType(DatabaseType databaseType) throws SQLException {
 		return switch (databaseType) {
 			case POSTGRES -> new PostgresSchemaInfoRetrieverImpl();
-			case MARIADB -> throw new UnsupportedOperationException("Not yet implemented.");
+			case MARIADB -> new MariaDbSchemaInfoRetrieverImpl();
 			case H2 -> throw new UnsupportedOperationException("Not yet implemented.");
 			case GENERIC -> throw new UnsupportedOperationException("Not yet implemented.");
 		};
@@ -32,8 +32,6 @@ public interface SchemaInfoRetriever {
 	 * @return the number of array dimensions, or 0 if not an array or cannot be determined
 	 * @throws SQLException if a database error occurs
 	 */
-	default int getArrayDimensions(Connection connection, String schema, String tableName, String columnName) throws SQLException {
-		return 0; // Default implementation returns 0 (not an array)
-	}
+	int getArrayDimensions(Connection connection, String schema, String tableName, String columnName) throws SQLException;
 
 }

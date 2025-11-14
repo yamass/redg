@@ -37,7 +37,6 @@ import javax.sql.DataSource;
 import java.sql.Types;
 
 import static de.yamass.redg.DatabaseType.*;
-import static de.yamass.redg.testing.TestDatabaseContainers.testSchemaName;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DbTest()
@@ -133,7 +132,7 @@ class ColumnExtractorTest2 {
 		Schema s = catalog.getSchemas().stream()
 				.filter(schema -> {
 					String name = schema.getName() != null ? schema.getName() : schema.getCatalogName();
-					return name.equalsIgnoreCase(testSchemaName(databaseType));
+					return name.equalsIgnoreCase(TestDatabaseContainers.SCHEMA_NAME);
 				})
 				.findFirst()
 				.orElseThrow();

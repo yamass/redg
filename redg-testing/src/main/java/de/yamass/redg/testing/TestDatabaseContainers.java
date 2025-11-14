@@ -1,6 +1,5 @@
 package de.yamass.redg.testing;
 
-import de.yamass.redg.DatabaseType;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -11,12 +10,16 @@ import org.testcontainers.utility.DockerImageName;
  */
 public class TestDatabaseContainers {
 
+	public static final String SCHEMA_NAME = "public";
+
     private static PostgreSQLContainer<?> postgres;
     private static MariaDBContainer<?> mariadb;
 
     public static JdbcDatabaseContainer<?> postgres() {
         if (postgres == null) {
-            postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+	        //noinspection resource
+	        postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"))
+		            .withReuse(true);
             postgres.start();
         }
         return postgres;
@@ -24,19 +27,13 @@ public class TestDatabaseContainers {
 
     public static JdbcDatabaseContainer<?> mariadb() {
         if (mariadb == null) {
-            mariadb = new MariaDBContainer<>(DockerImageName.parse("mariadb:lts"));
+	        //noinspection resource
+	        mariadb = new MariaDBContainer<>(DockerImageName.parse("mariadb:lts"))
+		            .withDatabaseName(SCHEMA_NAME)
+			        .withReuse(true);
             mariadb.start();
         }
         return mariadb;
     }
-
-	public static String testSchemaName(DatabaseType databaseType) {
-		return switch (databaseType) {
-			case POSTGRES -> postgres.getDatabaseName();
-			case MARIADB -> mariadb.getDatabaseName();
-			case H2 -> "PUBLIC";
-			default -> throw new IllegalArgumentException(databaseType + " database type is not supported yet!");
-		};
-	}
 
 }
