@@ -122,19 +122,25 @@ class SchemaInspectorTest {
 	void extractsConstraints() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
 
-		boolean uniqueConstraintDetected = result.constraints().stream().anyMatch(constraintMatches(
-				"constraint_unique_column_unique",
-				ConstraintType.UNIQUE,
-				"UNIQUE (constraint_unique_column)"
-		));
-		boolean checkConstraintDetected = result.constraints().stream().anyMatch(constraintMatches(
-				"constraint_positive_value_check",
-				ConstraintType.CHECK,
-				"constraint_positive_value > 0"
-		));
+		Optional<Constraint> uniqueConstraint = result.constraints().stream()
+				.filter(c -> "constraint_unique_column_unique".equalsIgnoreCase(c.name()))
+				.findFirst();
+		assertThat(uniqueConstraint).isPresent();
+		assertThat(uniqueConstraint.get()).satisfies(constraint -> {
+			assertThat(constraint.type()).isEqualTo(ConstraintType.UNIQUE);
+			assertThat(constraint.definition()).isNotNull();
+			assertThat(constraint.definition().toUpperCase()).contains("UNIQUE (CONSTRAINT_UNIQUE_COLUMN)");
+		});
 
-		assertThat(uniqueConstraintDetected).isTrue();
-		assertThat(checkConstraintDetected).isTrue();
+		Optional<Constraint> checkConstraint = result.constraints().stream()
+				.filter(c -> "constraint_positive_value_check".equalsIgnoreCase(c.name()))
+				.findFirst();
+		assertThat(checkConstraint).isPresent();
+		assertThat(checkConstraint.get()).satisfies(constraint -> {
+			assertThat(constraint.type()).isEqualTo(ConstraintType.CHECK);
+			assertThat(constraint.definition()).isNotNull();
+			assertThat(constraint.definition().toUpperCase()).contains("CONSTRAINT_POSITIVE_VALUE > 0");
+		});
 	}
 
 	@TestTemplate
@@ -143,12 +149,13 @@ class SchemaInspectorTest {
 	void extractsUserDefinedTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
 
-		boolean udtDetected = result.udts().stream().anyMatch(udt ->
-				"udt_status_enum".equalsIgnoreCase(udt.name()) &&
-						"e".equalsIgnoreCase(udt.type())
-		);
-
-		assertThat(udtDetected).isTrue();
+		Optional<Udt> udtOptional = result.udts().stream()
+				.filter(u -> "udt_status_enum".equalsIgnoreCase(u.name()))
+				.findFirst();
+		assertThat(udtOptional).isPresent();
+		assertThat(udtOptional.get()).satisfies(udt -> {
+			assertThat(udt.type()).isEqualTo("e");
+		});
 	}
 
 	@TestTemplate
@@ -180,12 +187,5 @@ class SchemaInspectorTest {
 	private SchemaInspectionResult inspectPublicSchema() throws SQLException {
 		SchemaInspector schemaInspector = new SchemaInspector(databaseType, dataSource);
 		return schemaInspector.inspectSchema("public");
-	}
-
-	private static java.util.function.Predicate<Constraint> constraintMatches(String name, ConstraintType type, String expectedFragment) {
-		return constraint -> constraint.name().equalsIgnoreCase(name)
-				&& constraint.type() == type
-				&& constraint.definition() != null
-				&& constraint.definition().toUpperCase().contains(expectedFragment.toUpperCase());
 	}
 }
