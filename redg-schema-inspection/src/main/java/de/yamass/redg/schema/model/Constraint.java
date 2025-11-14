@@ -1,4 +1,10 @@
 package de.yamass.redg.schema.model;
 
-public interface Constraint {
+public record Constraint(
+		String schemaName,
+		String name,
+		ConstraintType type,
+		String definition,
+		boolean partial
+) {
 }

@@ -1,6 +1,7 @@
 package de.yamass.redg.schema.vendor;
 
 import de.yamass.redg.schema.model.Constraint;
+import de.yamass.redg.schema.model.ConstraintType;
 import de.yamass.redg.schema.model.Udt;
 
 import java.sql.Connection;
@@ -27,9 +28,15 @@ public class PostgresSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
 					String def = rs.getString("def");
-					boolean partial = def.toLowerCase().contains("where");
-					System.out.printf("Constraint %s (%s) partial=%s def=%s%n", rs.getString("conname"), rs.getString("contype"), partial, def);
-					constraints.add(new Constraint());
+					boolean partial = def != null && def.toLowerCase().contains("where");
+					ConstraintType type = ConstraintType.fromDatabaseCode(rs.getString("contype"));
+					constraints.add(new Constraint(
+							schema,
+							rs.getString("conname"),
+							type,
+							def,
+							partial
+					));
 				}
 			}
 			return constraints;
@@ -49,10 +56,12 @@ public class PostgresSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
 			ps.setString(1, schema);
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
-					System.out.printf("UDT: %s type=%s category=%s%n",
+					udts.add(new Udt(
+							schema,
 							rs.getString("typname"),
 							rs.getString("typtype"),
-							rs.getString("typcategory"));
+							rs.getString("typcategory")
+					));
 				}
 			}
 		}

@@ -1,12 +1,23 @@
 package de.yamass.redg.schema.model;
 
+import java.sql.JDBCType;
+import java.util.Optional;
+
 public interface DataType {
+
 	String getName();
-	String getJavaSqlTypeName();
-	String getLocalTypeName();
-	String getVendor();
-	Integer getVendorTypeNumber();
+
+	Optional<JDBCType> getJdbcType();
+
+	/**
+	 * See DatabaseMetaData.getTypeInfo()getInt("SOURCE_DATA_TYPE")
+	 */
+	Integer getTypeNumber();
+
 	DataType getBaseType();
+
 	boolean isAutoIncrementable();
+
 	boolean isEnumerated();
+
 }

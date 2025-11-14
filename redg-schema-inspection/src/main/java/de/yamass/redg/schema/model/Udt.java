@@ -1,5 +1,9 @@
 package de.yamass.redg.schema.model;
 
-public interface Udt {
-	
+public record Udt(
+		String schemaName,
+		String name,
+		String type,
+		String category
+) {
 }
