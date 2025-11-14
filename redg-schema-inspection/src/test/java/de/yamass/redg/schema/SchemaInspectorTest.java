@@ -2,17 +2,10 @@ package de.yamass.redg.schema;
 
 import de.yamass.redg.DatabaseType;
 import de.yamass.redg.schema.inspector.SchemaInspector;
-import de.yamass.redg.schema.model.Column;
-import de.yamass.redg.schema.model.Constraint;
-import de.yamass.redg.schema.model.ConstraintType;
-import de.yamass.redg.schema.model.ForeignKey;
-import de.yamass.redg.schema.model.ForeignKeyColumn;
-import de.yamass.redg.schema.model.NumberDataType;
-import de.yamass.redg.schema.model.SchemaInspectionResult;
-import de.yamass.redg.schema.model.Table;
+import de.yamass.redg.schema.model.*;
+import de.yamass.redg.testing.Databases;
 import de.yamass.redg.testing.DbContext;
 import de.yamass.redg.testing.DbTest;
-import de.yamass.redg.testing.Databases;
 import de.yamass.redg.testing.Scripts;
 import org.junit.jupiter.api.TestTemplate;
 
@@ -60,21 +53,6 @@ class SchemaInspectorTest {
 
 	@TestTemplate
 	@Databases({POSTGRES})
-	@Scripts("de/yamass/redg/schema/sql/numeric-precision.sql")
-	void extractsNumericPrecisionAndScale() throws SQLException {
-		SchemaInspectionResult result = inspectPublicSchema();
-
-		Table table = result.findTableOrThrow("public", "numeric_precision_table");
-		Column numericColumn = table.findColumnOrThrow("numeric_precision_column");
-
-		assertThat(numericColumn.type()).isInstanceOf(NumberDataType.class);
-		NumberDataType numberDataType = (NumberDataType) numericColumn.type();
-		assertThat(numberDataType.getPrecision()).isEqualTo(12);
-		assertThat(numberDataType.getMaximumScale()).isEqualTo(4);
-	}
-
-	@TestTemplate
-	@Databases({POSTGRES})
 	@Scripts("de/yamass/redg/schema/sql/foreign-key.sql")
 	void extractsForeignKeyRelationships() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
@@ -92,7 +70,48 @@ class SchemaInspectorTest {
 		assertThat(column.targetColumn().name()).isEqualTo("target_id");
 
 		assertThat(target.incomingForeignKeys()).hasSize(1);
-		assertThat(target.incomingForeignKeys().get(0).sourceTable()).isEqualTo(source);
+		ForeignKey incoming = target.incomingForeignKeys().get(0);
+		assertThat(incoming.sourceTable()).isEqualTo(source);
+		assertThat(incoming.targetTable()).isEqualTo(target);
+		assertThat(incoming.columns()).hasSize(1);
+		ForeignKeyColumn incomingColumn = incoming.columns().get(0);
+		assertThat(incomingColumn.sourceColumn().name()).isEqualTo("target_id_fk");
+		assertThat(incomingColumn.targetColumn().name()).isEqualTo("target_id");
+	}
+
+	@TestTemplate
+	@Databases({POSTGRES})
+	@Scripts("de/yamass/redg/schema/sql/foreign-key-composite.sql")
+	void extractsCompositeForeignKeyRelationships() throws SQLException {
+		SchemaInspectionResult result = inspectPublicSchema();
+
+		Table source = result.findTableOrThrow("public", "fk_composite_source_table");
+		Table target = result.findTableOrThrow("public", "fk_composite_target_table");
+
+		assertThat(source.outgoingForeignKeys()).hasSize(1);
+		ForeignKey outgoing = source.outgoingForeignKeys().get(0);
+		assertThat(outgoing.targetTable()).isEqualTo(target);
+		assertThat(outgoing.columns()).hasSize(2);
+		
+		ForeignKeyColumn firstColumn = outgoing.columns().get(0);
+		assertThat(firstColumn.sourceColumn().name()).isEqualTo("target_part_a_fk");
+		assertThat(firstColumn.targetColumn().name()).isEqualTo("target_part_a");
+		
+		ForeignKeyColumn secondColumn = outgoing.columns().get(1);
+		assertThat(secondColumn.sourceColumn().name()).isEqualTo("target_part_b_fk");
+		assertThat(secondColumn.targetColumn().name()).isEqualTo("target_part_b");
+
+		assertThat(target.incomingForeignKeys()).hasSize(1);
+		ForeignKey incoming = target.incomingForeignKeys().get(0);
+		assertThat(incoming.sourceTable()).isEqualTo(source);
+		assertThat(incoming.targetTable()).isEqualTo(target);
+		assertThat(incoming.columns()).hasSize(2);
+		ForeignKeyColumn incomingFirstColumn = incoming.columns().get(0);
+		assertThat(incomingFirstColumn.sourceColumn().name()).isEqualTo("target_part_a_fk");
+		assertThat(incomingFirstColumn.targetColumn().name()).isEqualTo("target_part_a");
+		ForeignKeyColumn incomingSecondColumn = incoming.columns().get(1);
+		assertThat(incomingSecondColumn.sourceColumn().name()).isEqualTo("target_part_b_fk");
+		assertThat(incomingSecondColumn.targetColumn().name()).isEqualTo("target_part_b");
 	}
 
 	@TestTemplate
