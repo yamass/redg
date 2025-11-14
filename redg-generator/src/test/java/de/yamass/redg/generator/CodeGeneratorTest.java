@@ -20,7 +20,7 @@ import de.yamass.redg.generator.extractor.DataTypeExtractor;
 import de.yamass.redg.generator.extractor.DatabaseManager;
 import de.yamass.redg.generator.extractor.MetadataExtractor;
 import de.yamass.redg.generator.extractor.TableExtractor;
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
+import de.yamass.redg.generator.extractor.conveniencesetterprovider.ConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.ExplicitAttributeDecider;
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
@@ -69,7 +69,7 @@ public class CodeGeneratorTest {
             public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
                 return false;
             }
-        }, new DefaultConvenienceSetterProvider()));
+        }, ConvenienceSetterProvider.NONE));
         List<TableModel> models = metadataExtractor.extract(db);
         TableModel model = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
@@ -227,7 +227,7 @@ public class CodeGeneratorTest {
 		        return false;
 	        }
         },
-		        new DefaultConvenienceSetterProvider())).extract(db);
+		        ConvenienceSetterProvider.NONE)).extract(db);
         TableModel model = models.stream().filter(m -> Objects.equals("DemoUser", m.getName())).findFirst().orElse(null);
         Assertions.assertNotNull(model);
 

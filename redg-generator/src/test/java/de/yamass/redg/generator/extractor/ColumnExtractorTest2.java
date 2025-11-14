@@ -16,14 +16,14 @@
 
 package de.yamass.redg.generator.extractor;
 
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
+import de.yamass.redg.DatabaseType;
+import de.yamass.redg.generator.extractor.conveniencesetterprovider.ConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
 import de.yamass.redg.generator.testutil.DatabaseTypeTestUtil;
 import de.yamass.redg.models.ColumnModel;
 import de.yamass.redg.testing.*;
-import de.yamass.redg.DatabaseType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -53,7 +53,7 @@ class ColumnExtractorTest2 {
 	void init() throws Exception {
 		Assertions.assertNotNull(dataSource);
 
-		columnExtractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(), new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
+		columnExtractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(), new DefaultExplicitAttributeDecider(), ConvenienceSetterProvider.NONE);
 	}
 
 	@TestTemplate

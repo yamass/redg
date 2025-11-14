@@ -17,7 +17,6 @@
 package de.yamass.redg.generator.extractor;
 
 import de.yamass.redg.generator.extractor.conveniencesetterprovider.ConvenienceSetterProvider;
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
@@ -64,8 +63,7 @@ public class TableExtractor {
 	 *                                  {@code null} defaults to {@link DefaultExplicitAttributeDecider}.
 	 * @param nameProvider              The {@link NameProvider} that provides the class, field and method names for the generated code. If {@code null}
 	 *                                  defaults to {@link DefaultNameProvider}.
-	 * @param convenienceSetterProvider The {@link ConvenienceSetterProvider} that returns information about wanted convenience setters. If {@code null}
-	 *                                  defaults to {@link DefaultConvenienceSetterProvider}.
+	 * @param convenienceSetterProvider The {@link ConvenienceSetterProvider} that returns information about wanted convenience setters.
 	 */
 	public TableExtractor(final String classPrefix, final String targetPackage, DataTypeProvider dataTypeProvider,
 	                      final NameProvider nameProvider, ExplicitAttributeDecider explicitAttributeDecider,
@@ -92,7 +90,7 @@ public class TableExtractor {
 		}
 
 		if (convenienceSetterProvider == null) {
-			convenienceSetterProvider = new DefaultConvenienceSetterProvider();
+			convenienceSetterProvider = ConvenienceSetterProvider.NONE;
 		}
 
 		this.columnExtractor = new ColumnExtractor(dataTypeProvider, this.nameProvider, explicitAttributeDecider, convenienceSetterProvider);

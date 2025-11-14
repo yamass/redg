@@ -17,7 +17,7 @@
 package de.yamass.redg.generator.extractor;
 
 import de.yamass.redg.generator.Helpers;
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
+import de.yamass.redg.generator.extractor.conveniencesetterprovider.ConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.DefaultExplicitAttributeDecider;
 import de.yamass.redg.generator.extractor.explicitattributedecider.ExplicitAttributeDecider;
@@ -57,7 +57,7 @@ class ColumnExtractorTest {
 		Column column = extractColumnFromDemoDb("DEMO_USER", "ID");
 
 		ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
-				new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
+				new DefaultExplicitAttributeDecider(), ConvenienceSetterProvider.NONE);
 		ColumnModel model = extractor.extractColumnModel(createDataTypeLookup(catalog), column);
 
 		Assertions.assertEquals("id", model.getJavaPropertyName());
@@ -83,7 +83,7 @@ class ColumnExtractorTest {
 					public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
 						return false;
 					}
-				}, new DefaultConvenienceSetterProvider());
+				}, ConvenienceSetterProvider.NONE);
 		ColumnModel columnModel = extractor.extractColumnModel(createDataTypeLookup(catalog), column);
 
 		Assertions.assertEquals("DTYPE", columnModel.getDbName());
@@ -95,7 +95,7 @@ class ColumnExtractorTest {
 		Column column = extractColumnFromDemoDb("DEMO_USER", "DAY_TS");
 
 		ColumnExtractor extractor = new ColumnExtractor(new DefaultDataTypeProvider(), new DefaultNameProvider(),
-				new DefaultExplicitAttributeDecider(), new DefaultConvenienceSetterProvider());
+				new DefaultExplicitAttributeDecider(), ConvenienceSetterProvider.NONE);
 		ColumnModel model = extractor.extractColumnModel(createDataTypeLookup(catalog), column);
 
 		Assertions.assertEquals("DAY_TS", model.getDbName());

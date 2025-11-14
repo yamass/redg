@@ -22,8 +22,6 @@ import de.yamass.redg.generator.RedGGenerator;
 import de.yamass.redg.generator.exceptions.RedGGenerationException;
 import de.yamass.redg.generator.extractor.TableExtractor;
 import de.yamass.redg.generator.extractor.conveniencesetterprovider.ConvenienceSetterProvider;
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.DefaultConvenienceSetterProvider;
-import de.yamass.redg.generator.extractor.conveniencesetterprovider.xml.XmlFileConvenienceSetterProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DataTypeProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvider;
 import de.yamass.redg.generator.extractor.datatypeprovider.NoPrimitiveTypesDataTypeProviderWrapper;
@@ -35,6 +33,8 @@ import de.yamass.redg.generator.extractor.explicitattributedecider.JsonFileExpli
 import de.yamass.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
 import de.yamass.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
 import de.yamass.redg.jpa.JpaMetamodelRedGProvider;
+import de.yamass.redg.plugin.config.ConvenienceSettersConfig;
+import de.yamass.redg.plugin.config.MojoConvenienceSetterProvider;
 import de.yamass.redg.util.ScriptRunner;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -53,6 +53,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * The MOJO class for the RedG maven plugin
@@ -100,7 +101,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
     private File customNameMappings;
 
     @Parameter
-    private File convenienceSetterConfig;
+    private List<ConvenienceSettersConfig> convenienceSetters;
 
     @Parameter
     private JpaProviderConfig jpaProviderConfig;
@@ -185,15 +186,10 @@ public class RedGGeneratorMojo extends AbstractMojo {
 
 
         ConvenienceSetterProvider convenienceSetterProvider;
-        if (convenienceSetterConfig != null) {
-            try {
-                convenienceSetterProvider =
-                        new XmlFileConvenienceSetterProvider(new InputStreamReader(new FileInputStream(convenienceSetterConfig), "UTF-8"));
-            } catch (IOException e) {
-                throw new MojoFailureException("Could not read convenience setter config.", e);
-            }
+        if (convenienceSetters != null && !convenienceSetters.isEmpty()) {
+            convenienceSetterProvider = new MojoConvenienceSetterProvider(convenienceSetters);
         } else {
-            convenienceSetterProvider = new DefaultConvenienceSetterProvider();
+            convenienceSetterProvider = ConvenienceSetterProvider.NONE;
         }
 
         try {
