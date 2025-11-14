@@ -26,6 +26,7 @@
     <modules>
         <module>redg-common</module>
         <module>redg-testing</module>
+        <module>redg-schema-inspection</module>
         <module>redg-generator</module>
         <module>redg-jpa-providers</module>
         <module>redg-maven-plugin</module>
