@@ -18,7 +18,21 @@ public interface DataType {
 
 	boolean isAutoIncrementable();
 
-	boolean isEnumerated();
+	/**
+	 * Returns true if this is an enumerated type (enum).
+	 * @return true if this is an enum type
+	 */
+	default boolean isEnumerated() {
+		return !getEnumValues().isEmpty();
+	}
+
+	/**
+	 * Returns the list of enum values for enumerated types. Returns an empty list for non-enum types.
+	 * @return the list of enum values, or an empty list if not an enum
+	 */
+	default java.util.List<String> getEnumValues() {
+		return java.util.Collections.emptyList();
+	}
 
 	/**
 	 * Returns the number of array dimensions. Returns 0 if this is not an array type.

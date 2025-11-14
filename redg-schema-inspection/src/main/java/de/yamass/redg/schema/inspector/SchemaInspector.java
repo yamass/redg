@@ -236,6 +236,9 @@ public class SchemaInspector {
 			}
 		}
 
+		// Get enum values if this is an enum type
+		List<String> enumValues = schemaInfoRetriever.getEnumValues(connection, schema, typeName);
+
 		if (isNumericType(jdbcTypeId)) {
 			int precision = Optional.ofNullable(getInteger(columnMetadata, "COLUMN_SIZE")).orElse(0);
 			int scale = Optional.ofNullable(getInteger(columnMetadata, "DECIMAL_DIGITS")).orElse(0);
@@ -252,7 +255,8 @@ public class SchemaInspector {
 					0,
 					precision,
 					fixed,
-					unsigned
+					unsigned,
+					enumValues
 			);
 		}
 		return new DefaultDataType(
@@ -261,7 +265,13 @@ public class SchemaInspector {
 				typeId,
 				baseType,
 				autoIncrementable,
-				arrayDimensions
+				arrayDimensions,
+				0,
+				0,
+				0,
+				false,
+				false,
+				enumValues
 		);
 	}
 

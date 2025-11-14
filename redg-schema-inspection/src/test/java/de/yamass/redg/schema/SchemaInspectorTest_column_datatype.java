@@ -288,6 +288,20 @@ class SchemaInspectorTest_column_datatype {
 		return schemaInspector.inspectSchema("public");
 	}
 
+	@TestTemplate
+	@Databases({POSTGRES})
+	@Scripts("de/yamass/redg/schema/sql/column-datatype-enum.sql")
+	void extractsEnumDataTypes() throws SQLException {
+		SchemaInspectionResult result = inspectPublicSchema();
+		Table table = result.findTableOrThrow("public", "column_datatype_enum_table");
+
+		Column enumColumn = table.findColumnOrThrow("column_enum");
+		DataType enumType = enumColumn.type();
+		assertThat(enumType.getName()).isEqualTo("column_datatype_enum_type");
+		assertThat(enumType.isEnumerated()).isTrue();
+		assertThat(enumType.getEnumValues()).containsExactly("VALUE_A", "VALUE_B", "VALUE_C");
+	}
+
 	private void assertJdbcType(Table table, String columnName, JDBCType expectedJdbcType) {
 		Column column = table.findColumnOrThrow(columnName);
 		DataType dataType = column.type();

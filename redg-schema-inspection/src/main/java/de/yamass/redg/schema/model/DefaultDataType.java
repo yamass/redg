@@ -3,6 +3,8 @@ package de.yamass.redg.schema.model;
 import org.jspecify.annotations.Nullable;
 
 import java.sql.JDBCType;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class DefaultDataType implements DataType {
@@ -18,12 +20,17 @@ public class DefaultDataType implements DataType {
 	private final int precision;
 	private final boolean fixedPrecisionScale;
 	private final boolean unsigned;
+	private final List<String> enumValues;
 
 	public DefaultDataType(String name, @Nullable JDBCType jdbcType, Integer typeNumber, DataType baseType, boolean autoIncrementable, int arrayDimensions) {
-		this(name, jdbcType, typeNumber, baseType, autoIncrementable, arrayDimensions, 0, 0, 0, false, false);
+		this(name, jdbcType, typeNumber, baseType, autoIncrementable, arrayDimensions, 0, 0, 0, false, false, Collections.emptyList());
 	}
 
 	public DefaultDataType(String name, @Nullable JDBCType jdbcType, Integer typeNumber, DataType baseType, boolean autoIncrementable, int arrayDimensions, int maximumScale, int minimumScale, int precision, boolean fixedPrecisionScale, boolean unsigned) {
+		this(name, jdbcType, typeNumber, baseType, autoIncrementable, arrayDimensions, maximumScale, minimumScale, precision, fixedPrecisionScale, unsigned, Collections.emptyList());
+	}
+
+	public DefaultDataType(String name, @Nullable JDBCType jdbcType, Integer typeNumber, DataType baseType, boolean autoIncrementable, int arrayDimensions, int maximumScale, int minimumScale, int precision, boolean fixedPrecisionScale, boolean unsigned, List<String> enumValues) {
 		this.name = name;
 		this.jdbcType = jdbcType;
 		this.typeNumber = typeNumber;
@@ -35,6 +42,7 @@ public class DefaultDataType implements DataType {
 		this.precision = precision;
 		this.fixedPrecisionScale = fixedPrecisionScale;
 		this.unsigned = unsigned;
+		this.enumValues = enumValues != null ? List.copyOf(enumValues) : Collections.emptyList();
 	}
 
 	@Override
@@ -63,8 +71,8 @@ public class DefaultDataType implements DataType {
 	}
 
 	@Override
-	public boolean isEnumerated() {
-		return false;
+	public List<String> getEnumValues() {
+		return enumValues;
 	}
 
 	@Override

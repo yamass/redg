@@ -92,4 +92,29 @@ public class PostgresSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
 		}
 		return 0;
 	}
+
+	@Override
+	public List<String> getEnumValues(Connection connection, String schema, String typeName) throws SQLException {
+		// Query PostgreSQL system catalogs to get enum values
+		// pg_enum contains the enum values, ordered by oid (which reflects creation order)
+		String enumQuery = """
+				SELECT e.enumlabel
+				FROM pg_enum e
+				JOIN pg_type t ON t.oid = e.enumtypid
+				JOIN pg_namespace n ON n.oid = t.typnamespace
+				WHERE n.nspname = ? AND t.typname = ?
+				ORDER BY e.oid
+				""";
+		List<String> enumValues = new ArrayList<>();
+		try (PreparedStatement ps = connection.prepareStatement(enumQuery)) {
+			ps.setString(1, schema);
+			ps.setString(2, typeName);
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					enumValues.add(rs.getString("enumlabel"));
+				}
+			}
+		}
+		return enumValues;
+	}
 }
