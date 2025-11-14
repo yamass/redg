@@ -4,7 +4,7 @@ create type my_udt as (
 );
 
 create table udt_structured_reference_table (
-    udt_structured_reference_id serial primary key,
+    id serial primary key,
     udt_structured_column my_udt not null
 );
 

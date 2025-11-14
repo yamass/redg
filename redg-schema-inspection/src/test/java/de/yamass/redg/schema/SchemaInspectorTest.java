@@ -11,6 +11,7 @@ import org.junit.jupiter.api.TestTemplate;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import static de.yamass.redg.DatabaseType.MARIADB;
 import static de.yamass.redg.DatabaseType.POSTGRES;
@@ -93,11 +94,11 @@ class SchemaInspectorTest {
 		ForeignKey outgoing = source.outgoingForeignKeys().get(0);
 		assertThat(outgoing.targetTable()).isEqualTo(target);
 		assertThat(outgoing.columns()).hasSize(2);
-		
+
 		ForeignKeyColumn firstColumn = outgoing.columns().get(0);
 		assertThat(firstColumn.sourceColumn().name()).isEqualTo("target_part_a_fk");
 		assertThat(firstColumn.targetColumn().name()).isEqualTo("target_part_a");
-		
+
 		ForeignKeyColumn secondColumn = outgoing.columns().get(1);
 		assertThat(secondColumn.sourceColumn().name()).isEqualTo("target_part_b_fk");
 		assertThat(secondColumn.targetColumn().name()).isEqualTo("target_part_b");
@@ -156,21 +157,24 @@ class SchemaInspectorTest {
 	void extractsStructuredUserDefinedTypes() throws SQLException {
 		SchemaInspectionResult result = inspectPublicSchema();
 
-		boolean structuredUdtDetected = result.udts().stream().anyMatch(udt ->
-				"my_udt".equalsIgnoreCase(udt.name()) &&
-						"c".equalsIgnoreCase(udt.type()) &&
-						udt.fields().size() == 2 &&
-						udt.fields().stream().anyMatch(field ->
-								"udt_int_column".equalsIgnoreCase(field.name()) &&
-										"integer".equalsIgnoreCase(field.typeName())
-						) &&
-						udt.fields().stream().anyMatch(field ->
-								"udt_text_column".equalsIgnoreCase(field.name()) &&
-										"text".equalsIgnoreCase(field.typeName())
-						)
-		);
-
-		assertThat(structuredUdtDetected).isTrue();
+		Optional<Udt> udtOptional = result.udts().stream()
+				.filter(u -> "my_udt".equalsIgnoreCase(u.name()))
+				.findFirst();
+		assertThat(udtOptional.get()).satisfies(udt -> {
+			assertThat(udt.type()).isEqualTo("c");
+			assertThat(udt.fields()).hasSize(2);
+			assertThat(udt.fields()).first().satisfies(field -> {
+				assertThat(field.name()).isEqualToIgnoringCase("udt_int_column");
+				assertThat(field.type().getName()).isIn("integer", "int4");
+				assertThat(field.type().getJdbcType()).contains(java.sql.JDBCType.INTEGER);
+			});
+			assertThat(udt.fields()).element(1).satisfies(field -> {
+						assertThat(field.name()).isEqualToIgnoringCase("udt_text_column");
+						assertThat(field.type().getName()).isIn("text");
+						assertThat(field.type().getJdbcType()).contains(java.sql.JDBCType.VARCHAR);
+					}
+			);
+		});
 	}
 
 	private SchemaInspectionResult inspectPublicSchema() throws SQLException {
