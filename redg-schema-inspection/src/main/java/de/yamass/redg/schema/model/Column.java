@@ -1,5 +1,9 @@
 package de.yamass.redg.schema.model;
 
-public class Column {
-
+public record Column(
+		String name,
+		DataType type,
+		boolean nullable,
+		boolean unique
+) {
 }

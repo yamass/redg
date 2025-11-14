@@ -1,4 +1,5 @@
 package de.yamass.redg.schema.model;
 
-public record Udt() {
+public interface Udt {
+	
 }
