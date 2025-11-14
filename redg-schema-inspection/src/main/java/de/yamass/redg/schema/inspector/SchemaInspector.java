@@ -4,7 +4,6 @@ import de.yamass.redg.DatabaseType;
 import de.yamass.redg.schema.model.Column;
 import de.yamass.redg.schema.model.DataType;
 import de.yamass.redg.schema.model.DefaultDataType;
-import de.yamass.redg.schema.model.DefaultNumberDataType;
 import de.yamass.redg.schema.model.ForeignKey;
 import de.yamass.redg.schema.model.ForeignKeyColumn;
 import de.yamass.redg.schema.model.SchemaInspectionResult;
@@ -212,18 +211,18 @@ public class SchemaInspector {
 				int scale = Optional.ofNullable(getInteger(columnMetadata, "DECIMAL_DIGITS")).orElse(0);
 				boolean fixed = baseTypeNumber == Types.DECIMAL || baseTypeNumber == Types.NUMERIC;
 				boolean unsigned = baseTypeName != null && baseTypeName.toLowerCase(Locale.ROOT).contains("unsigned");
-				baseType = new DefaultNumberDataType(
+				baseType = new DefaultDataType(
 						baseTypeName,
 						baseJdbcType.orElse(null),
 						baseTypeNumber,
 						null,
 						false,
+						0,
 						scale,
 						0,
 						precision,
 						fixed,
-						unsigned,
-						0
+						unsigned
 				);
 			} else {
 				baseType = new DefaultDataType(
@@ -242,18 +241,18 @@ public class SchemaInspector {
 			int scale = Optional.ofNullable(getInteger(columnMetadata, "DECIMAL_DIGITS")).orElse(0);
 			boolean fixed = jdbcTypeId == Types.DECIMAL || jdbcTypeId == Types.NUMERIC;
 			boolean unsigned = typeName != null && typeName.toLowerCase(Locale.ROOT).contains("unsigned");
-			return new DefaultNumberDataType(
+			return new DefaultDataType(
 					typeName,
 					jdbcType.orElse(null),
 					typeId,
 					baseType,
 					autoIncrementable,
+					arrayDimensions,
 					scale,
 					0,
 					precision,
 					fixed,
-					unsigned,
-					arrayDimensions
+					unsigned
 			);
 		}
 		return new DefaultDataType(

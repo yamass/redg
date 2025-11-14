@@ -4,7 +4,6 @@ import de.yamass.redg.DatabaseType;
 import de.yamass.redg.schema.inspector.SchemaInspector;
 import de.yamass.redg.schema.model.Column;
 import de.yamass.redg.schema.model.DataType;
-import de.yamass.redg.schema.model.NumberDataType;
 import de.yamass.redg.schema.model.SchemaInspectionResult;
 import de.yamass.redg.schema.model.Table;
 import de.yamass.redg.testing.DbContext;
@@ -80,10 +79,9 @@ class SchemaInspectorTest_column_datatype {
 			assertJdbcType(table, "column_decimal", JDBCType.DECIMAL);
 		}
 
-		// Verify decimal type has NumberDataType with correct precision and scale
+		// Verify decimal type has correct precision and scale
 		Column decimalColumn = table.findColumnOrThrow("column_decimal");
-		assertThat(decimalColumn.type()).isInstanceOf(NumberDataType.class);
-		NumberDataType decimalType = (NumberDataType) decimalColumn.type();
+		DataType decimalType = decimalColumn.type();
 		assertThat(decimalType.getPrecision()).isEqualTo(10);
 		assertThat(decimalType.getMaximumScale()).isEqualTo(2);
 	}
@@ -199,11 +197,10 @@ class SchemaInspectorTest_column_datatype {
 		assertThat(decimalArrayType.getName()).isEqualTo("_numeric");
 		assertThat(decimalArrayType.getArrayDimensions()).isEqualTo(1);
 		assertThat(decimalArrayType.isArray()).isTrue();
-		NumberDataType decimalBaseType = (NumberDataType) decimalArrayType.getBaseType();
+		DataType decimalBaseType = decimalArrayType.getBaseType();
 		assertThat(decimalBaseType).isNotNull();
 		assertThat(decimalBaseType.getArrayDimensions()).isEqualTo(0);
 		assertThat(decimalBaseType.isArray()).isFalse();
-		assertThat(decimalBaseType).isInstanceOf(NumberDataType.class);
 		assertThat(decimalBaseType.getName()).isEqualTo("numeric");
 		assertThat(decimalBaseType.getPrecision()).isEqualTo(10);
 		assertThat(decimalBaseType.getMaximumScale()).isEqualTo(2);

@@ -13,14 +13,28 @@ public class DefaultDataType implements DataType {
 	private final DataType baseType;
 	private final boolean autoIncrementable;
 	private final int arrayDimensions;
+	private final int maximumScale;
+	private final int minimumScale;
+	private final int precision;
+	private final boolean fixedPrecisionScale;
+	private final boolean unsigned;
 
 	public DefaultDataType(String name, @Nullable JDBCType jdbcType, Integer typeNumber, DataType baseType, boolean autoIncrementable, int arrayDimensions) {
+		this(name, jdbcType, typeNumber, baseType, autoIncrementable, arrayDimensions, 0, 0, 0, false, false);
+	}
+
+	public DefaultDataType(String name, @Nullable JDBCType jdbcType, Integer typeNumber, DataType baseType, boolean autoIncrementable, int arrayDimensions, int maximumScale, int minimumScale, int precision, boolean fixedPrecisionScale, boolean unsigned) {
 		this.name = name;
 		this.jdbcType = jdbcType;
 		this.typeNumber = typeNumber;
 		this.baseType = baseType;
 		this.autoIncrementable = autoIncrementable;
 		this.arrayDimensions = arrayDimensions;
+		this.maximumScale = maximumScale;
+		this.minimumScale = minimumScale;
+		this.precision = precision;
+		this.fixedPrecisionScale = fixedPrecisionScale;
+		this.unsigned = unsigned;
 	}
 
 	@Override
@@ -56,6 +70,31 @@ public class DefaultDataType implements DataType {
 	@Override
 	public int getArrayDimensions() {
 		return arrayDimensions;
+	}
+
+	@Override
+	public int getMaximumScale() {
+		return maximumScale;
+	}
+
+	@Override
+	public int getMinimumScale() {
+		return minimumScale;
+	}
+
+	@Override
+	public int getPrecision() {
+		return precision;
+	}
+
+	@Override
+	public boolean isFixedPrecisionScale() {
+		return fixedPrecisionScale;
+	}
+
+	@Override
+	public boolean isUnsigned() {
+		return unsigned;
 	}
 }
 

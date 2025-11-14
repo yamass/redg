@@ -34,4 +34,44 @@ public interface DataType {
 		return getArrayDimensions() > 0;
 	}
 
+	/**
+	 * Returns the maximum scale for numeric types. Returns 0 for non-numeric types.
+	 * @return the maximum scale, or 0 if not applicable
+	 */
+	default int getMaximumScale() {
+		return 0;
+	}
+
+	/**
+	 * Returns the minimum scale for numeric types. Returns 0 for non-numeric types.
+	 * @return the minimum scale, or 0 if not applicable
+	 */
+	default int getMinimumScale() {
+		return 0;
+	}
+
+	/**
+	 * Returns the precision for numeric types. Returns 0 for non-numeric types.
+	 * @return the precision, or 0 if not applicable
+	 */
+	default int getPrecision() {
+		return 0;
+	}
+
+	/**
+	 * Returns true if this numeric type has fixed precision and scale. Returns false for non-numeric types.
+	 * @return true if fixed precision/scale, false otherwise
+	 */
+	default boolean isFixedPrecisionScale() {
+		return false;
+	}
+
+	/**
+	 * Returns true if this numeric type is unsigned. Returns false for non-numeric types.
+	 * @return true if unsigned, false otherwise
+	 */
+	default boolean isUnsigned() {
+		return false;
+	}
+
 }
