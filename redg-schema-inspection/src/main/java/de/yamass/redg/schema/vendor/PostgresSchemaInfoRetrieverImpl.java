@@ -3,12 +3,14 @@ package de.yamass.redg.schema.vendor;
 import de.yamass.redg.schema.model.Constraint;
 import de.yamass.redg.schema.model.ConstraintType;
 import de.yamass.redg.schema.model.Udt;
+import de.yamass.redg.schema.model.UdtField;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PostgresSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
@@ -46,7 +48,7 @@ public class PostgresSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
 	@Override
 	public List<Udt> getUdts(Connection connection, String schema) throws SQLException {
 		String udtQuery = """
-				SELECT typname, typtype, typcategory
+				SELECT typname, typtype, typcategory, typrelid
 				FROM pg_type t
 				JOIN pg_namespace n ON n.oid = t.typnamespace
 				WHERE n.nspname = ?
@@ -56,16 +58,55 @@ public class PostgresSchemaInfoRetrieverImpl implements SchemaInfoRetriever {
 			ps.setString(1, schema);
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
+					String typname = rs.getString("typname");
+					String typtype = rs.getString("typtype");
+					String typcategory = rs.getString("typcategory");
+					long typrelid = rs.getLong("typrelid");
+					
+					// For composite types (typtype = 'c'), get the fields
+					List<UdtField> fields = Collections.emptyList();
+					if ("c".equals(typtype) && typrelid != 0) {
+						fields = getCompositeTypeFields(connection, typrelid);
+					}
+					
 					udts.add(new Udt(
 							schema,
-							rs.getString("typname"),
-							rs.getString("typtype"),
-							rs.getString("typcategory")
+							typname,
+							typtype,
+							typcategory,
+							fields
 					));
 				}
 			}
 		}
 		return udts;
+	}
+	
+	private List<UdtField> getCompositeTypeFields(Connection connection, long typrelid) throws SQLException {
+		// Query pg_attribute to get the fields of a composite type
+		// attrelid points to the composite type's class (from typrelid)
+		// attnum > 0 excludes system columns
+		String fieldsQuery = """
+				SELECT a.attname, pg_catalog.format_type(a.atttypid, a.atttypmod) AS type_name
+				FROM pg_attribute a
+				WHERE a.attrelid = ?
+				    AND a.attnum > 0
+				    AND NOT a.attisdropped
+				ORDER BY a.attnum
+				""";
+		List<UdtField> fields = new ArrayList<>();
+		try (PreparedStatement ps = connection.prepareStatement(fieldsQuery)) {
+			ps.setLong(1, typrelid);
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					fields.add(new UdtField(
+							rs.getString("attname"),
+							rs.getString("type_name")
+					));
+				}
+			}
+		}
+		return fields;
 	}
 
 	@Override

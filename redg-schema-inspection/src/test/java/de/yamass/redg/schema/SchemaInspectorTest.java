@@ -150,6 +150,29 @@ class SchemaInspectorTest {
 		assertThat(udtDetected).isTrue();
 	}
 
+	@TestTemplate
+	@Databases({POSTGRES})
+	@Scripts("de/yamass/redg/schema/sql/udt-structured.sql")
+	void extractsStructuredUserDefinedTypes() throws SQLException {
+		SchemaInspectionResult result = inspectPublicSchema();
+
+		boolean structuredUdtDetected = result.udts().stream().anyMatch(udt ->
+				"my_udt".equalsIgnoreCase(udt.name()) &&
+						"c".equalsIgnoreCase(udt.type()) &&
+						udt.fields().size() == 2 &&
+						udt.fields().stream().anyMatch(field ->
+								"udt_int_column".equalsIgnoreCase(field.name()) &&
+										"integer".equalsIgnoreCase(field.typeName())
+						) &&
+						udt.fields().stream().anyMatch(field ->
+								"udt_text_column".equalsIgnoreCase(field.name()) &&
+										"text".equalsIgnoreCase(field.typeName())
+						)
+		);
+
+		assertThat(structuredUdtDetected).isTrue();
+	}
+
 	private SchemaInspectionResult inspectPublicSchema() throws SQLException {
 		SchemaInspector schemaInspector = new SchemaInspector(databaseType, dataSource);
 		return schemaInspector.inspectSchema("public");
