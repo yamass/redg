@@ -16,9 +16,9 @@
 
 package de.yamass.redg.generator.extractor.nameprovider;
 
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.Table;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.Table;
 
 /**
  * This is the interface used for generating the class/method/variable names for the code generation.
@@ -46,9 +46,10 @@ public interface NameProvider {
      * <p><b>This method must be deterministic!</b> Passing the same table multiple times has to yield the same result for each call.</p>
      *
      * @param column The database column
+     * @param table The table containing the column
      * @return The generated name
      */
-    String getMethodNameForColumn(Column column);
+    String getMethodNameForColumn(Column column, Table table);
 
     /**
      * Generates a method name for a database column that represents a foreign key or is part of a foreign key.
@@ -58,12 +59,11 @@ public interface NameProvider {
      * though not at the start of the name.
      * <p><b>This method must be deterministic!</b> Passing the same table multiple times has to yield the same result for each call.</p>
      *
-     * @param foreignKey The foreign key.
-     * @param primaryKeyColumn The referenced database column.
-     * @param foreignKeyColumn The referencing database column.
+     * @param foreignKeyColumn The foreign key column containing both source and target columns
+     * @param sourceTable The table containing the source column
      * @return The generated name
      */
-    String getMethodNameForForeignKeyColumn(ForeignKey foreignKey, Column primaryKeyColumn, Column foreignKeyColumn);
+    String getMethodNameForForeignKeyColumn(de.yamass.redg.schema.model.ForeignKeyColumn foreignKeyColumn, Table sourceTable);
 
     /**
      * Generates a method name for a foreign key.

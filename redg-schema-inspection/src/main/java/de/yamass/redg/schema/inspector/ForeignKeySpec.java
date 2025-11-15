@@ -6,13 +6,19 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 final class ForeignKeySpec {
+	private final String name;
 	private final QualifiedTableName source;
 	private final QualifiedTableName target;
 	private final SortedMap<Short, ColumnPair> orderedColumns = new TreeMap<>();
 
-	ForeignKeySpec(QualifiedTableName source, QualifiedTableName target) {
+	ForeignKeySpec(String name, QualifiedTableName source, QualifiedTableName target) {
+		this.name = name;
 		this.source = source;
 		this.target = target;
+	}
+	
+	String name() {
+		return name;
 	}
 
 	void addColumnPair(short sequence, String sourceColumn, String targetColumn) {

@@ -154,7 +154,7 @@ public class SchemaInspector {
 				boolean nullable = "YES".equalsIgnoreCase(cols.getString("IS_NULLABLE"));
 				boolean unique = uniqueColumns.contains(columnName);
 				DataType dataType = buildDataType(connection, metadata, cols, schemaInfoRetriever, schema, builder.key().name(), columnName);
-				builder.addColumn(new Column(columnName, dataType, nullable, unique));
+				builder.addColumnMetadata(columnName, dataType, nullable, unique);
 			}
 		}
 	}
@@ -162,7 +162,6 @@ public class SchemaInspector {
 	private static DataType buildDataType(Connection connection, DatabaseMetaData metadata, ResultSet columnMetadata, SchemaInfoRetriever schemaInfoRetriever, String schema, String tableName, String columnName) throws SQLException {
 		int jdbcTypeId = columnMetadata.getInt("DATA_TYPE");
 		Optional<JDBCType> jdbcType = resolveJdbcTypeName(jdbcTypeId);
-		int typeId = columnMetadata.getInt("SOURCE_DATA_TYPE");
 		String typeName = columnMetadata.getString("TYPE_NAME");
 		boolean autoIncrementable = "YES".equalsIgnoreCase(columnMetadata.getString("IS_AUTOINCREMENT"));
 
@@ -186,9 +185,9 @@ public class SchemaInspector {
 			
 			// Query database metadata to find the JDBC type for the base type
 			Optional<JDBCType> baseJdbcType = Optional.empty();
-			Integer baseTypeNumber = typeId; // Use SOURCE_DATA_TYPE as fallback
-			if (typeId != 0) {
-				baseJdbcType = resolveJdbcTypeName(typeId);
+			Integer baseTypeNumber = columnMetadata.getInt("SOURCE_DATA_TYPE"); // Use SOURCE_DATA_TYPE as fallback
+			if (baseTypeNumber != 0) {
+				baseJdbcType = resolveJdbcTypeName(baseTypeNumber);
 			}
 			
 			// If SOURCE_DATA_TYPE doesn't give us a valid JDBC type, query type info
@@ -228,7 +227,7 @@ public class SchemaInspector {
 				baseType = new DefaultDataType(
 						baseTypeName,
 						baseJdbcType.orElse(null),
-						baseTypeNumber != null ? baseTypeNumber : typeId,
+						baseTypeNumber != null ? baseTypeNumber : jdbcTypeId,
 						null,
 						false,
 						0
@@ -247,7 +246,7 @@ public class SchemaInspector {
 			return new DefaultDataType(
 					typeName,
 					jdbcType.orElse(null),
-					typeId,
+					jdbcTypeId,
 					baseType,
 					autoIncrementable,
 					arrayDimensions,
@@ -262,7 +261,7 @@ public class SchemaInspector {
 		return new DefaultDataType(
 				typeName,
 				jdbcType.orElse(null),
-				typeId,
+				jdbcTypeId,
 				baseType,
 				autoIncrementable,
 				arrayDimensions,
@@ -297,14 +296,14 @@ public class SchemaInspector {
 			Map<String, ForeignKeySpec> byName = new LinkedHashMap<>();
 			try (ResultSet fk = metadata.getImportedKeys(null, key.schema(), key.name())) {
 				while (fk.next()) {
-					String fkName = fk.getString("FK_NAME");
-					if (fkName == null || fkName.isBlank()) {
-						fkName = key.name() + "_fk_" + fk.getShort("KEY_SEQ");
-					}
+					String fkNameRaw = fk.getString("FK_NAME");
+					final String fkName = (fkNameRaw == null || fkNameRaw.isBlank()) 
+							? key.name() + "_fk_" + fk.getShort("KEY_SEQ")
+							: fkNameRaw;
 					String targetSchema = defaultIfBlank(fk.getString("PKTABLE_SCHEM"),
 							defaultIfBlank(fk.getString("PKTABLE_CAT"), key.schema()));
 					QualifiedTableName targetKey = new QualifiedTableName(targetSchema, fk.getString("PKTABLE_NAME"));
-					ForeignKeySpec spec = byName.computeIfAbsent(fkName, ignored -> new ForeignKeySpec(key, targetKey));
+					ForeignKeySpec spec = byName.computeIfAbsent(fkName, ignored -> new ForeignKeySpec(fkName, key, targetKey));
 					short sequence = fk.getShort("KEY_SEQ");
 					spec.addColumnPair(sequence, fk.getString("FKCOLUMN_NAME"), fk.getString("PKCOLUMN_NAME"));
 				}
@@ -323,8 +322,8 @@ public class SchemaInspector {
 			}
 			List<ForeignKeyColumn> columns = new ArrayList<>();
 			for (ColumnPair pair : spec.columnPairs()) {
-				Column source = sourceBuilder.column(pair.sourceColumn());
-				Column target = targetBuilder.column(pair.targetColumn());
+				Column source = sourceBuilder.table().findColumn(pair.sourceColumn()).orElse(null);
+				Column target = targetBuilder.table().findColumn(pair.targetColumn()).orElse(null);
 				if (source != null && target != null) {
 					columns.add(new ForeignKeyColumn(source, target));
 				}
@@ -332,7 +331,7 @@ public class SchemaInspector {
 			if (columns.isEmpty()) {
 				continue;
 			}
-			ForeignKey foreignKey = new ForeignKey(sourceBuilder.table(), targetBuilder.table(), List.copyOf(columns));
+			ForeignKey foreignKey = new ForeignKey(spec.name(), sourceBuilder.table(), targetBuilder.table(), List.copyOf(columns));
 			sourceBuilder.addOutgoingForeignKey(foreignKey);
 			targetBuilder.addIncomingForeignKey(foreignKey);
 		}

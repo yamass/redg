@@ -39,6 +39,10 @@
             <artifactId>redg-models</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.yamass</groupId>
+            <artifactId>redg-schema-inspection</artifactId>
+        </dependency>
+        <dependency>
             <groupId>us.fatehi</groupId>
             <artifactId>schemacrawler</artifactId>
         </dependency>

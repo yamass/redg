@@ -1,23 +1,16 @@
 package de.yamass.redg.schema.inspector;
 
-import de.yamass.redg.schema.model.Column;
-import de.yamass.redg.schema.model.ForeignKey;
-import de.yamass.redg.schema.model.Table;
+import de.yamass.redg.schema.model.*;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 final class TableBuilder {
 	private final QualifiedTableName key;
-	private final List<Column> columns = new ArrayList<>();
-	private final Map<String, Column> columnsByName = new LinkedHashMap<>();
+	private final List<ColumnMetadata> columnMetadataList = new ArrayList<>();
 	private final List<String> primaryKeyColumnNames = new ArrayList<>();
-	private Table table;
-	private List<ForeignKey> outgoing;
-	private List<ForeignKey> incoming;
+	private MutableTable table;
 
 	TableBuilder(QualifiedTableName key) {
 		this.key = key;
@@ -27,13 +20,9 @@ final class TableBuilder {
 		return key;
 	}
 
-	void addColumn(Column column) {
-		columns.add(column);
-		columnsByName.put(column.name(), column);
-	}
-
-	Column column(String name) {
-		return columnsByName.get(name);
+	void addColumnMetadata(String name, DataType type, boolean nullable, boolean unique) {
+		ColumnMetadata metadata = new ColumnMetadata(name, type, nullable, unique);
+		columnMetadataList.add(metadata);
 	}
 
 	void setPrimaryKeyColumnNames(List<String> primaryKeyColumnNames) {
@@ -42,13 +31,22 @@ final class TableBuilder {
 	}
 
 	void initializeTable() {
-		this.outgoing = new ArrayList<>();
-		this.incoming = new ArrayList<>();
-		List<Column> primaryKeyColumns = primaryKeyColumnNames.stream()
-				.map(this::column)
-				.filter(Objects::nonNull)
-				.toList();
-		this.table = new Table(key.schema(), key.name(), List.copyOf(columns), primaryKeyColumns, outgoing, incoming);
+		// Create table first with empty columns
+		this.table = new MutableTable(key.schema(), key.name());
+		
+		// Create Column records with table reference and add them to the table
+		for (ColumnMetadata metadata : columnMetadataList) {
+			Column column = new Column(metadata.name(), metadata.type(), metadata.nullable(), metadata.unique(), table);
+			table.addColumn(column);
+		}
+		
+		// Set primary key columns (reuse columns already added to the table)
+		for (String pkColumnName : primaryKeyColumnNames) {
+			table.columns().stream()
+					.filter(c -> c.name().equals(pkColumnName))
+					.findFirst()
+					.ifPresent(pkColumn -> table.addPrimaryKeyColumn(pkColumn));
+		}
 	}
 
 	Table table() {
@@ -56,11 +54,16 @@ final class TableBuilder {
 	}
 
 	void addOutgoingForeignKey(ForeignKey foreignKey) {
-		outgoing.add(foreignKey);
+		table.addOutgoingForeignKey(foreignKey);
 	}
 
 	void addIncomingForeignKey(ForeignKey foreignKey) {
-		incoming.add(foreignKey);
+		table.addIncomingForeignKey(foreignKey);
+	}
+
+	/**
+	 * Internal class to hold column metadata before the table is created.
+	 */
+	private record ColumnMetadata(String name, DataType type, boolean nullable, boolean unique) {
 	}
 }
-

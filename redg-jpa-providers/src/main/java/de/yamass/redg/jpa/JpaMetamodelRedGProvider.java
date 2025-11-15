@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Id;
@@ -54,10 +53,10 @@ import de.yamass.redg.generator.extractor.datatypeprovider.DefaultDataTypeProvid
 import de.yamass.redg.generator.extractor.nameprovider.DefaultNameProvider;
 import de.yamass.redg.generator.extractor.nameprovider.NameProvider;
 import de.yamass.redg.generator.utils.NameUtils;
-
-import schemacrawler.schema.ForeignKey;
-import schemacrawler.schema.ColumnReference;
-import schemacrawler.schema.Table;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.ForeignKeyColumn;
+import de.yamass.redg.schema.model.Table;
 
 /**
  * @author Yann Massard (yamass@gmail.com)
@@ -196,25 +195,41 @@ public class JpaMetamodelRedGProvider implements NameProvider, DataTypeProvider 
 
 	@Override
 	public String getClassNameForTable(Table table) {
-		ManagedType managedType = managedTypesByTableName.get(table.getName().toUpperCase());
+		ManagedType managedType = managedTypesByTableName.get(table.name().toUpperCase());
 		return managedType != null ? managedType.getJavaType().getSimpleName() : fallbackNameProvider.getClassNameForTable(table);
 	}
 
 	@Override
-	public String getMethodNameForColumn(schemacrawler.schema.Column column) {
-		String tableName = column.getParent().getName().toUpperCase();
-		SingularAttribute singularAttribute = singularAttributesByColumnName.get(new QualifiedColumnName(tableName, column.getName().toUpperCase()));
-		return singularAttribute != null ? singularAttribute.getName() : fallbackNameProvider.getMethodNameForColumn(column);
+	public String getMethodNameForColumn(Column column, Table table) {
+		String tableName = table.name().toUpperCase();
+		SingularAttribute singularAttribute = singularAttributesByColumnName.get(new QualifiedColumnName(tableName, column.name().toUpperCase()));
+		return singularAttribute != null ? singularAttribute.getName() : fallbackNameProvider.getMethodNameForColumn(column, table);
 	}
 
-    @Override
-    public String getMethodNameForForeignKeyColumn(ForeignKey foreignKey, schemacrawler.schema.Column primaryKeyColumn, schemacrawler.schema.Column foreignKeyColumn) {
-		String referenceMethodName = getMethodNameForReference(foreignKey);
-		String primaryKeyColumnName = foreignKey.getColumnReferences().stream()
-				.filter(columnReference -> columnReference.getPrimaryKeyColumn().getName().equals(primaryKeyColumn.getName()))
-				.map(columnReference -> columnReference.getPrimaryKeyColumn().getName())
-				.findFirst().orElse("asdf");
-        return referenceMethodName + NameUtils.firstCharacterToUpperCase(DefaultNameProvider.convertToJavaName(primaryKeyColumnName));
+	@Override
+	public String getMethodNameForForeignKeyColumn(ForeignKeyColumn foreignKeyColumn, Table sourceTable) {
+		// For foreign key columns, we need to find the corresponding JPA attribute
+		// First, try to find it as a regular column
+		String tableName = sourceTable.name().toUpperCase();
+		SingularAttribute singularAttribute = singularAttributesByColumnName.get(new QualifiedColumnName(tableName, foreignKeyColumn.sourceColumn().name().toUpperCase()));
+		
+		// Find the foreign key that contains this column
+		Optional<ForeignKey> foreignKeyOptional = sourceTable.outgoingForeignKeys().stream()
+				.filter(fk -> fk.columns().stream()
+						.anyMatch(fkCol -> fkCol.sourceColumn().equals(foreignKeyColumn.sourceColumn()) 
+								&& fkCol.targetColumn().equals(foreignKeyColumn.targetColumn())))
+				.findFirst();
+		
+		if (foreignKeyOptional.isPresent()) {
+			ForeignKey foreignKey = foreignKeyOptional.get();
+			String referenceMethodName = getMethodNameForReference(foreignKey);
+			String primaryKeyColumnName = foreignKeyColumn.targetColumn().name();
+			String primaryKeyJavaName = DefaultNameProvider.convertToJavaName(primaryKeyColumnName);
+			return referenceMethodName + NameUtils.firstCharacterToUpperCase(primaryKeyJavaName);
+		}
+		
+		// If not found, fall back to default behavior
+		return fallbackNameProvider.getMethodNameForForeignKeyColumn(foreignKeyColumn, sourceTable);
 	}
 
     private boolean isIdAttribute(SingularAttribute attribute) {
@@ -222,7 +237,7 @@ public class JpaMetamodelRedGProvider implements NameProvider, DataTypeProvider 
 	}
 
 	private String getSingularAttributeColumnName(SingularAttribute attribute) {
-		Column columnAnnotation = ((AnnotatedElement) attribute.getJavaMember()).getAnnotation(Column.class);
+		javax.persistence.Column columnAnnotation = ((AnnotatedElement) attribute.getJavaMember()).getAnnotation(javax.persistence.Column.class);
 		if (columnAnnotation != null && columnAnnotation.name().length() > 0) {
 			return columnAnnotation.name().toUpperCase();
 		} else {
@@ -238,10 +253,17 @@ public class JpaMetamodelRedGProvider implements NameProvider, DataTypeProvider 
 	}
 
 	private ForeignKeyRelation toForeignKeyRelation(ForeignKey foreignKey) {
-		String referencingTableName = foreignKey.getColumnReferences().get(0).getForeignKeyColumn().getParent().getName().toUpperCase();
-		String referencedTableName = foreignKey.getColumnReferences().get(0).getPrimaryKeyColumn().getParent().getName().toUpperCase();
-		Map<String, String> referenceColumnNamesMap = foreignKey.getColumnReferences().stream()
-				.collect(Collectors.toMap(columnReference -> columnReference.getForeignKeyColumn().getName().toUpperCase(), columnReference -> columnReference.getPrimaryKeyColumn().getName().toUpperCase()));
+		if (foreignKey.columns().isEmpty()) {
+			throw new IllegalArgumentException("Foreign key must have at least one column");
+		}
+		ForeignKeyColumn firstColumn = foreignKey.columns().get(0);
+		String referencingTableName = foreignKey.sourceTable().name().toUpperCase();
+		String referencedTableName = foreignKey.targetTable().name().toUpperCase();
+		Map<String, String> referenceColumnNamesMap = foreignKey.columns().stream()
+				.collect(Collectors.toMap(
+						fkCol -> fkCol.sourceColumn().name().toUpperCase(),
+						fkCol -> fkCol.targetColumn().name().toUpperCase()
+				));
 		return new ForeignKeyRelation(referencingTableName, referencedTableName, referenceColumnNamesMap);
 	}
 
@@ -259,34 +281,35 @@ public class JpaMetamodelRedGProvider implements NameProvider, DataTypeProvider 
 	}
 
 	@Override
-	public String getCanonicalDataTypeName(schemacrawler.schema.Column column) {
+	public String getCanonicalDataTypeName(Column column, Table table) {
 		SingularAttribute singularAttribute;
-		if (column.isPartOfForeignKey()) {
-			Optional<ColumnReference> foreignKeyColumnReferenceOptional = column.getParent().getForeignKeys().stream()
-					.flatMap(foreignKeyColumnReferences -> foreignKeyColumnReferences.getColumnReferences().stream())
-					.filter(foreignKeyColumnReference -> foreignKeyColumnReference.getForeignKeyColumn().getName().equals(column.getName()))
-					.findFirst();
+		// Check if this column is part of a foreign key
+		Optional<ForeignKeyColumn> foreignKeyColumnOptional = table.outgoingForeignKeys().stream()
+				.flatMap(foreignKey -> foreignKey.columns().stream())
+				.filter(fkCol -> fkCol.sourceColumn().equals(column))
+				.findFirst();
 
-			if (foreignKeyColumnReferenceOptional.isPresent()) {
-				ColumnReference ref = foreignKeyColumnReferenceOptional.get();
-				SingularAttribute targetSingularAttribute =
-						singularAttributesByColumnName.get(new QualifiedColumnName(ref.getPrimaryKeyColumn().getParent().getName().toUpperCase(), ref.getPrimaryKeyColumn().getName().toUpperCase()));
-				if (targetSingularAttribute != null) {
-					return targetSingularAttribute.getJavaType().getCanonicalName();
-				} else {
-					LOG.warn("Could not find target singular attribute for column " + column.getParent().getName() + "." + column.getName());
-					return fallbackDataTypeProvider.getCanonicalDataTypeName(column);
-				}
+		if (foreignKeyColumnOptional.isPresent()) {
+			ForeignKeyColumn fkCol = foreignKeyColumnOptional.get();
+			// For foreign key columns, use the target column's type
+			SingularAttribute targetSingularAttribute =
+					singularAttributesByColumnName.get(new QualifiedColumnName(
+							fkCol.targetColumn().table().name().toUpperCase(),
+							fkCol.targetColumn().name().toUpperCase()
+					));
+			if (targetSingularAttribute != null) {
+				return targetSingularAttribute.getJavaType().getCanonicalName();
 			} else {
-				return fallbackDataTypeProvider.getCanonicalDataTypeName(column);
+				LOG.warn("Could not find target singular attribute for column {}.{}", table.name(), column.name());
+				return fallbackDataTypeProvider.getCanonicalDataTypeName(column, table);
 			}
 		} else {
 			singularAttribute =
-					singularAttributesByColumnName.get(new QualifiedColumnName(column.getParent().getName().toUpperCase(), column.getName().toUpperCase()));
+					singularAttributesByColumnName.get(new QualifiedColumnName(table.name().toUpperCase(), column.name().toUpperCase()));
 			if (singularAttribute != null) {
 				return singularAttribute.getJavaType().getCanonicalName();
 			} else {
-				return fallbackDataTypeProvider.getCanonicalDataTypeName(column);
+				return fallbackDataTypeProvider.getCanonicalDataTypeName(column, table);
 			}
 		}
 	}

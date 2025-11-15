@@ -114,6 +114,11 @@
                 <artifactId>redg-models</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>de.yamass</groupId>
+                <artifactId>redg-schema-inspection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- Dependencies for the maven plugin -->
             <dependency>
                 <!-- TODO remove -->

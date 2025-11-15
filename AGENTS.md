@@ -30,7 +30,7 @@ RedG is highly configurable, both during code generation and runtime.
 - `redg-maven-plugin`: A maven plugin for invoking the RedG code generator.
 - `redg-extractor`: Tooling for generating RedG code from existing data. The main purpose of this module is to provide
   help for migrating from other data modeling tools to RedG.
-- `redg-jpa-providers`: This will soon be discontinued. Please ignore.
+- `redg-jpa-providers`: Code generator customization providers for JPA.
 - `redg-tests`: Some integration tests. 
 
 Here is a dependency graph boiled down to individual dependencies:
@@ -62,3 +62,4 @@ code will make use of the classes in `redg-runtime`.
 * All new unit tests should make use of testcontainers and the test infrastructure defined in `redg-testing` (unless
   the unit tests do not depend on a physical database at all).
 * Unit tests must make use of AssertJ whenever possible.
+* Use tabs for indentation.

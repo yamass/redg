@@ -14,8 +14,8 @@ public interface SchemaInfoRetriever {
 		return switch (databaseType) {
 			case POSTGRES -> new PostgresSchemaInfoRetrieverImpl();
 			case MARIADB -> new MariaDbSchemaInfoRetrieverImpl();
-			case H2 -> throw new UnsupportedOperationException("Not yet implemented.");
-			case GENERIC -> throw new UnsupportedOperationException("Not yet implemented.");
+			case H2 -> new H2SchemaInfoRetrieverImpl();
+			case GENERIC -> new GenericSchemaInfoRetrieverImpl();
 		};
 	}
 

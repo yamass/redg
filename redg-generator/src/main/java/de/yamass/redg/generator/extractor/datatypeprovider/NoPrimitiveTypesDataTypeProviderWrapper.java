@@ -19,11 +19,12 @@ package de.yamass.redg.generator.extractor.datatypeprovider;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
-import schemacrawler.schema.Column;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.Table;
 
 public class NoPrimitiveTypesDataTypeProviderWrapper implements DataTypeProvider {
 
-    private static final Map<String, Class> OBJECT_TYPE_BY_PRIMITIVE_TYPE = ImmutableMap.<String, Class>builder()
+    private static final Map<String, Class<?>> OBJECT_TYPE_BY_PRIMITIVE_TYPE = ImmutableMap.<String, Class<?>>builder()
             .put("boolean", java.lang.Boolean.class)
             .put("char", java.lang.Character.class)
             .put("byte", java.lang.Byte.class)
@@ -41,8 +42,8 @@ public class NoPrimitiveTypesDataTypeProviderWrapper implements DataTypeProvider
     }
 
     @Override
-    public String getCanonicalDataTypeName(Column column) {
-        String dataTypeName = originalDataTypeProvider.getCanonicalDataTypeName(column);
+    public String getCanonicalDataTypeName(Column column, Table table) {
+        String dataTypeName = originalDataTypeProvider.getCanonicalDataTypeName(column, table);
         return OBJECT_TYPE_BY_PRIMITIVE_TYPE.keySet().contains(dataTypeName) ? OBJECT_TYPE_BY_PRIMITIVE_TYPE.get(dataTypeName).getCanonicalName() : dataTypeName;
     }
 }

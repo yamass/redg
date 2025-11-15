@@ -90,8 +90,8 @@ public class ExistingGDemoCompany extends GDemoCompany {
     @Override
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[] {
-                new AttributeMetaInfo("COUNTRY_CODE", "DEMO_COMPANY", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true),
-                new AttributeMetaInfo("NAME", "DEMO_COMPANY", "\"RT-CG-MPFK\".PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true)
+                new AttributeMetaInfo("COUNTRY_CODE", "DEMO_COMPANY", "PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true),
+                new AttributeMetaInfo("NAME", "DEMO_COMPANY", "PUBLIC.DEMO_COMPANY", "CHARACTER VARYING", 12, java.lang.String.class, true)
         };
     }
 }

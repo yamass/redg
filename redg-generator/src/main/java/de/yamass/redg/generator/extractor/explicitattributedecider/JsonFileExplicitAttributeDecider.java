@@ -18,9 +18,9 @@ package de.yamass.redg.generator.extractor.explicitattributedecider;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import schemacrawler.schema.Column;
-import schemacrawler.schema.ColumnReference;
-import schemacrawler.schema.ForeignKey;
+import de.yamass.redg.schema.model.Column;
+import de.yamass.redg.schema.model.ForeignKey;
+import de.yamass.redg.schema.model.Table;
 
 import java.io.*;
 import java.util.*;
@@ -57,9 +57,9 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
     }
 
     @Override
-    public boolean isExplicitAttribute(Column column) {
-        String tableName = column.getParent().getName();
-        String columnName = column.getName();
+    public boolean isExplicitAttribute(Column column, Table table) {
+        String tableName = table.name();
+        String columnName = column.name();
 
         return explicitDataByTableRegex.keySet().stream()
                 .filter(regex -> matchesRegexIgnoreCase(tableName, regex))
@@ -74,7 +74,7 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
 
     @Override
     public boolean isExplicitForeignKey(final ForeignKey foreignKey) {
-        String tableName = foreignKey.getColumnReferences().get(0).getForeignKeyColumn().getParent().getName();
+        String tableName = foreignKey.sourceTable().name();
 
         return explicitDataByTableRegex.keySet().stream()
                 .filter(regex -> matchesRegexIgnoreCase(tableName, regex))
@@ -88,13 +88,8 @@ public class JsonFileExplicitAttributeDecider implements ExplicitAttributeDecide
     }
 
 	private static boolean matchesColumns(final String[] regexes, final ForeignKey foreignKey) {
-        /*return foreignKey.getColumnReferences().stream()
-                .map(ForeignKeyColumnReference::getForeignKeyColumn)
-                .map(Column::getName)
-                .anyMatch(name -> name.matches(regex));*/
-        List<String> columnNames = foreignKey.getColumnReferences().stream()
-                .map(ColumnReference::getForeignKeyColumn)
-                .map(Column::getName)
+        List<String> columnNames = foreignKey.columns().stream()
+                .map(fkCol -> fkCol.sourceColumn().name())
                 .collect(Collectors.toList());
         if (columnNames.size() != regexes.length) {
             return false;

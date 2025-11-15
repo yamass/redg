@@ -94,7 +94,7 @@ public class ExistingGDemoUser extends GDemoUser {
      * {@inheritDoc}
      */
     @Override
-    public GDemoUser company(GDemoCompany value) {
+    public GDemoUser demoUserCompany(GDemoCompany value) {
         throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
     }
 
@@ -102,7 +102,7 @@ public class ExistingGDemoUser extends GDemoUser {
      * {@inheritDoc}
      */
     @Override
-    public GDemoCompany company() {
+    public GDemoCompany demoUserCompany() {
         throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
     }
 
@@ -110,7 +110,7 @@ public class ExistingGDemoUser extends GDemoUser {
      * {@inheritDoc}
      */
     @Override
-    public GDemoUser bankAcc(GDemoBankAccount value) {
+    public GDemoUser demoUserBankAcc(GDemoBankAccount value) {
         throw new UnsupportedOperationException("Cannot change values of entities declared as existing.");
     }
 
@@ -118,17 +118,17 @@ public class ExistingGDemoUser extends GDemoUser {
      * {@inheritDoc}
      */
     @Override
-    public GDemoBankAccount bankAcc() {
+    public GDemoBankAccount demoUserBankAcc() {
         throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
     }
 
 
-    @Override
-    public java.lang.String worksAtName() {
-        throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
-    }
     @Override
     public java.lang.String worksAtCc() {
+        throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
+    }
+    @Override
+    public java.lang.String worksAtName() {
         throw new UnsupportedOperationException("Cannot read values of entities declared as existing that are not part of the primary key.");
     }
     @Override
@@ -167,7 +167,7 @@ public class ExistingGDemoUser extends GDemoUser {
     @Override
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[] {
-                new AttributeMetaInfo("ID", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true)
+                new AttributeMetaInfo("ID", "DEMO_USER", "PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true)
         };
     }
 }

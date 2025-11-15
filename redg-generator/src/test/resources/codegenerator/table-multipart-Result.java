@@ -30,7 +30,7 @@ import de.yamass.redg.models.*;
  *     </tr>
  *     <tr>
  *         <td>Full table name</td>
- *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+ *         <td>PUBLIC.DEMO_USER</td>
  *     </tr>
  * </table>
  */
@@ -39,12 +39,12 @@ public class GDemoUser implements RedGEntity {
     protected AbstractRedG redG;
 
     // do not manually make this public and instantiate it directly. Use the RedG Main class
-    GDemoUser(AbstractRedG redG, GDemoBankAccount bankAcc) {
+    GDemoUser(AbstractRedG redG, GDemoBankAccount demoUserBankAcc) {
         this.redG = redG;
-        if (bankAcc == null) {
-            throw new IllegalArgumentException("bankAcc may not be null!");
+        if (demoUserBankAcc == null) {
+            throw new IllegalArgumentException("demoUserBankAcc may not be null!");
         }
-        this.bankAcc = bankAcc;
+        this.demoUserBankAcc = demoUserBankAcc;
 
 
         try {
@@ -89,7 +89,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -133,7 +133,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -175,7 +175,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -219,7 +219,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -261,7 +261,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -302,7 +302,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -344,7 +344,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -385,7 +385,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -414,54 +414,54 @@ public class GDemoUser implements RedGEntity {
     }
 
 
-    private GDemoCompany company;
+    private GDemoCompany demoUserCompany;
 
     /**
      * This is a foreign key referencing {@link GDemoCompany}
      */
-    public GDemoUser company(GDemoCompany value) {
-        this.company = value;
+    public GDemoUser demoUserCompany(GDemoCompany value) {
+        this.demoUserCompany = value;
         return this;
     }
 
     /**
      * This is a foreign key referencing {@link GDemoCompany}
      */
-    public GDemoCompany company() {
-        return this.company;
+    public GDemoCompany demoUserCompany() {
+        return this.demoUserCompany;
     }
 
 
-    private GDemoBankAccount bankAcc;
+    private GDemoBankAccount demoUserBankAcc;
 
     /**
      * This is a foreign key referencing {@link GDemoBankAccount}
      */
-    public GDemoUser bankAcc(GDemoBankAccount value) {
+    public GDemoUser demoUserBankAcc(GDemoBankAccount value) {
         if (value == null) {
-            throw new IllegalArgumentException("Setting bankAcc to null violates a NOT NULL constraint!");
+            throw new IllegalArgumentException("Setting demoUserBankAcc to null violates a NOT NULL constraint!");
         }
-        this.bankAcc = value;
+        this.demoUserBankAcc = value;
         return this;
     }
 
     /**
      * This is a foreign key referencing {@link GDemoBankAccount}
      */
-    public GDemoBankAccount bankAcc() {
-        return this.bankAcc;
+    public GDemoBankAccount demoUserBankAcc() {
+        return this.demoUserBankAcc;
     }
 
 
-    public java.lang.String worksAtName() {
-        if (this.company != null) {
-            return this.company.name();
+    public java.lang.String worksAtCc() {
+        if (this.demoUserCompany != null) {
+            return this.demoUserCompany.countryCode();
         }
         return null;
     }
-    public java.lang.String worksAtCc() {
-        if (this.company != null) {
-            return this.company.countryCode();
+    public java.lang.String worksAtName() {
+        if (this.demoUserCompany != null) {
+            return this.demoUserCompany.name();
         }
         return null;
     }
@@ -478,7 +478,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -491,7 +491,7 @@ public class GDemoUser implements RedGEntity {
      * </table>
      */
     public java.lang.String accBic() {
-        return this.bankAcc.bic();
+        return this.demoUserBankAcc.bic();
     }
     /**
      * <table summary="The column model attributes and their values">
@@ -505,7 +505,7 @@ public class GDemoUser implements RedGEntity {
      *     </tr>
      *     <tr>
      *         <td>Full table name</td>
-     *         <td>"RT-CG-MPFK".PUBLIC.DEMO_USER</td>
+     *         <td>PUBLIC.DEMO_USER</td>
      *     </tr>
      *     <tr>
      *         <td>Column name</td>
@@ -518,13 +518,13 @@ public class GDemoUser implements RedGEntity {
      * </table>
      */
     public java.lang.String accIban() {
-        return this.bankAcc.iban();
+        return this.demoUserBankAcc.iban();
     }
 
     public List<RedGEntity> getDependencies() {
         List<RedGEntity> dependencies = new ArrayList<>();
-        if (company != null) dependencies.add(company);
-        if (bankAcc != null) dependencies.add(bankAcc);
+        if (demoUserCompany != null) dependencies.add(demoUserCompany);
+        if (demoUserBankAcc != null) dependencies.add(demoUserBankAcc);
         return dependencies;
     }
 
@@ -533,7 +533,7 @@ public class GDemoUser implements RedGEntity {
         return String.format("INSERT INTO \"DEMO_USER\" (" +
                         "\"ACC_BIC\", \"ACC_IBAN\"" +
                         ", " +
-                        "\"WORKS_AT_NAME\", \"WORKS_AT_CC\"" +
+                        "\"WORKS_AT_CC\", \"WORKS_AT_NAME\"" +
                         ", " +
                         "\"ID\", \"USERNAME\", \"FIRST_NAME\", \"LAST_NAME\"" +
                         ") VALUES (" +
@@ -542,29 +542,29 @@ public class GDemoUser implements RedGEntity {
                         "%s, %s" +
                         ", " +
                         "%s, %s, %s, %s)",
-                this.redG.getSqlValuesFormatter().formatValue(this.bankAcc.bic(),
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER",
+                this.redG.getSqlValuesFormatter().formatValue(this.demoUserBankAcc.bic(),
+                        "CHARACTER VARYING", "PUBLIC.DEMO_USER",
                         "DEMO_USER", "ACC_BIC"),
-                this.redG.getSqlValuesFormatter().formatValue(this.bankAcc.iban(),
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER",
+                this.redG.getSqlValuesFormatter().formatValue(this.demoUserBankAcc.iban(),
+                        "CHARACTER VARYING", "PUBLIC.DEMO_USER",
                         "DEMO_USER", "ACC_IBAN"),
-                this.redG.getSqlValuesFormatter().formatValue((this.company != null) ? this.company.name() : null,
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER",
-                        "DEMO_USER", "WORKS_AT_NAME"),
-                this.redG.getSqlValuesFormatter().formatValue((this.company != null) ? this.company.countryCode() : null,
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER",
+                this.redG.getSqlValuesFormatter().formatValue((this.demoUserCompany != null) ? this.demoUserCompany.countryCode() : null,
+                        "CHARACTER VARYING", "PUBLIC.DEMO_USER",
                         "DEMO_USER", "WORKS_AT_CC"),
+                this.redG.getSqlValuesFormatter().formatValue((this.demoUserCompany != null) ? this.demoUserCompany.name() : null,
+                        "CHARACTER VARYING", "PUBLIC.DEMO_USER",
+                        "DEMO_USER", "WORKS_AT_NAME"),
                 this.redG.getSqlValuesFormatter().formatValue(this.id(),
-                        "NUMERIC", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER",
+                        "NUMERIC", "PUBLIC.DEMO_USER",
                         "DEMO_USER", "ID"),
                 this.redG.getSqlValuesFormatter().formatValue(this.username(),
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER",
+                        "CHARACTER VARYING", "PUBLIC.DEMO_USER",
                         "DEMO_USER", "USERNAME"),
                 this.redG.getSqlValuesFormatter().formatValue(this.firstName(),
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER",
+                        "CHARACTER VARYING", "PUBLIC.DEMO_USER",
                         "DEMO_USER", "FIRST_NAME"),
                 this.redG.getSqlValuesFormatter().formatValue(this.lastName(),
-                        "CHARACTER VARYING", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER",
+                        "CHARACTER VARYING", "PUBLIC.DEMO_USER",
                         "DEMO_USER", "LAST_NAME")
         );
     }
@@ -573,7 +573,7 @@ public class GDemoUser implements RedGEntity {
         return "INSERT INTO \"DEMO_USER\" (" +
                 "\"ACC_BIC\", \"ACC_IBAN\"" +
                 ", " +
-                "\"WORKS_AT_NAME\", \"WORKS_AT_CC\"" +
+                "\"WORKS_AT_CC\", \"WORKS_AT_NAME\"" +
                 ", " +
                 "\"ID\", \"USERNAME\", \"FIRST_NAME\", \"LAST_NAME\"" +
                 ") VALUES (" +
@@ -586,10 +586,10 @@ public class GDemoUser implements RedGEntity {
 
     public Object[] getPreparedStatementValues() {
         return new Object[]{
-                this.bankAcc.bic(),
-                this.bankAcc.iban(),
-                (this.company != null) ? this.company.name() : null,
-                (this.company != null) ? this.company.countryCode() : null,
+                this.demoUserBankAcc.bic(),
+                this.demoUserBankAcc.iban(),
+                (this.demoUserCompany != null) ? this.demoUserCompany.countryCode() : null,
+                (this.demoUserCompany != null) ? this.demoUserCompany.name() : null,
                 this.id(),
                 this.username(),
                 this.firstName(),
@@ -599,18 +599,18 @@ public class GDemoUser implements RedGEntity {
 
     public AttributeMetaInfo[] getPreparedStatementValuesMetaInfos() {
         return new AttributeMetaInfo[]{
-                new AttributeMetaInfo("ACC_BIC", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, true),
-                new AttributeMetaInfo("ACC_IBAN", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, true),
-                new AttributeMetaInfo("WORKS_AT_NAME", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false),
-                new AttributeMetaInfo("WORKS_AT_CC", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false),
-                new AttributeMetaInfo("ID", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true),
-                new AttributeMetaInfo("USERNAME", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, true),
-                new AttributeMetaInfo("FIRST_NAME", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false),
-                new AttributeMetaInfo("LAST_NAME", "DEMO_USER", "\"RT-CG-MPFK\".PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false)
+                new AttributeMetaInfo("ACC_BIC", "DEMO_USER", "PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, true),
+                new AttributeMetaInfo("ACC_IBAN", "DEMO_USER", "PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, true),
+                new AttributeMetaInfo("WORKS_AT_CC", "DEMO_USER", "PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false),
+                new AttributeMetaInfo("WORKS_AT_NAME", "DEMO_USER", "PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false),
+                new AttributeMetaInfo("ID", "DEMO_USER", "PUBLIC.DEMO_USER", "NUMERIC", 2, java.math.BigDecimal.class, true),
+                new AttributeMetaInfo("USERNAME", "DEMO_USER", "PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, true),
+                new AttributeMetaInfo("FIRST_NAME", "DEMO_USER", "PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false),
+                new AttributeMetaInfo("LAST_NAME", "DEMO_USER", "PUBLIC.DEMO_USER", "CHARACTER VARYING", 12, java.lang.String.class, false)
         };
     }
 
-    private static String serializedTableModel = "rO0ABXNyACBkZS55YW1hc3MucmVkZy5tb2RlbHMuVGFibGVNb2RlbL+0Cs2MvQwOAgAKWgAYaGFzQ29sdW1uc0FuZEZvcmVpZ25LZXlzTAAJY2xhc3NOYW1ldAASTGphdmEvbGFuZy9TdHJpbmc7TAAHY29sdW1uc3QAEExqYXZhL3V0aWwvTGlzdDtMAAtmb3JlaWduS2V5c3EAfgACTAATaW5jb21pbmdGb3JlaWduS2V5c3EAfgACTAAXam9pblRhYmxlU2ltcGxpZmllckRhdGF0AA9MamF2YS91dGlsL01hcDtMAARuYW1lcQB+AAFMAAtwYWNrYWdlTmFtZXEAfgABTAALc3FsRnVsbE5hbWVxAH4AAUwAB3NxbE5hbWVxAH4AAXhwAXQACUdEZW1vVXNlcnNyABNqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHAAAAAIdwQAAAAIc3IAIWRlLnlhbWFzcy5yZWRnLm1vZGVscy5Db2x1bW5Nb2RlbNxb0tCXjsJzAgAMWgARZXhwbGljaXRBdHRyaWJ1dGVaAAdub3ROdWxsWgAQcGFydE9mRm9yZWlnbktleVoAEHBhcnRPZlByaW1hcnlLZXlaAAZ1bmlxdWVMABJjb252ZW5pZW5jZVNldHRlcnNxAH4AAkwACGRhdGFUeXBldAAlTGRlL3lhbWFzcy9yZWRnL21vZGVscy9EYXRhVHlwZU1vZGVsO0wAD2RiRnVsbFRhYmxlTmFtZXEAfgABTAAGZGJOYW1lcQB+AAFMAAtkYlRhYmxlTmFtZXEAfgABTAAQamF2YVByb3BlcnR5TmFtZXEAfgABTAAMamF2YVR5cGVOYW1lcQB+AAF4cAABAAEBc3IAH2phdmEudXRpbC5Db2xsZWN0aW9ucyRFbXB0eUxpc3R6uBe0PKee3gIAAHhwc3IAI2RlLnlhbWFzcy5yZWRnLm1vZGVscy5EYXRhVHlwZU1vZGVswgiOwMeuoVoCABVaABFhdXRvSW5jcmVtZW50YWJsZVoACmVudW1lcmF0ZWRaABNmaXhlZFByZWNpc2lvblNjYWxlSQAMbWF4aW11bVNjYWxlSQAMbWluaW11bVNjYWxlWgAIbnVsbGFibGVJABFudW1QcmVjaXNpb25SYWRpeEoACXByZWNpc2lvbloACHVuc2lnbmVkTAAIYmFzZVR5cGVxAH4ACUwAEGNyZWF0ZVBhcmFtZXRlcnNxAH4AAUwAGGRhdGFiYXNlU3BlY2lmaWNUeXBlTmFtZXEAfgABTAAQZGVmYXVsdEphdmFDbGFzc3QAEUxqYXZhL2xhbmcvQ2xhc3M7TAAKZW51bVZhbHVlc3EAfgACTAAPamF2YVNxbFR5cGVOYW1lcQB+AAFMAA1saXRlcmFsUHJlZml4cQB+AAFMAA1saXRlcmFsU3VmZml4cQB+AAFMAA1sb2NhbFR5cGVOYW1lcQB+AAFMAARuYW1lcQB+AAFMAAZ2ZW5kb3JxAH4AAUwAEHZlbmRvclR5cGVOdW1iZXJ0ABNMamF2YS9sYW5nL0ludGVnZXI7eHABAAEAAH//AAAAAAEAAAAKAAAAAAABhqAAcHQAD1BSRUNJU0lPTixTQ0FMRXQAB05VTUVSSUN2cgAUamF2YS5tYXRoLkJpZ0RlY2ltYWxUxxVX+YEoTwMAAkkABXNjYWxlTAAGaW50VmFsdAAWTGphdmEvbWF0aC9CaWdJbnRlZ2VyO3hyABBqYXZhLmxhbmcuTnVtYmVyhqyVHQuU4IsCAAB4cHNxAH4ABgAAAAB3BAAAAAB4cQB+ABJwcHEAfgAScQB+ABJ0AAhqYXZhLnNxbHNyABFqYXZhLmxhbmcuSW50ZWdlchLioKT3gYc4AgABSQAFdmFsdWV4cQB+ABUAAAACdAAdIlJULUNHLU1QRksiLlBVQkxJQy5ERU1PX1VTRVJ0AAJJRHQACURFTU9fVVNFUnQAAmlkdAAUamF2YS5tYXRoLkJpZ0RlY2ltYWxzcQB+AAgAAQAAAHEAfgAMc3EAfgANAAAAAAAAAAAAAAABAAAAAAAAAAA7msoAAHB0AAZMRU5HVEh0ABFDSEFSQUNURVIgVkFSWUlOR3ZyABBqYXZhLmxhbmcuU3RyaW5noPCkOHo7s0ICAAB4cHNxAH4ABgAAAAB3BAAAAAB4dAAHVkFSQ0hBUnQAASdxAH4AKHEAfgAjcQB+ACNxAH4AGHNxAH4AGQAAAAxxAH4AG3QACFVTRVJOQU1FcQB+AB10AAh1c2VybmFtZXQAEGphdmEubGFuZy5TdHJpbmdzcQB+AAgAAAAAAHEAfgAMcQB+ACFxAH4AG3QACkZJUlNUX05BTUVxAH4AHXQACWZpcnN0TmFtZXEAfgAsc3EAfgAIAAAAAABxAH4ADHEAfgAhcQB+ABt0AAlMQVNUX05BTUVxAH4AHXQACGxhc3ROYW1lcQB+ACxzcQB+AAgAAAEAAHEAfgAMcQB+ACFxAH4AG3QAC1dPUktTX0FUX0NDcQB+AB10AAl3b3Jrc0F0Q2NxAH4ALHNxAH4ACAAAAQAAcQB+AAxxAH4AIXEAfgAbdAANV09SS1NfQVRfTkFNRXEAfgAddAALd29ya3NBdE5hbWVxAH4ALHNxAH4ACAABAQAAcQB+AAxxAH4AIXEAfgAbdAAHQUNDX0JJQ3EAfgAddAAGYWNjQmljcQB+ACxzcQB+AAgAAQEAAHEAfgAMcQB+ACFxAH4AG3QACEFDQ19JQkFOcQB+AB10AAdhY2NJYmFucQB+ACx4c3EAfgAGAAAAAncEAAAAAnNyACVkZS55YW1hc3MucmVkZy5tb2RlbHMuRm9yZWlnbktleU1vZGVsi3oIWIjQbD8CAARaAAdub3ROdWxsTAAQamF2YVByb3BlcnR5TmFtZXEAfgABTAAMamF2YVR5cGVOYW1lcQB+AAFMAApyZWZlcmVuY2VzcQB+AAN4cAB0AAdjb21wYW55dAAMR0RlbW9Db21wYW55c3IAEWphdmEudXRpbC5IYXNoTWFwBQfawcMWYNEDAAJGAApsb2FkRmFjdG9ySQAJdGhyZXNob2xkeHA/QAAAAAAADHcIAAAAEAAAAAJxAH4AN3NyACtkZS55YW1hc3MucmVkZy5tb2RlbHMuRm9yZWlnbktleUNvbHVtbk1vZGVs92b+WemlPOQCAAhJAApzcWxUeXBlSW50TAAPZGJGdWxsVGFibGVOYW1lcQB+AAFMAAZkYk5hbWVxAH4AAUwAC2RiVGFibGVOYW1lcQB+AAFMAApkYlR5cGVOYW1lcQB+AAFMAAlsb2NhbE5hbWVxAH4AAUwACWxvY2FsVHlwZXEAfgABTAAXcHJpbWFyeUtleUF0dHJpYnV0ZU5hbWVxAH4AAXhwAAAADHEAfgAbcQB+ADdxAH4AHXEAfgAjdAALd29ya3NBdE5hbWVxAH4ALHQABG5hbWVxAH4ANHNxAH4ARgAAAAxxAH4AG3EAfgA0cQB+AB1xAH4AI3QACXdvcmtzQXRDY3EAfgAsdAALY291bnRyeUNvZGV4c3EAfgBAAXQAB2JhbmtBY2N0ABBHRGVtb0JhbmtBY2NvdW50c3EAfgBEP0AAAAAAAAx3CAAAABAAAAACcQB+ADpzcQB+AEYAAAAMcQB+ABtxAH4AOnEAfgAdcQB+ACN0AAZhY2NCaWNxAH4ALHQAA2JpY3EAfgA9c3EAfgBGAAAADHEAfgAbcQB+AD1xAH4AHXEAfgAjdAAHYWNjSWJhbnEAfgAsdAAEaWJhbnh4c3EAfgAGAAAAAHcEAAAAAHhzcQB+AEQ/QAAAAAAAAHcIAAAAEAAAAAB4dAAIRGVtb1VzZXJ0ABhkZS55YW1hc3MucmVkZy5nZW5lcmF0ZWRxAH4AG3EAfgAd";
+    private static String serializedTableModel = "rO0ABXNyACBkZS55YW1hc3MucmVkZy5tb2RlbHMuVGFibGVNb2RlbDbHSQJAzJJ4AgAKWgAYaGFzQ29sdW1uc0FuZEZvcmVpZ25LZXlzTAAJY2xhc3NOYW1ldAASTGphdmEvbGFuZy9TdHJpbmc7TAAHY29sdW1uc3QAEExqYXZhL3V0aWwvTGlzdDtMAAtmb3JlaWduS2V5c3EAfgACTAATaW5jb21pbmdGb3JlaWduS2V5c3EAfgACTAAXam9pblRhYmxlU2ltcGxpZmllckRhdGF0AA9MamF2YS91dGlsL01hcDtMAARuYW1lcQB+AAFMAAtwYWNrYWdlTmFtZXEAfgABTAALc3FsRnVsbE5hbWVxAH4AAUwAB3NxbE5hbWVxAH4AAXhwAXQACUdEZW1vVXNlcnNyABNqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHAAAAAIdwQAAAAIc3IAIWRlLnlhbWFzcy5yZWRnLm1vZGVscy5Db2x1bW5Nb2RlbPh9//pKB8pQAgAMWgARZXhwbGljaXRBdHRyaWJ1dGVaAAdub3ROdWxsWgAQcGFydE9mRm9yZWlnbktleVoAEHBhcnRPZlByaW1hcnlLZXlaAAZ1bmlxdWVMABJjb252ZW5pZW5jZVNldHRlcnNxAH4AAkwACGRhdGFUeXBldAAlTGRlL3lhbWFzcy9yZWRnL21vZGVscy9EYXRhVHlwZU1vZGVsO0wAD2RiRnVsbFRhYmxlTmFtZXEAfgABTAAGZGJOYW1lcQB+AAFMAAtkYlRhYmxlTmFtZXEAfgABTAAQamF2YVByb3BlcnR5TmFtZXEAfgABTAAMamF2YVR5cGVOYW1lcQB+AAF4cAABAAEBc3IAEWphdmEudXRpbC5Db2xsU2VyV46rtjobqBEDAAFJAAN0YWd4cAAAAAF3BAAAAAB4c3IAI2RlLnlhbWFzcy5yZWRnLm1vZGVscy5EYXRhVHlwZU1vZGVs+a0mnLWxazkCAANaAAhudWxsYWJsZUwABG5hbWVxAH4AAUwAEHZlbmRvclR5cGVOdW1iZXJ0ABNMamF2YS9sYW5nL0ludGVnZXI7eHABdAAHTlVNRVJJQ3NyABFqYXZhLmxhbmcuSW50ZWdlchLioKT3gYc4AgABSQAFdmFsdWV4cgAQamF2YS5sYW5nLk51bWJlcoaslR0LlOCLAgAAeHAAAAACdAAQUFVCTElDLkRFTU9fVVNFUnQAAklEdAAJREVNT19VU0VSdAACaWR0ABRqYXZhLm1hdGguQmlnRGVjaW1hbHNxAH4ACAABAAAAcQB+AAxzcQB+AA0BdAARQ0hBUkFDVEVSIFZBUllJTkdzcQB+ABEAAAAMdAAQUFVCTElDLkRFTU9fVVNFUnQACFVTRVJOQU1FcQB+ABZ0AAh1c2VybmFtZXQAEGphdmEubGFuZy5TdHJpbmdzcQB+AAgAAAAAAHEAfgAMcQB+ABp0ABBQVUJMSUMuREVNT19VU0VSdAAKRklSU1RfTkFNRXEAfgAWdAAJZmlyc3ROYW1lcQB+ACBzcQB+AAgAAAAAAHEAfgAMcQB+ABp0ABBQVUJMSUMuREVNT19VU0VSdAAJTEFTVF9OQU1FcQB+ABZ0AAhsYXN0TmFtZXEAfgAgc3EAfgAIAAABAABxAH4ADHEAfgAadAAQUFVCTElDLkRFTU9fVVNFUnQAC1dPUktTX0FUX0NDcQB+ABZ0AAl3b3Jrc0F0Q2NxAH4AIHNxAH4ACAAAAQAAcQB+AAxxAH4AGnQAEFBVQkxJQy5ERU1PX1VTRVJ0AA1XT1JLU19BVF9OQU1FcQB+ABZ0AAt3b3Jrc0F0TmFtZXEAfgAgc3EAfgAIAAEBAABxAH4ADHEAfgAadAAQUFVCTElDLkRFTU9fVVNFUnQAB0FDQ19CSUNxAH4AFnQABmFjY0JpY3EAfgAgc3EAfgAIAAEBAABxAH4ADHEAfgAadAAQUFVCTElDLkRFTU9fVVNFUnQACEFDQ19JQkFOcQB+ABZ0AAdhY2NJYmFucQB+ACB4c3EAfgAGAAAAAncEAAAAAnNyACVkZS55YW1hc3MucmVkZy5tb2RlbHMuRm9yZWlnbktleU1vZGVsi3oIWIjQbD8CAARaAAdub3ROdWxsTAAQamF2YVByb3BlcnR5TmFtZXEAfgABTAAMamF2YVR5cGVOYW1lcQB+AAFMAApyZWZlcmVuY2VzcQB+AAN4cAB0AA9kZW1vVXNlckNvbXBhbnl0AAxHRGVtb0NvbXBhbnlzcgARamF2YS51dGlsLkhhc2hNYXAFB9rBwxZg0QMAAkYACmxvYWRGYWN0b3JJAAl0aHJlc2hvbGR4cD9AAAAAAAADdwgAAAAEAAAAAnEAfgArc3IAK2RlLnlhbWFzcy5yZWRnLm1vZGVscy5Gb3JlaWduS2V5Q29sdW1uTW9kZWz3Zv5Z6aU85AIACEkACnNxbFR5cGVJbnRMAA9kYkZ1bGxUYWJsZU5hbWVxAH4AAUwABmRiTmFtZXEAfgABTAALZGJUYWJsZU5hbWVxAH4AAUwACmRiVHlwZU5hbWVxAH4AAUwACWxvY2FsTmFtZXEAfgABTAAJbG9jYWxUeXBlcQB+AAFMABdwcmltYXJ5S2V5QXR0cmlidXRlTmFtZXEAfgABeHAAAAAMdAAQUFVCTElDLkRFTU9fVVNFUnEAfgArcQB+ABZxAH4AG3QACXdvcmtzQXRDY3EAfgAgdAALY291bnRyeUNvZGVxAH4AL3NxAH4AQAAAAAx0ABBQVUJMSUMuREVNT19VU0VScQB+AC9xAH4AFnEAfgAbdAALd29ya3NBdE5hbWVxAH4AIHQABG5hbWV4c3EAfgA6AXQAD2RlbW9Vc2VyQmFua0FjY3QAEEdEZW1vQmFua0FjY291bnRzcQB+AD4/QAAAAAAAA3cIAAAABAAAAAJxAH4AM3NxAH4AQAAAAAx0ABBQVUJMSUMuREVNT19VU0VScQB+ADNxAH4AFnEAfgAbdAAGYWNjQmljcQB+ACB0AANiaWNxAH4AN3NxAH4AQAAAAAx0ABBQVUJMSUMuREVNT19VU0VScQB+ADdxAH4AFnEAfgAbdAAHYWNjSWJhbnEAfgAgdAAEaWJhbnh4c3EAfgAGAAAAAHcEAAAAAHhzcQB+AD4/QAAAAAAAAHcIAAAAEAAAAAB4dAAIRGVtb1VzZXJ0ABhkZS55YW1hc3MucmVkZy5nZW5lcmF0ZWR0ABBQVUJMSUMuREVNT19VU0VScQB+ABY=";
     private static TableModel tableModel;
 
     public static String getSerializedTableModel() {
