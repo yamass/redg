@@ -1,3 +1,4 @@
+de.yamass.redg
 de.yamass.redg_maven_plugin
 de.yamass.redg.extractor
 de.yamass.redg.extractor.filter
@@ -10,19 +11,17 @@ de.yamass.redg.generator
 de.yamass.redg.generator.exceptions
 de.yamass.redg.generator.extractor
 de.yamass.redg.generator.extractor.conveniencesetterprovider
-de.yamass.redg.generator.extractor.conveniencesetterprovider.xml
 de.yamass.redg.generator.extractor.datatypeprovider
-de.yamass.redg.generator.extractor.datatypeprovider.helpers
 de.yamass.redg.generator.extractor.datatypeprovider.json
 de.yamass.redg.generator.extractor.datatypeprovider.xml
 de.yamass.redg.generator.extractor.explicitattributedecider
 de.yamass.redg.generator.extractor.nameprovider
 de.yamass.redg.generator.extractor.nameprovider.json
-de.yamass.redg.generator.extractor.utils
 de.yamass.redg.generator.utils
 de.yamass.redg.jpa
 de.yamass.redg.models
 de.yamass.redg.plugin
+de.yamass.redg.plugin.config
 de.yamass.redg.plugin.util
 de.yamass.redg.runtime
 de.yamass.redg.runtime.defaultvalues
@@ -34,3 +33,8 @@ de.yamass.redg.runtime.jdbc
 de.yamass.redg.runtime.transformer
 de.yamass.redg.runtime.util
 de.yamass.redg.runtime.visualization
+de.yamass.redg.schema.inspector
+de.yamass.redg.schema.model
+de.yamass.redg.schema.vendor
+de.yamass.redg.testing
+de.yamass.redg.util
