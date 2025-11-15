@@ -15,31 +15,10 @@ public class DataTypeExtractor {
 	public DataTypeModel extractDataType(DataTypeLookup dataTypeLookup, ColumnDataType columnDataType) {
 		LOG.debug("Extracting model for data type {}", columnDataType.getName());
 
-		DataTypeModel baseType = columnDataType.getBaseType() != null
-				? dataTypeLookup.getDataTypeModel(columnDataType.getBaseType()) : null;
-
 		return new DataTypeModel(
 				columnDataType.getName(),
-				columnDataType.getJavaSqlType().getName(),
-				columnDataType.getJavaSqlType().getVendor(),
 				columnDataType.getJavaSqlType().getVendorTypeNumber(),
-				baseType,
-				columnDataType.getCreateParameters(),
-				columnDataType.getDatabaseSpecificTypeName(),
-				columnDataType.getEnumValues(),
-				columnDataType.getLiteralPrefix(),
-				columnDataType.getLiteralSuffix(),
-				columnDataType.getLocalTypeName(),
-				columnDataType.getMaximumScale(),
-				columnDataType.getMinimumScale(),
-				columnDataType.getNumPrecisionRadix(),
-				columnDataType.getPrecision(),
-				columnDataType.getTypeMappedClass(),
-				columnDataType.isAutoIncrementable(),
-				columnDataType.isEnumerated(),
-				columnDataType.isFixedPrecisionScale(),
-				columnDataType.isNullable(),
-				columnDataType.isUnsigned()
+				columnDataType.isNullable()
 		);
 	}
 

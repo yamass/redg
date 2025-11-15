@@ -111,7 +111,6 @@ public class ForeignKeyExtractor {
             throw new RedGGenerationException("Referencing foreign key is in an excluded table: " + originTable.getFullName());
         }
         model.setReferencingJavaTypeName(this.classPrefix + this.nameProvider.getClassNameForTable(originTable));
-        model.setReferencingEntityName(this.nameProvider.getClassNameForTable(originTable));
         model.setReferencingAttributeName(this.nameProvider.getMethodNameForReference(foreignKey));
         model.setAttributeName(this.nameProvider.getMethodNameForIncomingForeignKey(foreignKey));
         model.setNotNull(!foreignKey.getColumnReferences().get(0).getForeignKeyColumn().isNullable()

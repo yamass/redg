@@ -63,7 +63,7 @@ class ColumnExtractorTest {
 		Assertions.assertEquals("id", model.getJavaPropertyName());
 		Assertions.assertEquals("ID", model.getDbName());
 		Assertions.assertEquals("DEMO_USER", model.getDbTableName());
-		Assertions.assertEquals("NUMERIC", model.getSqlTypeName());
+		Assertions.assertEquals("NUMERIC", model.getDbTypeName());
 		Assertions.assertEquals("java.math.BigDecimal", model.getJavaTypeName());
 		Assertions.assertTrue(model.isNotNull());
 	}

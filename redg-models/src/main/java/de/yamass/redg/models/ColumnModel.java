@@ -106,14 +106,6 @@ public class ColumnModel implements Serializable{
         return dataType.getName();
     }
 
-    public String getJavaSqlTypeName() {
-        return dataType.getJavaSqlTypeName();
-    }
-
-    public String getSqlTypeName() {
-        return dataType.getName();
-    }
-
     public DataTypeModel getDataType() {
         return dataType;
     }

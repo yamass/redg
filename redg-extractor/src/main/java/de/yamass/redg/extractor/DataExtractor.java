@@ -158,7 +158,7 @@ public class DataExtractor {
                         }
                         if (value != null) {
                             entityModel.addValues(cm.getJavaPropertyName(), new EntityModel.ValueModel(
-                                    jcrProvider.getCodeForColumnValue(value, cm.getSqlTypeName(), cm.getSqlTypeInt(), cm.getJavaTypeName()),
+                                    jcrProvider.getCodeForColumnValue(value, cm.getDbTypeName(), cm.getSqlTypeInt(), cm.getJavaTypeName()),
                                     cm.isPartOfForeignKey() ? EntityModel.ValueModel.ForeignKeyState.FK : EntityModel.ValueModel.ForeignKeyState.NON_FK));
                         }
                     }

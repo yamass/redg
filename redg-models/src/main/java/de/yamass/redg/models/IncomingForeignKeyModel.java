@@ -21,19 +21,10 @@ import java.io.Serializable;
 
 public class IncomingForeignKeyModel implements Serializable{
 
-    private String referencingEntityName;
     private String referencingJavaTypeName;
     private String referencingAttributeName;
     private String attributeName;
     private boolean notNull;
-
-    public String getReferencingEntityName() {
-        return referencingEntityName;
-    }
-
-    public void setReferencingEntityName(final String referencingEntityName) {
-        this.referencingEntityName = referencingEntityName;
-    }
 
     public String getReferencingJavaTypeName() {
         return referencingJavaTypeName;

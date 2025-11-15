@@ -67,7 +67,7 @@ class ColumnExtractorTest2 {
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
 		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
-		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(DatabaseTypeTestUtil.getIntegerType(databaseType));
+		assertThat(model.getDbTypeName()).isEqualToIgnoringCase(DatabaseTypeTestUtil.getIntegerType(databaseType));
 		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
 		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.INTEGER);
@@ -85,7 +85,7 @@ class ColumnExtractorTest2 {
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
 		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
-		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase(DatabaseTypeTestUtil.getVarcharType(databaseType));
+		assertThat(model.getDbTypeName()).isEqualToIgnoringCase(DatabaseTypeTestUtil.getVarcharType(databaseType));
 		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
 		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR);
@@ -103,7 +103,7 @@ class ColumnExtractorTest2 {
 		assertThat(model.getDbFullTableName()).matches("(?i).*\\.t$");
 		assertThat(model.getJavaPropertyName()).isEqualToIgnoringCase("c");
 		assertThat(model.getDbName()).isEqualToIgnoringCase("c");
-		assertThat(model.getSqlTypeName()).isEqualToIgnoringCase("my_enum");
+		assertThat(model.getDbTypeName()).isEqualToIgnoringCase("my_enum");
 		assertThat(model.getJavaTypeName()).isEqualToIgnoringCase("java.lang.Integer");
 		assertThat(model.getJavaTypeAsClass()).isEqualTo(Integer.class);
 		assertThat(model.getSqlTypeInt()).isEqualTo(Types.VARCHAR);
