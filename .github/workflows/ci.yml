@@ -22,4 +22,5 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: redg-schema-inspection/target/site/jacoco/jacoco.xml,redg-runtime/target/site/jacoco/jacoco.xml,redg-generator/target/site/jacoco/jacoco.xml
