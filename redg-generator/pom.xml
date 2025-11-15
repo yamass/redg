@@ -43,18 +43,6 @@
             <artifactId>redg-schema-inspection</artifactId>
         </dependency>
         <dependency>
-            <groupId>us.fatehi</groupId>
-            <artifactId>schemacrawler</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>us.fatehi</groupId>
-            <artifactId>schemacrawler-postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>us.fatehi</groupId>
-            <artifactId>schemacrawler-mysql</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>ST4</artifactId>
         </dependency>

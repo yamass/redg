@@ -27,8 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Maps JDBC types to Java classes, similar to SchemaCrawler's TypeMap utility.
- * This provides the default mapping that SchemaCrawler uses for type mapping.
+ * Maps JDBC types to Java classes.
  */
 public class TypeMap {
 
@@ -73,7 +72,7 @@ public class TypeMap {
         // Boolean
         TYPE_MAP.put(JDBCType.BOOLEAN, Boolean.class);
 
-        // Other types - matching SchemaCrawler's TypeMap exactly
+        // TODO some of these we might want to change
         TYPE_MAP.put(JDBCType.ARRAY, java.sql.Array.class);
         TYPE_MAP.put(JDBCType.STRUCT, java.sql.Struct.class);
         TYPE_MAP.put(JDBCType.REF, java.sql.Ref.class);
@@ -87,7 +86,6 @@ public class TypeMap {
 
     /**
      * Maps a JDBC type to its default Java class.
-     * This follows the same mapping rules as SchemaCrawler's TypeMap.
      *
      * @param jdbcType The JDBC type to map
      * @return The Java class that corresponds to the JDBC type, or Object.class if not found

@@ -181,7 +181,7 @@ public class RedGGeneratorMojoIT {
 
 		// Verify custom names are used
 		// The name-mappings.json maps USERNAME column to customUserName attribute
-		// Note: SchemaCrawler reports H2 table/column names in uppercase
+		// Note: H2 reports table/column names in uppercase
 		String userCode = Files.readString(generatedDir.resolve("GUser.java"));
 
 		assertThat(userCode).contains("public GUser customUserName(");

@@ -23,7 +23,6 @@ import org.jspecify.annotations.NonNull;
 
 /**
  * The default data type provider, used if nothing else is specified.
- * This behaves like SchemaCrawler's TypeMap utility, mapping JDBC types to Java classes.
  */
 public class DefaultDataTypeProvider implements DataTypeProvider {
 
