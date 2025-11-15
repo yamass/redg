@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.yamass.redg.test</groupId>
+    <artifactId>basic-test</artifactId>
+    <version>1.0.0</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.3.232</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>de.yamass</groupId>
+                <artifactId>redg-maven-plugin</artifactId>
+                <version>@project.version@</version>
+                <configuration>
+                    <jdbcDriver>org.h2.Driver</jdbcDriver>
+                    <connectionString>jdbc:h2:mem:basic_test;DB_CLOSE_DELAY=-1</connectionString>
+                    <username>sa</username>
+                    <password>sa</password>
+                    <sqlScripts>
+                        <param>src/main/resources/schema.sql</param>
+                    </sqlScripts>
+                    <targetPackage>de.yamass.redg.generated</targetPackage>
+                    <schemaRegex>.*</schemaRegex>
+                    <tablesRegex>.*</tablesRegex>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+

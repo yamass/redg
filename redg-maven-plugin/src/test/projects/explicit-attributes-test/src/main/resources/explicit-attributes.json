@@ -1,0 +1,7 @@
+{
+  "USER": {
+    "attributes": ["DESCRIPTION"],
+    "relations": [["a_id"]]
+  }
+}
+

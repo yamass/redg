@@ -16,12 +16,17 @@
 
 package de.yamass.redg.plugin.config;
 
-import de.yamass.redg.models.ConvenienceSetterModel;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.Serializable;
 
 public class ConvenienceSetterConfig implements Serializable{
+
+	/**
+	 * The fully qualified java type name for which the convenience setter(s) should be generated.
+	 */
+	@Parameter
+	private String originalType;
 
 	/**
 	 * The fully qualified class name of the (first and only!) parameter of the convenience setter.
@@ -33,31 +38,29 @@ public class ConvenienceSetterConfig implements Serializable{
 	 * The fully qualified name of the converter method. This must be a static method with one parameter.
 	 * E.g. ${@code com.example.MyConverter.convert}
 	 */
-	@Parameter
+    @Parameter
     private String converterMethod;
 
-    public ConvenienceSetterConfig(String convenienceType, String converterMethod) {
-        this.convenienceType = convenienceType;
-        this.converterMethod = converterMethod;
+    public ConvenienceSetterConfig() {
+        // No-args constructor required for Maven configuration binding
     }
 
-    public String getConvenienceType() {
-        return convenienceType;
-    }
-
-    public void setConvenienceType(String convenienceType) {
-        this.convenienceType = convenienceType;
-    }
-
-    public String getConverterMethod() {
-        return converterMethod;
-    }
-
-    public void setConverterMethod(String converterMethod) {
-        this.converterMethod = converterMethod;
-    }
-
-	ConvenienceSetterModel toModel() {
-		return new ConvenienceSetterModel(convenienceType, converterMethod);
+	public ConvenienceSetterConfig(String originalType, String convenienceType, String converterMethod) {
+		this.originalType = originalType;
+		this.convenienceType = convenienceType;
+		this.converterMethod = converterMethod;
 	}
+
+	public String getOriginalType() {
+		return originalType;
+	}
+
+	public String getConvenienceType() {
+		return convenienceType;
+	}
+
+	public String getConverterMethod() {
+		return converterMethod;
+	}
+
 }

@@ -9,17 +9,17 @@ import java.util.stream.Collectors;
 
 public class MojoConvenienceSetterProvider implements ConvenienceSetterProvider {
 
-    private final List<ConvenienceSettersConfig> convenienceSetterConfig;
+    private final List<ConvenienceSetterConfig> convenienceSetterConfig;
 
-    public MojoConvenienceSetterProvider(List<ConvenienceSettersConfig> convenienceSetterConfig) {
+    public MojoConvenienceSetterProvider(List<ConvenienceSetterConfig> convenienceSetterConfig) {
         this.convenienceSetterConfig = convenienceSetterConfig;
     }
 
     @Override
     public List<ConvenienceSetterModel> getConvenienceSetters(Column column, String javaDataTypeName) {
         return this.convenienceSetterConfig.stream()
-                .filter(dataTypeConvenienceSetterConfig -> dataTypeConvenienceSetterConfig.getOriginalType().equals(javaDataTypeName))
-                .flatMap(dataTypeConvenienceSetterConfig -> dataTypeConvenienceSetterConfig.getSetters().stream())
+                .filter(csc -> csc.getOriginalType().equals(javaDataTypeName))
+                .map(csc -> new ConvenienceSetterModel(csc.getConvenienceType(), csc.getConverterMethod()))
                 .collect(Collectors.toList());
     }
 }

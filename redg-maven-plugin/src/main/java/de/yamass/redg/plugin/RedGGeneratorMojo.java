@@ -33,7 +33,7 @@ import de.yamass.redg.generator.extractor.explicitattributedecider.JsonFileExpli
 import de.yamass.redg.generator.extractor.nameprovider.MultiProviderNameProvider;
 import de.yamass.redg.generator.extractor.nameprovider.json.JsonFileNameProvider;
 import de.yamass.redg.jpa.JpaMetamodelRedGProvider;
-import de.yamass.redg.plugin.config.ConvenienceSettersConfig;
+import de.yamass.redg.plugin.config.ConvenienceSetterConfig;
 import de.yamass.redg.plugin.config.MojoConvenienceSetterProvider;
 import de.yamass.redg.util.ScriptRunner;
 import org.apache.maven.plugin.AbstractMojo;
@@ -61,7 +61,7 @@ import java.util.List;
 @Mojo(name = "redg", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES)
 public class RedGGeneratorMojo extends AbstractMojo {
 
-    @Parameter(property = "redg.connectionString", defaultValue = "jdbc:h2:mem:redg;DB_CLOSE_DELAY=-1")
+    @Parameter(property = "redg.connectionString", required = true)
     private String connectionString;
 
     @Parameter(property = "redg.username")
@@ -70,7 +70,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
     @Parameter(property = "redg.password")
     private String password = "";
 
-    @Parameter(property = "redg.jdbcDriver", defaultValue = "org.h2.Driver")
+    @Parameter(property = "redg.jdbcDriver", required = true)
     private String jdbcDriver;
 
     @Parameter(property = "redg.enableVisualization")
@@ -101,7 +101,7 @@ public class RedGGeneratorMojo extends AbstractMojo {
     private File customNameMappings;
 
     @Parameter
-    private List<ConvenienceSettersConfig> convenienceSetters;
+    private ConvenienceSetterConfig[] convenienceSetters;
 
     @Parameter
     private JpaProviderConfig jpaProviderConfig;
@@ -186,8 +186,8 @@ public class RedGGeneratorMojo extends AbstractMojo {
 
 
         ConvenienceSetterProvider convenienceSetterProvider;
-        if (convenienceSetters != null && !convenienceSetters.isEmpty()) {
-            convenienceSetterProvider = new MojoConvenienceSetterProvider(convenienceSetters);
+        if (convenienceSetters != null && convenienceSetters.length > 0) {
+            convenienceSetterProvider = new MojoConvenienceSetterProvider(List.of(convenienceSetters));
         } else {
             convenienceSetterProvider = ConvenienceSetterProvider.NONE;
         }
