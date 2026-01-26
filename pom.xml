@@ -66,7 +66,7 @@
         <jacksonVersion>2.19.2</jacksonVersion>
         <jacksonDatabindVersion>2.19.2</jacksonDatabindVersion>
         <jacocoVersion>0.8.13</jacocoVersion>
-        <assertjVersion>3.6.1</assertjVersion>
+        <assertjVersion>3.27.7</assertjVersion>
         <mockitoVersion>2.23.0</mockitoVersion>
         <springVersion>4.3.5.RELEASE</springVersion>
         <commonsCliVersion>1.4</commonsCliVersion>
