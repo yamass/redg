@@ -63,7 +63,7 @@
         <stringtemplateVersion>4.0.8</stringtemplateVersion>
         <mavenVersion>3.9.9</mavenVersion>
         <mavenProjectVersion>2.2.1</mavenProjectVersion>
-        <jacksonVersion>2.19.2</jacksonVersion>
+        <jacksonVersion>2.21.1</jacksonVersion>
         <jacksonDatabindVersion>2.19.2</jacksonDatabindVersion>
         <jacocoVersion>0.8.13</jacocoVersion>
         <assertjVersion>3.6.1</assertjVersion>
